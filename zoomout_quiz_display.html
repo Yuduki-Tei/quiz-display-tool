@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>zoomout_quiz_display</title>
+  <style>
+    /* Style for the canvas */
+    canvas {
+      border: 1px solid #000;
+      display: block;
+      margin: 10px auto;
+      cursor: crosshair;
+    }
+    /* Controls container */
+    #controls {
+      text-align: center;
+      margin: 10px;
+    }
+    /* Style for buttons and file labels */
+    button, .file-label {
+      height: 30px;
+      padding: 0 12px;
+      font-size: 14px;
+      margin: 5px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background-color: #eee;
+      display: inline-block;
+      text-align: center;
+      line-height: 30px;
+      vertical-align: middle;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    /* Hide the native file input */
+    .file-input-hidden {
+      display: none;
+    }
+    /* Style for number inputs */
+    input[type="number"] {
+      height: 30px;
+      font-size: 14px;
+      margin: 5px;
+      padding: 0 10px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <!-- File selection for image -->
+    <label for="imageLoader" class="file-label">Choose Picture</label>
+    <input type="file" id="imageLoader" accept="image/*" multiple class="file-input-hidden">
+    
+    <button id="addQueueBtn">Queue</button>
+    <button id="startBtn">Start</button>
+    <button id="toggleBtn">Pause</button>
+    <button id="nextBtn">Next</button>
+    <label for="speedInput">Speed (seconds):</label>
+    <input type="number" id="speedInput" min="1" max="100" step="1" value="30">
+    <button id="saveQueueBtn">Save Queue</button>
+    
+    <label for="loadQueueInput" class="file-label">Load Queue</label>
+    <input type="file" id="loadQueueInput" accept=".json,.txt" class="file-input-hidden">
+  </div>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    // Get DOM elements
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const imageLoader = document.getElementById('imageLoader');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const startBtn = document.getElementById('startBtn');
+    const speedInput = document.getElementById('speedInput');
+    const addQueueBtn = document.getElementById('addQueueBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const saveQueueBtn = document.getElementById('saveQueueBtn');
+    const loadQueueBtn = document.getElementById('loadQueueInput');
+
+    let img = new Image();
+    let imgLoaded = false;
+    let aspectRatio = 1;
+
+    // Variables used for selection coordinates
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+    let dragW = 0, dragH = 0;
+
+    // Animation variables
+    let revealAnim = null;
+    let animationId = null;
+    let paused = false;
+    let animationDuration = parseInt(speedInput.value, 10) * 1000; // in milliseconds
+
+    // Store queued selections
+    let queue = [];
+    let currentIndex = -1;
+
+    // Handle image file selection
+    imageLoader.onchange = (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      loadImage(files[0]);
+      imageLoader.filesList = files;
+    };
+
+    // Function to load image and draw it on canvas (resizing if needed)
+    function loadImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        img = new Image();
+        img.onload = () => {
+          imgLoaded = true;
+          // Limit image size to max 1280x720
+          const maxW = 1280;
+          const maxH = 720;
+          const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+          const cw = Math.round(img.width * scale);
+          const ch = Math.round(img.height * scale);
+          canvas.width = cw;
+          canvas.height = ch;
+          aspectRatio = canvas.width / canvas.height;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          if (callback) callback();
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Mouse events to handle the selection rectangle on canvas
+    canvas.onmousedown = (e) => {
+      if (!imgLoaded) return;
+      const rect = canvas.getBoundingClientRect();
+      dragStartX = e.clientX - rect.left;
+      dragStartY = e.clientY - rect.top;
+      isDragging = true;
+    };
+
+    canvas.onmousemove = (e) => {
+      if (isDragging && imgLoaded) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const dx = mx - dragStartX;
+        const dy = dx / aspectRatio;
+
+        dragW = dx;
+        dragH = dy;
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(dragStartX, dragStartY, dragW, dragH);
+      }
+    };
+
+    canvas.onmouseup = () => {
+      isDragging = false;
+    };
+
+    // Add current selection to the queue
+    addQueueBtn.onclick = () => {
+      if (!imgLoaded || dragW === 0 || dragH === 0) return;
+
+      queue.push({
+        imgSrc: img.src,
+        dragStartX,
+        dragStartY,
+        dragW,
+        dragH,
+        imgWidth: img.width,
+        imgHeight: img.height,
+        canvasWidth: canvas.width,
+        canvasHeight: canvas.height
+      });
+
+      alert('Added to queue: ' + queue.length + ' items');
+    };
+
+    // Show next item in the queue
+    nextBtn.onclick = () => {
+      if (queue.length === 0) return;
+      currentIndex++;
+      if (currentIndex >= queue.length) currentIndex = 0;
+      showQueueItem(currentIndex);
+    };
+
+    // Function to show a queued selection (scaling image if too big)
+    function showQueueItem(idx) {
+      const item = queue[idx];
+      if (!item) return;
+
+      img = new Image();
+      img.onload = () => {
+        imgLoaded = true;
+
+        // Scale image dimensions if exceeding 1280x720
+        const maxW = 1280, maxH = 720;
+        let newImgW = item.imgWidth, newImgH = item.imgHeight;
+        const scaleFactor = Math.min(maxW / newImgW, maxH / newImgH, 1);
+        newImgW = Math.round(newImgW * scaleFactor);
+        newImgH = Math.round(newImgH * scaleFactor);
+
+        // Set canvas size to the new scaled dimensions
+        canvas.width = newImgW;
+        canvas.height = newImgH;
+
+        const origScaleX = item.imgWidth / item.canvasWidth;
+        const origScaleY = item.imgHeight / item.canvasHeight;
+        const selX = item.dragStartX * origScaleX;
+        const selY = item.dragStartY * origScaleY;
+        const selW = item.dragW * origScaleX;
+        const selH = item.dragH * origScaleY;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(
+          img,
+          selX, selY, selW, selH, 
+          0, 0, canvas.width, canvas.height
+        );
+      };
+
+      img.src = item.imgSrc;
+    }
+
+    // Update animation duration based on speed input
+    speedInput.oninput = function() {
+      const value = parseInt(this.value, 10);
+      if (value >= 1 && value <= 100) {
+        animationDuration = value * 1000;
+      } else {
+        alert('Please enter a value between 1 and 100 seconds.');
+      }
+    };
+
+    // Start the animation to zoom out from selection to full image
+    startBtn.onclick = () => {
+      if (!imgLoaded || dragW === 0 || dragH === 0) return;
+      
+      const scaleX = img.width / canvas.width;
+      const scaleY = img.height / canvas.height;
+      const left0 = dragStartX * scaleX;
+      const top0 = dragStartY * scaleY;
+      const right0 = (dragStartX + dragW) * scaleX;
+      const bottom0 = (dragStartY + dragH) * scaleY;
+
+      const left1 = 0;
+      const top1  = 0;
+      const right1 = img.width;
+      const bottom1 = img.height;
+
+      // Save initial and final areas for animation
+      revealAnim = {
+        left0, top0, right0, bottom0,
+        left1, top1, right1, bottom1
+      };
+
+      animationStart = null;
+      paused = false;
+      toggleBtn.textContent = 'Pause';
+      cancelAnimationFrame(animationId);
+      requestAnimationFrame(drawAnim);
+    };
+
+    // Toggle pause/resume for the animation
+    toggleBtn.onclick = () => {
+      if (!revealAnim) return;
+      paused = !paused;
+      toggleBtn.textContent = paused ? 'Restart' : 'Pause';
+      if (!paused) requestAnimationFrame(drawAnim);
+    };
+
+    // Draw the zoom-out animation
+    function drawAnim(ts) {
+      if (paused) return;
+      if (!animationStart) animationStart = ts;
+      let progress = (ts - animationStart) / animationDuration;
+      if (progress > 1) progress = 1;
+
+      // Use easeInOutCubic easing function for smooth animation
+      function easeInOutCubic(x) {
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      }
+      progress = easeInOutCubic(progress);
+
+      const {
+        left0, top0, right0, bottom0,
+        left1, top1, right1, bottom1
+      } = revealAnim;
+
+      const w0 = right0 - left0;
+      const h0 = bottom0 - top0;
+      const w1 = right1 - left1;
+      const h1 = bottom1 - top1;
+
+      const w = w0 + (w1 - w0) * progress;
+      const h = h0 + (h1 - h0) * progress;
+
+      const cx0 = left0 + w0 / 2;
+      const cy0 = top0 + h0 / 2;
+      const cx1 = left1 + w1 / 2;
+      const cy1 = top1 + h1 / 2;
+      const cx = cx0 + (cx1 - cx0) * progress;
+      const cy = cy0 + (cy1 - cy0) * progress;
+
+      const left = cx - w / 2;
+      const top = cy - h / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw part of the image using current animation values over the entire canvas
+      ctx.drawImage(
+        img,
+        left, top, w, h,
+        0, 0, canvas.width, canvas.height
+      );
+
+      if (progress < 1) {
+        animationId = requestAnimationFrame(drawAnim);
+      } else {
+        // End of animation: draw full image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // Save the queue to a JSON file
+    document.getElementById('saveQueueBtn').onclick = () => {
+      if (!queue.length) {
+        alert('Queue is currently empty.');
+        return;
+      }
+      const dataStr = JSON.stringify(queue);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'queue_state.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Load the queue file and display the first item
+    loadQueueBtn.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const loadedQueue = JSON.parse(evt.target.result);
+          if (Array.isArray(loadedQueue)) {
+            queue = loadedQueue;
+            currentIndex = queue.length > 0 ? 0 : -1;
+
+            if (currentIndex >= 0) {
+              showQueueItem(currentIndex);
+            }
+
+            alert('Queue loaded successfully. Length: ' + queue.length);
+          } else {
+            alert('Invalid queue file.');
+          }
+        } catch (err) {
+          alert('Error processing file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+  </script>
+</body>
+</html>

@@ -1,17 +1,17 @@
 <template>
   <div id="app">
-    <ImageZoomer />
+    <ImageZoomerManager />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ImageZoomer from './components/ImageZoomer.vue';
+import ImageZoomerManager from './components/ImageZoomerManager.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
-    ImageZoomer
+    ImageZoomerManager
   }
 });
 </script>

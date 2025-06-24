@@ -13,6 +13,10 @@
         ></canvas>
       </div>
       <button @click="startZoomOut">Zoom Out</button>
+      <button @click="handlePauseOrResumeZoomOut" :disabled="!isZooming">
+        {{ isPaused ? 'Resume' : 'Pause' }}
+      </button>
+      <button @click="handleShowFullImage">Show Full Image</button>
     </div>
     <div v-else style="margin:1em;color:#888;">Please select an image and select a region.</div>
   </div>
@@ -22,8 +26,8 @@
 import { defineComponent, ref, reactive, nextTick, watch } from 'vue';
 import { loadImageFile } from './loadImageUtil';
 import { useRectSelection } from './useRectSelection';
-import { startZoomOut as zoomOutUtil } from './zoomOutUtil';
-import type { SelectionRect } from './ImageZoomerTypes';
+import { startZoomOut as zoomOutUtil, showFullImage, stopZoomOut } from './zoomOutUtil';
+import type { CanvasImageContext } from './ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomerManager',
@@ -36,10 +40,25 @@ export default defineComponent({
     const naturalHeight = ref(0);
     const imgLoaded = ref(false);
     const isZooming = ref(false);
+    const isPaused = ref(false);
     const aspectRatio = ref(16 / 9);
     const { rect: selection, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspectRatio.value);
 
-    // ファイル選択
+    // 共通のcontext生成関数
+    function getCanvasContext(): CanvasImageContext | null {
+      if (!mainCanvas.value || !image.value) return null;
+      return {
+        image: image.value,
+        canvas: mainCanvas.value,
+        naturalWidth: naturalWidth.value,
+        naturalHeight: naturalHeight.value,
+        displayWidth: displayWidth.value,
+        displayHeight: displayHeight.value,
+        selection: { ...selection }
+      };
+    }
+
+    // file choosing
     const onFileChange = async (e: Event) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || !files[0]) return;
@@ -60,7 +79,7 @@ export default defineComponent({
       }
     };
 
-    // canvas描画
+    // canvas rendering
     const drawMain = () => {
       if (!mainCanvas.value || !image.value) return;
       const ctx = mainCanvas.value.getContext('2d');
@@ -72,7 +91,7 @@ export default defineComponent({
       }
     };
 
-    // イベントハンドラ
+    // event handler
     const handleMouseDown = (e: MouseEvent) => {
       if (isZooming.value) return;
       onMouseDown(e, mainCanvas.value!);
@@ -88,41 +107,63 @@ export default defineComponent({
       drawMain();
     };
 
-    // ズームアウトアニメーション
+    // zoomout animation
+    let zoomController: ReturnType<typeof zoomOutUtil> | null = null;
     const startZoomOut = () => {
-      if (!mainCanvas.value || !image.value) return;
+      const ctx = getCanvasContext();
+      if (!ctx) return;
       isZooming.value = true;
-      zoomOutUtil({
-        image: image.value,
-        canvas: mainCanvas.value,
-        naturalWidth: naturalWidth.value,
-        naturalHeight: naturalHeight.value,
-        displayWidth: displayWidth.value,
-        displayHeight: displayHeight.value,
-        selection: { ...selection },
+      isPaused.value = false;
+      zoomController = zoomOutUtil({
+        ...ctx,
         duration: 10000,
         onFinish: () => {
           isZooming.value = false;
-          drawMain();
+          isPaused.value = false;
+          zoomController = null;
+          showFullImage(ctx);
         }
       });
     };
 
-    // ファイルや選択範囲が変わったらcanvas再描画
+    // pause/resume toggle
+    const handlePauseOrResumeZoomOut = () => {
+      if (!zoomController) return;
+      if (isPaused.value) {
+        zoomController.resume();
+        isPaused.value = false;
+      } else {
+        zoomController.pause();
+        isPaused.value = true;
+      }
+    };
+
+    // rerender the canvas when selection changes
     watch([image, () => selection.x, () => selection.y, () => selection.w, () => selection.h], () => {
       drawMain();
     });
+
+    // show full image without zooming
+    const handleShowFullImage = () => {
+      const ctx = getCanvasContext();
+      if (!ctx) return;
+      showFullImage(ctx);
+    };
 
     return {
       mainCanvas,
       displayWidth,
       displayHeight,
       imgLoaded,
+      isZooming,
+      isPaused,
+      handlePauseOrResumeZoomOut,
       handleMouseDown,
       handleMouseMove,
       handleMouseUp,
       onFileChange,
-      startZoomOut
+      startZoomOut,
+      handleShowFullImage
     };
   }
 });

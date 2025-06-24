@@ -7,7 +7,15 @@ export type ZoomOutParams = ImageDisplayContext & {
   onFinish?: () => void;
 };
 
+let currentController: ReturnType<typeof startZoomOut> | null = null;
+
 export function startZoomOut(params: ZoomOutParams) {
+  let paused = false;
+  let finished = false;
+  let animationFrameId: number | null = null;
+  let start = performance.now();
+  let pauseTime = 0;
+
   const {
     image,
     canvas,
@@ -19,9 +27,9 @@ export function startZoomOut(params: ZoomOutParams) {
     duration = 10000,
     onFinish
   } = params;
+
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
-  let start = performance.now();
   // Normalize selection rectangle (always left-top origin)
   const sx = selection.w >= 0 ? selection.x : selection.x + selection.w;
   const sy = selection.h >= 0 ? selection.y : selection.y + selection.h;
@@ -36,6 +44,7 @@ export function startZoomOut(params: ZoomOutParams) {
   const scaleX = naturalWidth / displayWidth;
   const scaleY = naturalHeight / displayHeight;
   function animate(ts: number) {
+    if (paused || finished) return;
     let progress = Math.min((ts - start) / duration, 1);
     // Ease in-out cubic for smooth animation
     progress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
@@ -61,9 +70,9 @@ export function startZoomOut(params: ZoomOutParams) {
       0, 0, displayWidth, displayHeight
     );
     if (progress < 1) {
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     } else {
-      // Ensure the last frame shows the full image
+      finished = true;
       ctx!.clearRect(0, 0, displayWidth, displayHeight);
       ctx!.drawImage(
         image,
@@ -73,5 +82,55 @@ export function startZoomOut(params: ZoomOutParams) {
       if (onFinish) onFinish();
     }
   }
-  animate(performance.now());
+
+  animationFrameId = requestAnimationFrame(animate);
+
+  const controller = {
+    pause() {
+      if (!paused && !finished) {
+        paused = true;
+        pauseTime = performance.now();
+      }
+    },
+    resume() {
+      if (paused && !finished) {
+        paused = false;
+        start += performance.now() - pauseTime;
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    },
+    stop() {
+      finished = true;
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    }
+  };
+  currentController = controller;
+  return controller;
+}
+
+export function stopZoomOut() {
+  if (currentController) {
+    currentController.stop();
+    currentController = null;
+  }
+}
+
+export function showFullImage(params: ZoomOutParams) {
+  stopZoomOut();
+  const {
+    image,
+    canvas,
+    naturalWidth,
+    naturalHeight,
+    displayWidth,
+    displayHeight
+  } = params;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.clearRect(0, 0, displayWidth, displayHeight);
+  ctx.drawImage(
+    image,
+    0, 0, naturalWidth, naturalHeight,
+    0, 0, displayWidth, displayHeight
+  );
 }

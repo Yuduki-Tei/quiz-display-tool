@@ -13,3 +13,7 @@ export interface ImageDisplayContext {
   displayHeight: number;
   selection: SelectionRect;
 }
+
+export interface CanvasImageContext extends ImageDisplayContext {
+  canvas: HTMLCanvasElement;
+}

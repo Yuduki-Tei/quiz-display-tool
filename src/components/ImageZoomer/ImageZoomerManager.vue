@@ -40,8 +40,15 @@ export default defineComponent({
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
     const isZooming = ref(false);
     const isPaused = ref(false);
-    const aspectRatio = ref(16 / 9);
-    const { rect: selection, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspectRatio.value);
+    const aspectRatio = ref(16/9);
+    watch(
+      [() => props.imageState.displayWidth, () => props.imageState.displayHeight],
+      ([w, h]) => {
+        if (w > 0 && h > 0) aspectRatio.value = w / h;
+      },
+      { immediate: true }
+    );
+    const { rect: selection, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspectRatio);
 
     // 共通のcontext生成関数
     function getCanvasContext(): CanvasImageContext | null {

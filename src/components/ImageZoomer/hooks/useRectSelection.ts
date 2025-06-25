@@ -1,7 +1,7 @@
-import { ref, reactive } from 'vue';
+import { ref, reactive, watch, type Ref } from 'vue';
 import type { SelectionRect } from '../types/ImageZoomerTypes';
 
-export function useRectSelection(aspect: number) {
+export function useRectSelection(aspect: Ref<number>) {
   const isDragging = ref(false);
   const rect = reactive<SelectionRect>({ x: 0, y: 0, w: 0, h: 0 });
 
@@ -21,7 +21,7 @@ export function useRectSelection(aspect: number) {
     const bounds = canvas.getBoundingClientRect();
     const mx = e.clientX - bounds.left;
     const dx = mx - rect.x;
-    const dy = dx / aspect;
+    const dy = dx / aspect.value;
     rect.w = dx;
     rect.h = dy;
   };

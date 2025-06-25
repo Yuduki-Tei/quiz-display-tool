@@ -1,4 +1,4 @@
-import type { ImageDisplayContext } from './ImageZoomerTypes';
+import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
 
 // Utility for zoom-out animation on canvas
 export type ZoomOutParams = ImageDisplayContext & {

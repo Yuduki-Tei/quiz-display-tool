@@ -20,8 +20,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { startZoomOut as zoomOutUtil } from './zoomOutUtil';
-import type { ImageDisplayContext } from './ImageZoomerTypes';
+import { startZoomOut as zoomOutUtil } from './hooks/zoomOutUtil';
+import type { ImageDisplayContext } from './types/ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomer',
@@ -54,7 +54,6 @@ export default defineComponent({
       ctx.save();
       ctx.strokeStyle = 'red';
       ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
       const sel = props.context.selection;
       ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
       ctx.restore();

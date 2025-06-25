@@ -1,5 +1,5 @@
 import { ref, reactive } from 'vue';
-import type { SelectionRect } from './ImageZoomerTypes';
+import type { SelectionRect } from '../types/ImageZoomerTypes';
 
 export function useRectSelection(aspect: number) {
   const isDragging = ref(false);

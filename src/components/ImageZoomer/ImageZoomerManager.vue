@@ -1,12 +1,11 @@
 <template>
   <div>
-    <input type="file" accept="image/*" @change="onFileChange" />
-    <div v-if="imgLoaded">
+    <div v-if="imageState.image">
       <div class="canvas-container">
         <canvas
           ref="mainCanvas"
-          :width="displayWidth"
-          :height="displayHeight"
+          :width="imageState.displayWidth"
+          :height="imageState.displayHeight"
           @mousedown="handleMouseDown"
           @mousemove="handleMouseMove"
           @mouseup="handleMouseUp"
@@ -23,22 +22,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, nextTick, watch } from 'vue';
-import { loadImageFile } from './loadImageUtil';
-import { useRectSelection } from './useRectSelection';
-import { startZoomOut as zoomOutUtil, showFullImage, stopZoomOut } from './zoomOutUtil';
-import type { CanvasImageContext } from './ImageZoomerTypes';
+import { defineComponent, ref, watch, PropType } from 'vue';
+import { useRectSelection } from './hooks/useRectSelection';
+import { startZoomOut as zoomOutUtil, showFullImage } from './hooks/zoomOutUtil';
+import type { CanvasImageContext } from './types/ImageZoomerTypes';
+import type { ImageState } from '../ImageProvider.vue';
 
 export default defineComponent({
   name: 'ImageZoomerManager',
-  setup() {
+  props: {
+    imageState: {
+      type: Object as PropType<ImageState>,
+      required: true
+    }
+  },
+  setup(props) {
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
-    const image = ref<HTMLImageElement | null>(null);
-    const displayWidth = ref(0);
-    const displayHeight = ref(0);
-    const naturalWidth = ref(0);
-    const naturalHeight = ref(0);
-    const imgLoaded = ref(false);
     const isZooming = ref(false);
     const isPaused = ref(false);
     const aspectRatio = ref(16 / 9);
@@ -46,46 +45,25 @@ export default defineComponent({
 
     // 共通のcontext生成関数
     function getCanvasContext(): CanvasImageContext | null {
-      if (!mainCanvas.value || !image.value) return null;
+      if (!mainCanvas.value || !props.imageState.image) return null;
       return {
-        image: image.value,
+        image: props.imageState.image,
         canvas: mainCanvas.value,
-        naturalWidth: naturalWidth.value,
-        naturalHeight: naturalHeight.value,
-        displayWidth: displayWidth.value,
-        displayHeight: displayHeight.value,
+        naturalWidth: props.imageState.naturalWidth,
+        naturalHeight: props.imageState.naturalHeight,
+        displayWidth: props.imageState.displayWidth,
+        displayHeight: props.imageState.displayHeight,
         selection: { ...selection }
       };
     }
 
-    // file choosing
-    const onFileChange = async (e: Event) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files || !files[0]) return;
-      const file = files[0];
-      const maxW = 1280, maxH = 720;
-      try {
-        const result = await loadImageFile(file, maxW, maxH);
-        image.value = result.image;
-        displayWidth.value = result.width;
-        displayHeight.value = result.height;
-        naturalWidth.value = result.naturalWidth;
-        naturalHeight.value = result.naturalHeight;
-        imgLoaded.value = true;
-        await nextTick();
-        drawMain();
-      } catch (err) {
-        imgLoaded.value = false;
-      }
-    };
-
     // canvas rendering
     const drawMain = () => {
-      if (!mainCanvas.value || !image.value) return;
+      if (!mainCanvas.value || !props.imageState.image) return;
       const ctx = mainCanvas.value.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, displayWidth.value, displayHeight.value);
-      ctx.drawImage(image.value, 0, 0, displayWidth.value, displayHeight.value);
+      ctx.clearRect(0, 0, props.imageState.displayWidth, props.imageState.displayHeight);
+      ctx.drawImage(props.imageState.image, 0, 0, props.imageState.displayWidth, props.imageState.displayHeight);
       if (!isZooming.value) {
         drawSelection(mainCanvas.value);
       }
@@ -139,7 +117,10 @@ export default defineComponent({
     };
 
     // rerender the canvas when selection changes
-    watch([image, () => selection.x, () => selection.y, () => selection.w, () => selection.h], () => {
+    watch([
+      () => props.imageState.image,
+      () => selection.x, () => selection.y, () => selection.w, () => selection.h
+    ], () => {
       drawMain();
     });
 
@@ -152,17 +133,13 @@ export default defineComponent({
 
     return {
       mainCanvas,
-      displayWidth,
-      displayHeight,
-      imgLoaded,
       isZooming,
       isPaused,
-      handlePauseOrResumeZoomOut,
       handleMouseDown,
       handleMouseMove,
       handleMouseUp,
-      onFileChange,
       startZoomOut,
+      handlePauseOrResumeZoomOut,
       handleShowFullImage
     };
   }

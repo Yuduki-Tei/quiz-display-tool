@@ -18,10 +18,15 @@
       </button>
       <button @click="handleShowFullImage">Show Full Image</button>
       <GenericQueue
+        ref="genericQueue"
         :add-item="currentContext"
         @update:current="onQueueCurrentChange"
         @update:queue="onQueueChange"
       />
+      <div style="margin-top:1em;">
+        <button @click="handleExportQueue">Export Queue</button>
+        <input type="file" accept="application/json" @change="handleImportQueue" />
+      </div>
     </div>
     <div v-else style="margin:1em;color:#888;">Please select an image and select a region.</div>
   </div>
@@ -45,6 +50,7 @@ export default defineComponent({
   },
   setup(props) {
     const imageZoomer = ref();
+    const genericQueue = ref();
     const isZooming = ref(false);
     const isPaused = ref(false);
     const aspectRatio = ref(1);
@@ -73,7 +79,6 @@ export default defineComponent({
     });
 
     const onQueueCurrentChange = (ctx: ImageDisplayContext) => {
-      console.log('Current context changed:', ctx);
       if (!ctx) return;
       props.imageState.image = ctx.image;
       props.imageState.naturalWidth = ctx.naturalWidth;
@@ -84,7 +89,25 @@ export default defineComponent({
     };
     const onQueueChange = (queue: ImageDisplayContext[]) => {
       // TODO: 需要時可同步 queue 狀態到外部
-      // console.log('Queue changed:', queue);
+    };
+
+    const handleExportQueue = () => {
+      genericQueue.value?.exportQueue();
+    };
+    const handleImportQueue = (e: Event) => {
+      const input = e.target as HTMLInputElement;
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const data = evt.target?.result as string;
+          genericQueue.value?.importQueue(data);
+        } catch (err) {
+          alert('Failed to import queue');
+        }
+      };
+      reader.readAsText(file);
     };
 
     // zoomout animation
@@ -104,6 +127,7 @@ export default defineComponent({
 
     return {
       imageZoomer,
+      genericQueue,
       isZooming,
       isPaused,
       startZoomOut,
@@ -112,7 +136,9 @@ export default defineComponent({
       currentContext,
       onSelectionUpdate,
       onQueueCurrentChange,
-      onQueueChange
+      onQueueChange,
+      handleExportQueue,
+      handleImportQueue
     };
   }
 });

@@ -52,12 +52,64 @@ export default defineComponent({
         emit('update:current', queue.value[currentIndex.value]);
       }
     };
-    // 預留 export/import
-    const exportQueue = () => {
-      // TODO: 將 queue.value 輸出為 JSON
+    function imageToBase64(img: HTMLImageElement): Promise<string> {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject('No canvas context');
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      });
+    }
+    function base64ToImage(base64: string): Promise<HTMLImageElement> {
+      return new Promise((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = base64;
+      });
+    }
+
+    const exportQueue = async () => {
+      const arr = await Promise.all(queue.value.map(async (item) => {
+        const base64 = await imageToBase64(item.image);
+        return {
+          ...item,
+          image: base64
+        };
+      }));
+      const dataStr = JSON.stringify(arr, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'queue.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     };
-    const importQueue = (data: any) => {
-      // TODO: 從 JSON 載入 queue
+    const importQueue = async (data: any) => {
+      try {
+        const arr = typeof data === 'string' ? JSON.parse(data) : data;
+        if (Array.isArray(arr)) {
+          const restored = await Promise.all(arr.map(async (item) => {
+            const img = await base64ToImage(item.image);
+            return {
+              ...item,
+              image: img
+            };
+          }));
+          queue.value = restored;
+          currentIndex.value = restored.length > 0 ? 0 : -1;
+          emit('update:queue', queue.value);
+          emit('update:current', queue.value[currentIndex.value]);
+        }
+      } catch (e) {
+        alert('Invalid queue data');
+      }
     };
 
     // 外部可 watch queue 變化
@@ -69,7 +121,9 @@ export default defineComponent({
       canAdd,
       addToQueue,
       goNext,
-      goPrev
+      goPrev,
+      exportQueue,
+      importQueue
     };
   }
 });

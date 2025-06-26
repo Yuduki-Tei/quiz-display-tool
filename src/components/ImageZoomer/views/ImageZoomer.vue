@@ -20,8 +20,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { startZoomOut as zoomOutUtil } from './hooks/zoomOutUtil';
-import type { ImageDisplayContext } from './types/ImageZoomerTypes';
+import { startZoomOut as zoomOutUtil } from '../hooks/zoomOutUtil';
+import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomer',

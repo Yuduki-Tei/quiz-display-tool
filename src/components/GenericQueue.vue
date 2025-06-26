@@ -32,7 +32,6 @@ export default defineComponent({
     const canAdd = computed(() => !!props.addItem);
 
     const addToQueue = () => {
-      console.log('Adding item to queue:', props.addItem);
       if (!props.addItem) return;
       queue.value.push(props.addItem);
       currentIndex.value = queue.value.length - 1;

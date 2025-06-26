@@ -1,4 +1,4 @@
-import { ref, reactive, watch, type Ref } from 'vue';
+import { ref, reactive, type Ref } from 'vue';
 import type { SelectionRect } from '../types/ImageZoomerTypes';
 
 export function useRectSelection(aspect: Ref<number>) {

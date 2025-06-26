@@ -124,10 +124,18 @@ export default defineComponent({
       emit('show-full-image');
     };
 
-    watch(() => props.context, () => {
-      aspect.value = props.context.displayWidth / props.context.displayHeight || 1;
-      nextTick(() => drawImage());
-    }, { deep: true, immediate: true });
+watch(
+  () => props.context,
+  (newCtx) => {
+    aspect.value = newCtx.displayWidth / newCtx.displayHeight || 1;
+    rect.x = newCtx.selection.x;
+    rect.y = newCtx.selection.y;
+    rect.w = newCtx.selection.w;
+    rect.h = newCtx.selection.h;
+    nextTick(() => drawImage());
+  },
+  { deep: true, immediate: true }
+);
 
     onMounted(() => {
       drawImage();

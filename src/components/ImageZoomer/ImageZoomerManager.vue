@@ -72,11 +72,15 @@ export default defineComponent({
       };
     });
 
-    // queue 狀態由 GenericQueue 管理
     const onQueueCurrentChange = (ctx: ImageDisplayContext) => {
-      // TODO: 這裡可根據 ctx 更新顯示內容
-      // 例如 emit('load-context', ctx) 或直接覆蓋 imageState/selection
-      // console.log('Current from queue:', ctx);
+      console.log('Current context changed:', ctx);
+      if (!ctx) return;
+      props.imageState.image = ctx.image;
+      props.imageState.naturalWidth = ctx.naturalWidth;
+      props.imageState.naturalHeight = ctx.naturalHeight;
+      props.imageState.displayWidth = ctx.displayWidth;
+      props.imageState.displayHeight = ctx.displayHeight;
+      selection.value = { ...ctx.selection };
     };
     const onQueueChange = (queue: ImageDisplayContext[]) => {
       // TODO: 需要時可同步 queue 狀態到外部

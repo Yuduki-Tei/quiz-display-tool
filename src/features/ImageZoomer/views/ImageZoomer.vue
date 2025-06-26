@@ -113,6 +113,8 @@ export default defineComponent({
         canvas: mainCanvas.value
       });
       emit('show-full-image');
+      showZoomCanvas.value = false;
+      zoomController = null;
     };
 
     watch(

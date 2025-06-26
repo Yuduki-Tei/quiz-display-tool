@@ -21,7 +21,7 @@ export async function loadImageFile(
         naturalWidth,
         naturalHeight,
         displayWidth: w,
-        displayHeight: h
+        displayHeight: h,
       });
     };
     img.onerror = reject;

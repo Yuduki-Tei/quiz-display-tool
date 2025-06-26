@@ -1,20 +1,12 @@
 <template>
   <div class="queue-panel">
-    <div>
-      <button @click="addToQueue" :disabled="!canAdd">Add to Queue</button>
-      <button @click="goPrev" :disabled="queue.length === 0 || currentIndex <= 0">Prev</button>
-      <button @click="goNext" :disabled="queue.length === 0 || currentIndex >= queue.length - 1">Next</button>
-      <span v-if="queue.length > 0">{{ currentIndex + 1 }} / {{ queue.length }}</span>
-      <span v-else>Queue is empty</span>
-    </div>
-    <!-- 預留未來匯出/載入功能 -->
-    <!-- <button @click="exportQueue">Export</button>
-    <button @click="importQueue">Import</button> -->
+    <span v-if="queue.length > 0">{{ currentIndex + 1 }} / {{ queue.length }}</span>
+    <span v-else>Queue is empty</span>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, PropType, computed } from 'vue';
+import { defineComponent, ref, watch, PropType } from 'vue';
 
 export default defineComponent({
   name: 'GenericQueue',
@@ -25,11 +17,9 @@ export default defineComponent({
     }
   },
   emits: ['update:current', 'update:queue'],
-  setup(props, { emit }) {
+  setup(props, { emit, expose }) {
     const queue = ref<any[]>([]);
     const currentIndex = ref(-1);
-
-    const canAdd = computed(() => !!props.addItem);
 
     const addToQueue = () => {
       if (!props.addItem) return;
@@ -104,7 +94,6 @@ export default defineComponent({
           }));
           queue.value = restored;
           currentIndex.value = restored.length > 0 ? 0 : -1;
-          emit('update:queue', queue.value);
           emit('update:current', queue.value[currentIndex.value]);
         }
       } catch (e) {
@@ -115,15 +104,19 @@ export default defineComponent({
     // 外部可 watch queue 變化
     watch(queue, (val) => emit('update:queue', val));
 
-    return {
-      queue,
-      currentIndex,
-      canAdd,
+    expose({
       addToQueue,
       goNext,
       goPrev,
       exportQueue,
-      importQueue
+      importQueue,
+      queue,
+      currentIndex
+    });
+
+    return {
+      queue,
+      currentIndex
     };
   }
 });

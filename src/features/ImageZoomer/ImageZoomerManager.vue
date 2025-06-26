@@ -1,22 +1,24 @@
 <template>
   <div>
-    <input type="file" accept="image/*" @change="onFileChange" style="margin-bottom:1em;" />
-    <div v-if="context && context.image">
-      <ImageZoomer ref="imageZoomer" />
-      <button @click="startZoomOut">Zoom Out</button>
-      <button @click="handlePauseOrResumeZoomOut" :disabled="!isZooming">
-        {{ isPaused ? 'Resume' : 'Pause' }}
-      </button>
-      <button @click="handleShowFullImage">Show Full Image</button>
-      <GenericQueue
-        ref="genericQueue"
-        :add-item="context"
-        @update:current="onQueueCurrentChange"
-        @update:queue="onQueueChange"
-      />
-      <div style="margin-top:1em;">
+    <div class="top-bar">
+      <input type="file" accept="image/*" @change="onFileChange" />
+      <div class="button-row">
+        <button @click="startZoomOut" :disabled="!hasSelection">Zoom Out</button>
+        <button @click="handlePauseOrResumeZoomOut" :disabled="!isZooming && !isPaused">
+          {{ isPaused ? 'Resume' : 'Pause' }}
+        </button>
+        <button @click="handleShowFullImage" :disabled = "!context || !isZooming && !isPaused">Show Full Image</button>
+        <button @click="addToQueue" :disabled="!hasSelection">Add to Queue</button>
+        <button @click="goPrev" :disabled="!canGoPrev">Prev</button>
+        <button @click="goNext" :disabled="!canGoNext">Next</button>
         <button @click="handleExportQueue">Export Queue</button>
         <input type="file" accept="application/json" @change="handleImportQueue" />
+      </div>
+    </div>
+    <div v-if="context && context.image">
+      <ImageZoomer ref="imageZoomer" @update:selection="onSelectionUpdate" />
+      <GenericQueue ref="genericQueue" :add-item="context" @update:current="onQueueCurrentChange" @update:queue="onQueueChange" />
+      <div style="margin-top:1em;">
       </div>
     </div>
     <div v-else style="margin:1em;color:#888;">Please select an image and select a region.</div>
@@ -24,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useImageZoomerStore } from './stores/imageZoomerStore';
 import { loadImageFile } from '../../composables/useImageLoader';
@@ -68,7 +70,7 @@ export default defineComponent({
       imageStore.setContext(ctx);
     };
     const onQueueChange = (queue: ImageZoomerContext[]) => {
-      // 必要なら外部同期
+      // 可選：外部同步 queue 狀態
     };
 
     // queueエクスポート/インポート
@@ -94,17 +96,36 @@ export default defineComponent({
     // zoomout animation
     const startZoomOut = () => {
       imageZoomer.value?.startZoomOut();
+      isZooming.value = true;
+      isPaused.value = false;
     };
     const handlePauseOrResumeZoomOut = () => {
       if (isPaused.value) {
         imageZoomer.value?.resumeZoomOut();
+        isPaused.value = false;
+        isZooming.value = true;
       } else {
         imageZoomer.value?.pauseZoomOut();
+        isPaused.value = true;
+        isZooming.value = false;
       }
     };
     const handleShowFullImage = () => {
       imageZoomer.value?.showFullImage();
+      isZooming.value = false;
+      isPaused.value = false;
     };
+
+    // queue 操作按鈕
+    const addToQueue = () => genericQueue.value?.addToQueue();
+    const goPrev = () => genericQueue.value?.goPrev();
+    const goNext = () => genericQueue.value?.goNext();
+    const canGoPrev = computed(() => genericQueue.value?.queue?.length > 0 && genericQueue.value?.currentIndex > 0);
+    const canGoNext = computed(() => genericQueue.value?.queue?.length > 0 && genericQueue.value?.currentIndex < genericQueue.value?.queue.length - 1);
+    const hasSelection = computed(() => {
+      const sel = context.value?.selection;
+      return !!(context.value && sel && sel.w && sel.h);
+    });
 
     return {
       imageZoomer,
@@ -120,7 +141,13 @@ export default defineComponent({
       onQueueChange,
       handleExportQueue,
       handleImportQueue,
-      onFileChange
+      onFileChange,
+      addToQueue,
+      goPrev,
+      goNext,
+      canGoPrev,
+      canGoNext,
+      hasSelection
     };
   }
 });
@@ -134,5 +161,18 @@ export default defineComponent({
 canvas {
   border: 1px solid #ccc;
   background: #222;
+}
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  align-items: center;
+}
+.top-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 1em;
 }
 </style>

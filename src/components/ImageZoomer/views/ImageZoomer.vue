@@ -5,6 +5,9 @@
         ref="mainCanvas"
         :width="context.displayWidth"
         :height="context.displayHeight"
+        @mousedown="handleMouseDown"
+        @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
       ></canvas>
       <canvas
         ref="zoomCanvas"
@@ -20,7 +23,8 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { startZoomOut as zoomOutUtil } from '../hooks/zoomOutUtil';
+import { useRectSelection } from '../hooks/useRectSelection';
+import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../hooks/zoomOutUtil';
 import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
 
 export default defineComponent({
@@ -35,10 +39,20 @@ export default defineComponent({
       default: 10000
     }
   },
-  setup(props) {
+  emits: [
+    'zoom-start',
+    'zoom-finish',
+    'zoom-pause',
+    'zoom-resume',
+    'show-full-image',
+    'update:selection'
+  ],
+  setup(props, { emit, expose }) {
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
     const zoomCanvas = ref<HTMLCanvasElement | null>(null);
     const showZoomCanvas = ref(false);
+    const aspect = ref(props.context.displayWidth / props.context.displayHeight || 1);
+    const { rect, isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspect);
 
     // Draw the image to the main canvas
     const drawImage = () => {
@@ -51,28 +65,67 @@ export default defineComponent({
         0, 0, props.context.displayWidth, props.context.displayHeight
       );
       // Draw selection rectangle
-      ctx.save();
-      ctx.strokeStyle = 'red';
-      ctx.lineWidth = 2;
-      const sel = props.context.selection;
-      ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
-      ctx.restore();
+      if (rect.w !== 0 && rect.h !== 0) {
+        drawSelection(mainCanvas.value);
+      }
     };
+
+    // 框選事件
+    const handleMouseDown = (e: MouseEvent) => {
+      onMouseDown(e, mainCanvas.value!);
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      onMouseMove(e, mainCanvas.value!);
+      if (isDragging.value) drawImage();
+    };
+    const handleMouseUp = (e: MouseEvent) => {
+      onMouseUp();
+      emit('update:selection', { ...rect });
+      drawImage();
+    };
+
+    let zoomController: ReturnType<typeof zoomOutUtil> | null = null;
 
     // Animate zoom out from selection to full image
     const startZoomOut = () => {
       if (!zoomCanvas.value || !props.context.image) return;
       showZoomCanvas.value = true;
-      zoomOutUtil({
+      emit('zoom-start');
+      zoomController = zoomOutUtil({
         ...props.context,
+        selection: rect,
         canvas: zoomCanvas.value,
         duration: props.animationDuration,
-        onFinish: () => { showZoomCanvas.value = false; }
+        onFinish: () => {
+          showZoomCanvas.value = false;
+          emit('zoom-finish');
+        }
       });
     };
 
-    // Watch for context changes and redraw
+    const pauseZoomOut = () => {
+      if (zoomController && typeof zoomController.pause === 'function') {
+        zoomController.pause();
+        emit('zoom-pause');
+      }
+    };
+    const resumeZoomOut = () => {
+      if (zoomController && typeof zoomController.resume === 'function') {
+        zoomController.resume();
+        emit('zoom-resume');
+      }
+    };
+    const showFullImage = () => {
+      if (!mainCanvas.value || !props.context.image) return;
+      showFullImageUtil({
+        ...props.context,
+        canvas: mainCanvas.value
+      });
+      emit('show-full-image');
+    };
+
     watch(() => props.context, () => {
+      aspect.value = props.context.displayWidth / props.context.displayHeight || 1;
       nextTick(() => drawImage());
     }, { deep: true, immediate: true });
 
@@ -80,15 +133,29 @@ export default defineComponent({
       drawImage();
     });
 
+    // expose methods for parent
+    expose({
+      startZoomOut,
+      pauseZoomOut,
+      resumeZoomOut,
+      showFullImage
+    });
+
     return {
       mainCanvas,
       zoomCanvas,
       showZoomCanvas,
       drawImage,
-      startZoomOut
+      startZoomOut,
+      pauseZoomOut,
+      resumeZoomOut,
+      showFullImage,
+      handleMouseDown,
+      handleMouseMove,
+      handleMouseUp
     };
   }
 });
 </script>
 
-<style src="./ImageZoomer.css"></style>
+<style src="../ImageZoomer.css"></style>

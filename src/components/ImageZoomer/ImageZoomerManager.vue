@@ -1,35 +1,42 @@
 <template>
   <div>
     <div v-if="imageState.image">
-      <div class="canvas-container">
-        <canvas
-          ref="mainCanvas"
-          :width="imageState.displayWidth"
-          :height="imageState.displayHeight"
-          @mousedown="handleMouseDown"
-          @mousemove="handleMouseMove"
-          @mouseup="handleMouseUp"
-        ></canvas>
-      </div>
+      <ImageZoomer
+        ref="imageZoomer"
+        :context="currentContext"
+        :animationDuration="10000"
+        @update:selection="onSelectionUpdate"
+        @zoom-start="isZooming = true; isPaused = false"
+        @zoom-finish="isZooming = false; isPaused = false"
+        @zoom-pause="isPaused = true"
+        @zoom-resume="isPaused = false"
+        @show-full-image="isZooming = false; isPaused = false"
+      />
       <button @click="startZoomOut">Zoom Out</button>
       <button @click="handlePauseOrResumeZoomOut" :disabled="!isZooming">
         {{ isPaused ? 'Resume' : 'Pause' }}
       </button>
       <button @click="handleShowFullImage">Show Full Image</button>
+      <GenericQueue
+        :add-item="currentContext"
+        @update:current="onQueueCurrentChange"
+        @update:queue="onQueueChange"
+      />
     </div>
     <div v-else style="margin:1em;color:#888;">Please select an image and select a region.</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, PropType } from 'vue';
-import { useRectSelection } from './hooks/useRectSelection';
-import { startZoomOut as zoomOutUtil, showFullImage } from './hooks/zoomOutUtil';
-import type { CanvasImageContext } from './types/ImageZoomerTypes';
+import { defineComponent, ref, watch, computed, PropType } from 'vue';
+import ImageZoomer from './views/ImageZoomer.vue';
+import GenericQueue from '../GenericQueue.vue';
+import type { ImageDisplayContext } from './types/ImageZoomerTypes';
 import type { ImageState } from '../ImageProvider.vue';
 
 export default defineComponent({
   name: 'ImageZoomerManager',
+  components: { ImageZoomer, GenericQueue },
   props: {
     imageState: {
       type: Object as PropType<ImageState>,
@@ -37,10 +44,10 @@ export default defineComponent({
     }
   },
   setup(props) {
-    const mainCanvas = ref<HTMLCanvasElement | null>(null);
+    const imageZoomer = ref();
     const isZooming = ref(false);
     const isPaused = ref(false);
-    const aspectRatio = ref(16/9);
+    const aspectRatio = ref(1);
     watch(
       [() => props.imageState.displayWidth, () => props.imageState.displayHeight],
       ([w, h]) => {
@@ -48,106 +55,60 @@ export default defineComponent({
       },
       { immediate: true }
     );
-    const { rect: selection, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspectRatio);
-
-    // 共通のcontext生成関数
-    function getCanvasContext(): CanvasImageContext | null {
-      if (!mainCanvas.value || !props.imageState.image) return null;
+    const selection = ref({ x: 0, y: 0, w: 0, h: 0 });
+    const onSelectionUpdate = (rect: any) => {
+      selection.value = rect;
+    };
+    // context
+    const currentContext = computed<ImageDisplayContext>(() => {
+      if (!props.imageState.image) return null as any;
       return {
         image: props.imageState.image,
-        canvas: mainCanvas.value,
         naturalWidth: props.imageState.naturalWidth,
         naturalHeight: props.imageState.naturalHeight,
         displayWidth: props.imageState.displayWidth,
         displayHeight: props.imageState.displayHeight,
-        selection: { ...selection }
+        selection: selection.value
       };
-    }
+    });
 
-    // canvas rendering
-    const drawMain = () => {
-      if (!mainCanvas.value || !props.imageState.image) return;
-      const ctx = mainCanvas.value.getContext('2d');
-      if (!ctx) return;
-      ctx.clearRect(0, 0, props.imageState.displayWidth, props.imageState.displayHeight);
-      ctx.drawImage(props.imageState.image, 0, 0, props.imageState.displayWidth, props.imageState.displayHeight);
-      if (!isZooming.value) {
-        drawSelection(mainCanvas.value);
-      }
+    // queue 狀態由 GenericQueue 管理
+    const onQueueCurrentChange = (ctx: ImageDisplayContext) => {
+      // TODO: 這裡可根據 ctx 更新顯示內容
+      // 例如 emit('load-context', ctx) 或直接覆蓋 imageState/selection
+      // console.log('Current from queue:', ctx);
     };
-
-    // event handler
-    const handleMouseDown = (e: MouseEvent) => {
-      if (isZooming.value) return;
-      onMouseDown(e, mainCanvas.value!);
-    };
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isZooming.value) return;
-      onMouseMove(e, mainCanvas.value!);
-      drawMain();
-    };
-    const handleMouseUp = () => {
-      if (isZooming.value) return;
-      onMouseUp();
-      drawMain();
+    const onQueueChange = (queue: ImageDisplayContext[]) => {
+      // TODO: 需要時可同步 queue 狀態到外部
+      // console.log('Queue changed:', queue);
     };
 
     // zoomout animation
-    let zoomController: ReturnType<typeof zoomOutUtil> | null = null;
     const startZoomOut = () => {
-      const ctx = getCanvasContext();
-      if (!ctx) return;
-      isZooming.value = true;
-      isPaused.value = false;
-      zoomController = zoomOutUtil({
-        ...ctx,
-        duration: 10000,
-        onFinish: () => {
-          isZooming.value = false;
-          isPaused.value = false;
-          zoomController = null;
-          showFullImage(ctx);
-        }
-      });
+      imageZoomer.value?.startZoomOut();
     };
-
-    // pause/resume toggle
     const handlePauseOrResumeZoomOut = () => {
-      if (!zoomController) return;
       if (isPaused.value) {
-        zoomController.resume();
-        isPaused.value = false;
+        imageZoomer.value?.resumeZoomOut();
       } else {
-        zoomController.pause();
-        isPaused.value = true;
+        imageZoomer.value?.pauseZoomOut();
       }
     };
-
-    // rerender the canvas when selection changes
-    watch([
-      () => props.imageState.image,
-      () => selection.x, () => selection.y, () => selection.w, () => selection.h
-    ], () => {
-      drawMain();
-    });
-
-    // show full image without zooming
     const handleShowFullImage = () => {
-      const ctx = getCanvasContext();
-      if (!ctx) return;
-      showFullImage(ctx);
+      imageZoomer.value?.showFullImage();
     };
 
     return {
-      mainCanvas,
+      imageZoomer,
       isZooming,
       isPaused,
-      handleMouseDown,
-      handleMouseMove,
-      handleMouseUp,
       startZoomOut,
       handlePauseOrResumeZoomOut,
-      handleShowFullImage
+      handleShowFullImage,
+      currentContext,
+      onSelectionUpdate,
+      onQueueCurrentChange,
+      onQueueChange
     };
   }
 });

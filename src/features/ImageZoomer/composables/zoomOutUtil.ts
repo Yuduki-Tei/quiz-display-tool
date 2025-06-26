@@ -2,6 +2,7 @@ import type { ImageZoomerContext } from '../types/ImageZoomerTypes';
 
 // Utility for zoom-out animation on canvas
 export type ZoomOutParams = ImageZoomerContext & {
+  onStart?: () => void;
   onFinish?: () => void;
 };
 
@@ -15,6 +16,7 @@ export function startZoomOut(params: ZoomOutParams) {
   let pauseTime = 0;
 
   const {
+    onStart,
     image,
     canvas,
     naturalWidth,
@@ -28,6 +30,7 @@ export function startZoomOut(params: ZoomOutParams) {
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
+  if (onStart) onStart();
   // Normalize selection rectangle (always left-top origin)
   const sx = selection.w >= 0 ? selection.x : selection.x + selection.w;
   const sy = selection.h >= 0 ? selection.y : selection.y + selection.h;

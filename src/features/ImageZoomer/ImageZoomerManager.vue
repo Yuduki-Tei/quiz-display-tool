@@ -1,18 +1,8 @@
 <template>
   <div>
     <input type="file" accept="image/*" @change="onFileChange" style="margin-bottom:1em;" />
-    <div v-if="imageState && imageState.image">
-      <ImageZoomer
-        ref="imageZoomer"
-        :context="currentContext"
-        :animationDuration="10000"
-        @update:selection="onSelectionUpdate"
-        @zoom-start="isZooming = true; isPaused = false"
-        @zoom-finish="isZooming = false; isPaused = false"
-        @zoom-pause="isPaused = true"
-        @zoom-resume="isPaused = false"
-        @show-full-image="isZooming = false; isPaused = false"
-      />
+    <div v-if="context && context.image">
+      <ImageZoomer ref="imageZoomer" />
       <button @click="startZoomOut">Zoom Out</button>
       <button @click="handlePauseOrResumeZoomOut" :disabled="!isZooming">
         {{ isPaused ? 'Resume' : 'Pause' }}
@@ -20,7 +10,7 @@
       <button @click="handleShowFullImage">Show Full Image</button>
       <GenericQueue
         ref="genericQueue"
-        :add-item="currentContext"
+        :add-item="context"
         @update:current="onQueueCurrentChange"
         @update:queue="onQueueChange"
       />
@@ -34,62 +24,54 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useImageStore } from '../../stores/imageStore';
+import { useImageZoomerStore } from './stores/imageZoomerStore';
+import { loadImageFile } from '../../composables/useImageLoader';
 import ImageZoomer from './views/ImageZoomer.vue';
 import GenericQueue from '../../components/GenericQueue.vue';
-import type { ImageZoomerContext } from './types/ImageZoomerTypes';
+import type { ImageZoomerContext, SelectionRect } from './types/ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomerManager',
   components: { ImageZoomer, GenericQueue },
   setup() {
-    const imageStore = useImageStore();
-    const { context: imageState } = storeToRefs(imageStore);
+    const imageStore = useImageZoomerStore();
+    const { context } = storeToRefs(imageStore);
     const imageZoomer = ref();
     const genericQueue = ref();
     const isZooming = ref(false);
     const isPaused = ref(false);
-    const aspectRatio = ref(1);
-    watch(
-      [() => imageState.value?.displayWidth, () => imageState.value?.displayHeight],
-      ([w, h]) => {
-        if (w > 0 && h > 0) aspectRatio.value = w / h;
-      },
-      { immediate: true }
-    );
-    const selection = ref({ x: 0, y: 0, w: 0, h: 0 });
-    const onSelectionUpdate = (rect: any) => {
-      selection.value = rect;
-    };
-    // context
-    const currentContext = computed<ImageZoomerContext>(() => {
-      if (!imageState.value || !imageState.value.image) return null as any;
-      return {
-        image: imageState.value.image,
-        naturalWidth: imageState.value.naturalWidth,
-        naturalHeight: imageState.value.naturalHeight,
-        displayWidth: imageState.value.displayWidth,
-        displayHeight: imageState.value.displayHeight,
-        selection: selection.value
-      };
-    });
 
+    // ファイル選択
+    const onFileChange = async (e: Event) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || !files[0]) return;
+      const file = files[0];
+      try {
+        const imgData = await loadImageFile(file);
+        imageStore.setContext({ ...imgData, selection: { x: 0, y: 0, w: 0, h: 0 }, duration: 10000 });
+      } catch (err) {
+        imageStore.resetContext();
+      }
+    };
+
+    // selection更新
+    const onSelectionUpdate = (rect: SelectionRect) => {
+      if (!context.value) return;
+      imageStore.setContext({ ...context.value, selection: rect });
+    };
+
+    // queue操作
     const onQueueCurrentChange = (ctx: ImageZoomerContext) => {
       if (!ctx) return;
-      if (!imageState.value) return;
-      imageState.value.image = ctx.image;
-      imageState.value.naturalWidth = ctx.naturalWidth;
-      imageState.value.naturalHeight = ctx.naturalHeight;
-      imageState.value.displayWidth = ctx.displayWidth;
-      imageState.value.displayHeight = ctx.displayHeight;
-      selection.value = { ...ctx.selection };
+      imageStore.setContext(ctx);
     };
     const onQueueChange = (queue: ImageZoomerContext[]) => {
-      // TODO: 需要時可同步 queue 狀態到外部
+      // 必要なら外部同期
     };
 
+    // queueエクスポート/インポート
     const handleExportQueue = () => {
       genericQueue.value?.exportQueue();
     };
@@ -124,18 +106,6 @@ export default defineComponent({
       imageZoomer.value?.showFullImage();
     };
 
-    // 画像ファイル選択
-    const onFileChange = async (e: Event) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files || !files[0]) return;
-      const file = files[0];
-      try {
-        await imageStore.loadImageFile(file);
-      } catch (err) {
-        imageStore.resetImage();
-      }
-    };
-
     return {
       imageZoomer,
       genericQueue,
@@ -144,13 +114,12 @@ export default defineComponent({
       startZoomOut,
       handlePauseOrResumeZoomOut,
       handleShowFullImage,
-      currentContext,
+      context,
       onSelectionUpdate,
       onQueueCurrentChange,
       onQueueChange,
       handleExportQueue,
       handleImportQueue,
-      imageState,
       onFileChange
     };
   }

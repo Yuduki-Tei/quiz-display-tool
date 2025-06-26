@@ -1,20 +1,16 @@
 <template>
   <div id="app">
-    <ImageProvider v-slot="{ imageState }">
-      <ImageZoomerManager :imageState="imageState" />
-    </ImageProvider>
+    <ImageZoomerManager />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import ImageProvider from './components/ImageProvider.vue';
-import ImageZoomerManager from './components/ImageZoomer/ImageZoomerManager.vue';
+import ImageZoomerManager from './features/ImageZoomer/ImageZoomerManager.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
-    ImageProvider,
     ImageZoomerManager
   }
 });

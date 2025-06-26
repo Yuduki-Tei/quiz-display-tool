@@ -23,15 +23,15 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { useRectSelection } from '../hooks/useRectSelection';
-import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../hooks/zoomOutUtil';
-import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
+import { useRectSelection } from '../composables/useRectSelection';
+import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../composables/zoomOutUtil';
+import type { ImageZoomerContext } from '../types/ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomer',
   props: {
     context: {
-      type: Object as () => ImageDisplayContext,
+      type: Object as () => ImageZoomerContext,
       required: true
     },
     animationDuration: {

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div v-if="imageState.image">
+    <input type="file" accept="image/*" @change="onFileChange" style="margin-bottom:1em;" />
+    <div v-if="imageState && imageState.image">
       <ImageZoomer
         ref="imageZoomer"
         :context="currentContext"
@@ -33,29 +34,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, computed, PropType } from 'vue';
+import { defineComponent, ref, watch, computed } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useImageStore } from '../../stores/imageStore';
 import ImageZoomer from './views/ImageZoomer.vue';
-import GenericQueue from '../GenericQueue.vue';
-import type { ImageDisplayContext } from './types/ImageZoomerTypes';
-import type { ImageState } from '../ImageProvider.vue';
+import GenericQueue from '../../components/GenericQueue.vue';
+import type { ImageZoomerContext } from './types/ImageZoomerTypes';
 
 export default defineComponent({
   name: 'ImageZoomerManager',
   components: { ImageZoomer, GenericQueue },
-  props: {
-    imageState: {
-      type: Object as PropType<ImageState>,
-      required: true
-    }
-  },
-  setup(props) {
+  setup() {
+    const imageStore = useImageStore();
+    const { context: imageState } = storeToRefs(imageStore);
     const imageZoomer = ref();
     const genericQueue = ref();
     const isZooming = ref(false);
     const isPaused = ref(false);
     const aspectRatio = ref(1);
     watch(
-      [() => props.imageState.displayWidth, () => props.imageState.displayHeight],
+      [() => imageState.value?.displayWidth, () => imageState.value?.displayHeight],
       ([w, h]) => {
         if (w > 0 && h > 0) aspectRatio.value = w / h;
       },
@@ -66,28 +64,29 @@ export default defineComponent({
       selection.value = rect;
     };
     // context
-    const currentContext = computed<ImageDisplayContext>(() => {
-      if (!props.imageState.image) return null as any;
+    const currentContext = computed<ImageZoomerContext>(() => {
+      if (!imageState.value || !imageState.value.image) return null as any;
       return {
-        image: props.imageState.image,
-        naturalWidth: props.imageState.naturalWidth,
-        naturalHeight: props.imageState.naturalHeight,
-        displayWidth: props.imageState.displayWidth,
-        displayHeight: props.imageState.displayHeight,
+        image: imageState.value.image,
+        naturalWidth: imageState.value.naturalWidth,
+        naturalHeight: imageState.value.naturalHeight,
+        displayWidth: imageState.value.displayWidth,
+        displayHeight: imageState.value.displayHeight,
         selection: selection.value
       };
     });
 
-    const onQueueCurrentChange = (ctx: ImageDisplayContext) => {
+    const onQueueCurrentChange = (ctx: ImageZoomerContext) => {
       if (!ctx) return;
-      props.imageState.image = ctx.image;
-      props.imageState.naturalWidth = ctx.naturalWidth;
-      props.imageState.naturalHeight = ctx.naturalHeight;
-      props.imageState.displayWidth = ctx.displayWidth;
-      props.imageState.displayHeight = ctx.displayHeight;
+      if (!imageState.value) return;
+      imageState.value.image = ctx.image;
+      imageState.value.naturalWidth = ctx.naturalWidth;
+      imageState.value.naturalHeight = ctx.naturalHeight;
+      imageState.value.displayWidth = ctx.displayWidth;
+      imageState.value.displayHeight = ctx.displayHeight;
       selection.value = { ...ctx.selection };
     };
-    const onQueueChange = (queue: ImageDisplayContext[]) => {
+    const onQueueChange = (queue: ImageZoomerContext[]) => {
       // TODO: 需要時可同步 queue 狀態到外部
     };
 
@@ -125,6 +124,18 @@ export default defineComponent({
       imageZoomer.value?.showFullImage();
     };
 
+    // 画像ファイル選択
+    const onFileChange = async (e: Event) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (!files || !files[0]) return;
+      const file = files[0];
+      try {
+        await imageStore.loadImageFile(file);
+      } catch (err) {
+        imageStore.resetImage();
+      }
+    };
+
     return {
       imageZoomer,
       genericQueue,
@@ -138,7 +149,9 @@ export default defineComponent({
       onQueueCurrentChange,
       onQueueChange,
       handleExportQueue,
-      handleImportQueue
+      handleImportQueue,
+      imageState,
+      onFileChange
     };
   }
 });

@@ -1,9 +1,7 @@
-import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
+import type { ImageZoomerContext } from '../types/ImageZoomerTypes';
 
 // Utility for zoom-out animation on canvas
-export type ZoomOutParams = ImageDisplayContext & {
-  canvas: HTMLCanvasElement;
-  duration?: number; // ms
+export type ZoomOutParams = ImageZoomerContext & {
   onFinish?: () => void;
 };
 

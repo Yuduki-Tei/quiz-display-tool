@@ -1,29 +1,34 @@
-import { ref, reactive, type Ref } from 'vue';
-import type { SelectionRect } from '../types/ImageZoomerTypes';
+import { ref, type Ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useImageZoomerStore } from '../stores/imageZoomerStore';
 
 export function useRectSelection(aspect: Ref<number>) {
+  const imageStore = useImageZoomerStore();
+  const { context } = storeToRefs(imageStore);
   const isDragging = ref(false);
-  const rect = reactive<SelectionRect>({ x: 0, y: 0, w: 0, h: 0 });
 
   // Mouse down handler
   const onMouseDown = (e: MouseEvent, canvas: HTMLCanvasElement) => {
     const bounds = canvas.getBoundingClientRect();
-    rect.x = e.clientX - bounds.left;
-    rect.y = e.clientY - bounds.top;
-    rect.w = 0;
-    rect.h = 0;
+    if (!context.value) return;
+    context.value.selection = {
+      x: e.clientX - bounds.left,
+      y: e.clientY - bounds.top,
+      w: 0,
+      h: 0
+    };
     isDragging.value = true;
   };
 
   // Mouse move handler
   const onMouseMove = (e: MouseEvent, canvas: HTMLCanvasElement) => {
-    if (!isDragging.value) return;
+    if (!isDragging.value || !context.value) return;
     const bounds = canvas.getBoundingClientRect();
     const mx = e.clientX - bounds.left;
-    const dx = mx - rect.x;
+    const dx = mx - context.value.selection.x;
     const dy = dx / aspect.value;
-    rect.w = dx;
-    rect.h = dy;
+    context.value.selection.w = dx;
+    context.value.selection.h = dy;
   };
 
   // Mouse up handler
@@ -33,6 +38,8 @@ export function useRectSelection(aspect: Ref<number>) {
 
   // Draw selection rectangle on given canvas
   const drawSelection = (canvas: HTMLCanvasElement) => {
+    if (!context.value) return;
+    const rect = context.value.selection;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctx.save();
@@ -45,7 +52,6 @@ export function useRectSelection(aspect: Ref<number>) {
 
   return {
     isDragging,
-    rect,
     onMouseDown,
     onMouseMove,
     onMouseUp,

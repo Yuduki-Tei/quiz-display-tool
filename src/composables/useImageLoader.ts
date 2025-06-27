@@ -1,13 +1,10 @@
-// Utility to load and resize an image file
-export interface LoadImageResult {
-  image: HTMLImageElement;
-  width: number;
-  height: number;
-  naturalWidth: number;
-  naturalHeight: number;
-}
+import type { ImageContext } from 'src/@types/types';
 
-export function loadImageFile(file: File, maxWidth: number, maxHeight: number): Promise<LoadImageResult> {
+export async function loadImageFile(
+  file: File,
+  maxWidth = 1280,
+  maxHeight = 720
+): Promise<ImageContext> {
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     img.onload = () => {
@@ -19,11 +16,12 @@ export function loadImageFile(file: File, maxWidth: number, maxHeight: number): 
       w = Math.round(w * scale);
       h = Math.round(h * scale);
       resolve({
+        canvas: null,
         image: img,
-        width: w,
-        height: h,
         naturalWidth,
-        naturalHeight
+        naturalHeight,
+        displayWidth: w,
+        displayHeight: h,
       });
     };
     img.onerror = reject;

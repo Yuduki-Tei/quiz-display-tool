@@ -23,22 +23,13 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { useRectSelection } from '../hooks/useRectSelection';
-import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../hooks/zoomOutUtil';
-import type { ImageDisplayContext } from '../types/ImageZoomerTypes';
+import { storeToRefs } from 'pinia';
+import { useImageZoomerStore } from '../stores/imageZoomerStore';
+import { useRectSelection } from '../composables/useRectSelection';
+import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../composables/zoomOutUtil';
 
 export default defineComponent({
   name: 'ImageZoomer',
-  props: {
-    context: {
-      type: Object as () => ImageDisplayContext,
-      required: true
-    },
-    animationDuration: {
-      type: Number,
-      default: 10000
-    }
-  },
   emits: [
     'zoom-start',
     'zoom-finish',
@@ -47,25 +38,27 @@ export default defineComponent({
     'show-full-image',
     'update:selection'
   ],
-  setup(props, { emit, expose }) {
+  setup(_, { emit, expose }) {
+    const imageStore = useImageZoomerStore();
+    const { context } = storeToRefs(imageStore);
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
     const zoomCanvas = ref<HTMLCanvasElement | null>(null);
     const showZoomCanvas = ref(false);
-    const aspect = ref(props.context.displayWidth / props.context.displayHeight || 1);
-    const { rect, isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspect);
+    const aspect = ref(context.value?.displayWidth / context.value?.displayHeight || 1);
+    const { isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspect);
 
     // Draw the image to the main canvas
     const drawImage = () => {
-      if (!mainCanvas.value || !props.context.image) return;
+      if (!mainCanvas.value || !context.value?.image) return;
       const ctx = mainCanvas.value.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, props.context.displayWidth, props.context.displayHeight);
+      ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
       ctx.drawImage(
-        props.context.image,
-        0, 0, props.context.displayWidth, props.context.displayHeight
+        context.value.image,
+        0, 0, context.value.displayWidth, context.value.displayHeight
       );
       // Draw selection rectangle
-      if (rect.w !== 0 && rect.h !== 0) {
+      if (context.value.selection.w !== 0 && context.value.selection.h !== 0) {
         drawSelection(mainCanvas.value);
       }
     };
@@ -80,7 +73,7 @@ export default defineComponent({
     };
     const handleMouseUp = (e: MouseEvent) => {
       onMouseUp();
-      emit('update:selection', { ...rect });
+      emit('update:selection', { ...context.value?.selection });
       drawImage();
     };
 
@@ -88,14 +81,12 @@ export default defineComponent({
 
     // Animate zoom out from selection to full image
     const startZoomOut = () => {
-      if (!zoomCanvas.value || !props.context.image) return;
+      if (!zoomCanvas.value || !context.value?.image) return;
       showZoomCanvas.value = true;
       emit('zoom-start');
       zoomController = zoomOutUtil({
-        ...props.context,
-        selection: rect,
+        ...context.value,
         canvas: zoomCanvas.value,
-        duration: props.animationDuration,
         onFinish: () => {
           showZoomCanvas.value = false;
           emit('zoom-finish');
@@ -116,26 +107,25 @@ export default defineComponent({
       }
     };
     const showFullImage = () => {
-      if (!mainCanvas.value || !props.context.image) return;
+      if (!mainCanvas.value || !context.value?.image) return;
       showFullImageUtil({
-        ...props.context,
+        ...context.value,
         canvas: mainCanvas.value
       });
       emit('show-full-image');
+      showZoomCanvas.value = false;
+      zoomController = null;
     };
 
-watch(
-  () => props.context,
-  (newCtx) => {
-    aspect.value = newCtx.displayWidth / newCtx.displayHeight || 1;
-    rect.x = newCtx.selection.x;
-    rect.y = newCtx.selection.y;
-    rect.w = newCtx.selection.w;
-    rect.h = newCtx.selection.h;
-    nextTick(() => drawImage());
-  },
-  { deep: true, immediate: true }
-);
+    watch(
+      () => context.value,
+      (newCtx) => {
+        if (!newCtx) return;
+        aspect.value = newCtx.displayWidth / newCtx.displayHeight || 1;
+        nextTick(() => drawImage());
+      },
+      { deep: true, immediate: true }
+    );
 
     onMounted(() => {
       drawImage();
@@ -160,7 +150,8 @@ watch(
       showFullImage,
       handleMouseDown,
       handleMouseMove,
-      handleMouseUp
+      handleMouseUp,
+      context
     };
   }
 });

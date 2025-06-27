@@ -6,24 +6,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, PropType } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
   name: 'GenericQueue',
-  props: {
-    addItem: {
-      type: Object as PropType<any>,
-      required: false
-    }
-  },
   emits: ['update:current', 'update:queue'],
-  setup(props, { emit, expose }) {
+  setup(_, { emit, expose }) {
     const queue = ref<any[]>([]);
     const currentIndex = ref(-1);
 
-    const addToQueue = () => {
-      if (!props.addItem) return;
-      queue.value.push(props.addItem);
+    const addToQueue = (addItem: any) => {
+      queue.value.push(addItem);
       currentIndex.value = queue.value.length - 1;
       emit('update:queue', queue.value);
       emit('update:current', queue.value[currentIndex.value]);

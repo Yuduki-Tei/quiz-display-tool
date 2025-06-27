@@ -117,7 +117,7 @@ export default defineComponent({
     };
 
     // queue 操作按鈕
-    const addToQueue = () => genericQueue.value?.addToQueue();
+    const addToQueue = () => genericQueue.value?.addToQueue(context.value);
     const goPrev = () => genericQueue.value?.goPrev();
     const goNext = () => genericQueue.value?.goNext();
     const canGoPrev = computed(() => genericQueue.value?.queue?.length > 0 && genericQueue.value?.currentIndex > 0);

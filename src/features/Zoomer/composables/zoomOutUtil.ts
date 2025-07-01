@@ -1,14 +1,20 @@
-import type { ImageZoomerContext } from '../types/ImageZoomerTypes';
+import type { ImageContext } from "@/@types/types";
+import type { ZoomerContext } from "../types/ZoomerTypes";
+import { useZoomerStore } from "../stores/zoomerStore";
 
 // Utility for zoom-out animation on canvas
-export type ZoomOutParams = ImageZoomerContext & {
-  onStart?: () => void;
-  onFinish?: () => void;
-};
+export type ZoomOutParams = ZoomerContext &
+  ImageContext & {
+    onStart?: () => void;
+    onFinish?: () => void;
+  };
 
 let currentController: ReturnType<typeof startZoomOut> | null = null;
 
 export function startZoomOut(params: ZoomOutParams) {
+  const imageStore = useZoomerStore();
+  imageStore.setZooming(true);
+  imageStore.setPaused(false);
   let paused = false;
   let finished = false;
   let animationFrameId: number | null = null;
@@ -17,18 +23,18 @@ export function startZoomOut(params: ZoomOutParams) {
 
   const {
     onStart,
-    image,
     canvas,
+    renderable,
     naturalWidth,
     naturalHeight,
     displayWidth,
     displayHeight,
     selection,
     duration = 10000,
-    onFinish
+    onFinish,
   } = params;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
   if (onStart) onStart();
   // Normalize selection rectangle (always left-top origin)
@@ -48,7 +54,10 @@ export function startZoomOut(params: ZoomOutParams) {
     if (paused || finished) return;
     let progress = Math.min((ts - start) / duration, 1);
     // Ease in-out cubic for smooth animation
-    progress = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    progress =
+      progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
     // Interpolate center and size
     const cx = center0.x + (center1.x - center0.x) * progress;
     const cy = center0.y + (center1.y - center0.y) * progress;
@@ -60,15 +69,27 @@ export function startZoomOut(params: ZoomOutParams) {
     let sw2 = w * scaleX;
     let sh2 = h * scaleY;
     // Clamp to image bounds
-    if (sx2 < 0) { sw2 += sx2; sx2 = 0; }
-    if (sy2 < 0) { sh2 += sy2; sy2 = 0; }
+    if (sx2 < 0) {
+      sw2 += sx2;
+      sx2 = 0;
+    }
+    if (sy2 < 0) {
+      sh2 += sy2;
+      sy2 = 0;
+    }
     if (sx2 + sw2 > naturalWidth) sw2 = naturalWidth - sx2;
     if (sy2 + sh2 > naturalHeight) sh2 = naturalHeight - sy2;
     ctx!.clearRect(0, 0, displayWidth, displayHeight);
     ctx!.drawImage(
-      image,
-      sx2, sy2, sw2, sh2,
-      0, 0, displayWidth, displayHeight
+      renderable,
+      sx2,
+      sy2,
+      sw2,
+      sh2,
+      0,
+      0,
+      displayWidth,
+      displayHeight
     );
     if (progress < 1) {
       animationFrameId = requestAnimationFrame(animate);
@@ -76,10 +97,17 @@ export function startZoomOut(params: ZoomOutParams) {
       finished = true;
       ctx!.clearRect(0, 0, displayWidth, displayHeight);
       ctx!.drawImage(
-        image,
-        0, 0, naturalWidth, naturalHeight,
-        0, 0, displayWidth, displayHeight
+        renderable,
+        0,
+        0,
+        naturalWidth,
+        naturalHeight,
+        0,
+        0,
+        displayWidth,
+        displayHeight
       );
+      imageStore.setZooming(false);
       if (onFinish) onFinish();
     }
   }
@@ -91,6 +119,8 @@ export function startZoomOut(params: ZoomOutParams) {
       if (!paused && !finished) {
         paused = true;
         pauseTime = performance.now();
+        imageStore.setPaused(true);
+        imageStore.setZooming(false);
       }
     },
     resume() {
@@ -98,12 +128,16 @@ export function startZoomOut(params: ZoomOutParams) {
         paused = false;
         start += performance.now() - pauseTime;
         animationFrameId = requestAnimationFrame(animate);
+        imageStore.setPaused(false);
+        imageStore.setZooming(true);
       }
     },
     stop() {
       finished = true;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    }
+      imageStore.setZooming(false);
+      imageStore.setPaused(false);
+    },
   };
   currentController = controller;
   return controller;
@@ -119,19 +153,25 @@ export function stopZoomOut() {
 export function showFullImage(params: ZoomOutParams) {
   stopZoomOut();
   const {
-    image,
+    renderable,
     canvas,
     naturalWidth,
     naturalHeight,
     displayWidth,
-    displayHeight
+    displayHeight,
   } = params;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
   ctx.clearRect(0, 0, displayWidth, displayHeight);
   ctx.drawImage(
-    image,
-    0, 0, naturalWidth, naturalHeight,
-    0, 0, displayWidth, displayHeight
+    renderable,
+    0,
+    0,
+    naturalWidth,
+    naturalHeight,
+    0,
+    0,
+    displayWidth,
+    displayHeight
   );
 }

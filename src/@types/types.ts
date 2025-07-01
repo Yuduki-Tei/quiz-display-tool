@@ -1,6 +1,8 @@
 export interface ImageContext {
+  id: string;
+  image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
-  image: HTMLImageElement;
+  renderable: ImageBitmap | null;
   naturalWidth: number;
   naturalHeight: number;
   displayWidth: number;

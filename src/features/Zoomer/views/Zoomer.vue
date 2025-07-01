@@ -22,40 +22,76 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, watch, nextTick } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useImageZoomerStore } from '../stores/imageZoomerStore';
-import { useRectSelection } from '../composables/useRectSelection';
-import { startZoomOut as zoomOutUtil, showFullImage as showFullImageUtil } from '../composables/zoomOutUtil';
+import {
+  defineComponent,
+  ref,
+  onMounted,
+  watch,
+  nextTick,
+  computed,
+} from "vue";
+import { useZoomerStore } from "../stores/zoomerStore";
+import { useImageStore } from "@/stores/imageStore";
+import { useRectSelection } from "../composables/useRectSelection";
+import {
+  startZoomOut as zoomOutUtil,
+  showFullImage as showFullImageUtil,
+} from "../composables/zoomOutUtil";
 
 export default defineComponent({
-  name: 'ImageZoomer',
+  name: "Zoomer",
+  props: {
+    id: {
+      type: String,
+      required: true,
+    },
+  },
   emits: [
-    'zoom-start',
-    'zoom-finish',
-    'zoom-pause',
-    'zoom-resume',
-    'show-full-image',
-    'update:selection'
+    "zoom-start",
+    "zoom-finish",
+    "zoom-pause",
+    "zoom-resume",
+    "show-full-image",
+    "update:selection",
   ],
-  setup(_, { emit, expose }) {
-    const imageStore = useImageZoomerStore();
-    const { context } = storeToRefs(imageStore);
+  setup(props, { emit, expose }) {
+    const zoomerStore = useZoomerStore();
+    const imageStore = useImageStore();
+    const context = computed(() => {
+      const imageCtx = imageStore.getContext(props.id);
+      const zoomerCtx = zoomerStore.getContext(props.id);
+      return {
+        ...imageCtx,
+        ...zoomerCtx,
+      };
+    });
+    const setContext = (ctx: any) => zoomerStore.setContext(props.id, ctx);
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
     const zoomCanvas = ref<HTMLCanvasElement | null>(null);
     const showZoomCanvas = ref(false);
-    const aspect = ref(context.value?.displayWidth / context.value?.displayHeight || 1);
-    const { isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } = useRectSelection(aspect);
+    const aspect = ref(
+      context.value?.displayWidth / context.value?.displayHeight || 1
+    );
+    const { isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } =
+      useRectSelection(aspect, context, setContext);
 
     // Draw the image to the main canvas
     const drawImage = () => {
       if (!mainCanvas.value || !context.value?.image) return;
-      const ctx = mainCanvas.value.getContext('2d');
+      const ctx = mainCanvas.value.getContext("2d");
       if (!ctx) return;
-      ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
+      ctx.clearRect(
+        0,
+        0,
+        context.value.displayWidth,
+        context.value.displayHeight
+      );
       ctx.drawImage(
-        context.value.image,
-        0, 0, context.value.displayWidth, context.value.displayHeight
+        context.value.renderable,
+        0,
+        0,
+        context.value.displayWidth,
+        context.value.displayHeight
       );
       // Draw selection rectangle
       if (context.value.selection.w !== 0 && context.value.selection.h !== 0) {
@@ -71,9 +107,9 @@ export default defineComponent({
       onMouseMove(e, mainCanvas.value!);
       if (isDragging.value) drawImage();
     };
-    const handleMouseUp = (e: MouseEvent) => {
+    const handleMouseUp = () => {
       onMouseUp();
-      emit('update:selection', { ...context.value?.selection });
+      emit("update:selection", { ...context.value?.selection });
       drawImage();
     };
 
@@ -83,36 +119,36 @@ export default defineComponent({
     const startZoomOut = () => {
       if (!zoomCanvas.value || !context.value?.image) return;
       showZoomCanvas.value = true;
-      emit('zoom-start');
+      emit("zoom-start");
       zoomController = zoomOutUtil({
         ...context.value,
         canvas: zoomCanvas.value,
         onFinish: () => {
           showZoomCanvas.value = false;
-          emit('zoom-finish');
-        }
+          emit("zoom-finish");
+        },
       });
     };
 
     const pauseZoomOut = () => {
-      if (zoomController && typeof zoomController.pause === 'function') {
+      if (zoomController && typeof zoomController.pause === "function") {
         zoomController.pause();
-        emit('zoom-pause');
+        emit("zoom-pause");
       }
     };
     const resumeZoomOut = () => {
-      if (zoomController && typeof zoomController.resume === 'function') {
+      if (zoomController && typeof zoomController.resume === "function") {
         zoomController.resume();
-        emit('zoom-resume');
+        emit("zoom-resume");
       }
     };
     const showFullImage = () => {
       if (!mainCanvas.value || !context.value?.image) return;
       showFullImageUtil({
         ...context.value,
-        canvas: mainCanvas.value
+        canvas: mainCanvas.value,
       });
-      emit('show-full-image');
+      emit("show-full-image");
       showZoomCanvas.value = false;
       zoomController = null;
     };
@@ -136,7 +172,7 @@ export default defineComponent({
       startZoomOut,
       pauseZoomOut,
       resumeZoomOut,
-      showFullImage
+      showFullImage,
     });
 
     return {
@@ -151,10 +187,10 @@ export default defineComponent({
       handleMouseDown,
       handleMouseMove,
       handleMouseUp,
-      context
+      context,
     };
-  }
+  },
 });
 </script>
 
-<style src="../ImageZoomer.css"></style>
+<style src="../Zoomer.css"></style>

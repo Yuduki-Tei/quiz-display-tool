@@ -16,7 +16,7 @@
       </div>
     </div>
     <div>
-      <Zoomer ref="Zoomer" :id="currentId" />
+      <Zoomer ref="zoomer" :id="currentId" />
       <div style="margin-top: 1em"></div>
     </div>
   </div>
@@ -47,7 +47,7 @@ export default defineComponent({
       displayType: "message",
       timestamp: null,
     });
-    const zoomer = ref();
+    const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
     const currentId = ref<string | null>(null);
 
     const hasSelection = computed(() => {
@@ -73,20 +73,19 @@ export default defineComponent({
     };
 
     const startZoomOut = () => {
-      if (!currentId.value) return;
-      zoomer.value?.startZoomOut(currentId.value);
+      zoomer.value.startZoomOut();
     };
     const handlePauseOrResumeZoomOut = () => {
       if (!currentId.value) return;
       if (isPaused.value) {
-        zoomer.value?.resumeZoomOut(currentId.value);
+        zoomer.value.resumeZoomOut();
       } else {
-        zoomer.value?.pauseZoomOut(currentId.value);
+        zoomer.value.pauseZoomOut && zoomer.value.pauseZoomOut();
       }
     };
     const handleShowFullImage = () => {
       if (!currentId.value) return;
-      zoomer.value?.showFullImage();
+      zoomer.value.showFullImage();
     };
 
     const handleNotify = (status: string) => {

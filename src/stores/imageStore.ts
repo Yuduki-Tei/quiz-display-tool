@@ -1,67 +1,67 @@
 import { defineStore } from "pinia";
-import type { ImageContext } from "../@types/types";
+import type { ImageData } from "../@types/types";
 
 export const useImageStore = defineStore("imageStore", {
   state: () => ({
-    contexts: [] as Array<ImageContext>,
+    allData: [] as Array<ImageData>,
     currentIndex: -1,
   }),
   actions: {
     getIndexById(id: string): number {
-      return this.contexts.findIndex((c: ImageContext) => c.id === id);
+      return this.allData.findIndex((c: ImageData) => c.id === id);
     },
 
-    addContext(ctx: ImageContext): "added" | "updated" {
-      const id = ctx.id;
+    addData(data: ImageData): "added" | "updated" {
+      const id = data.id;
       if (this.getIndexById(id) === -1) {
-        this.contexts.push(ctx);
-        this.currentIndex = this.contexts.length - 1;
+        this.allData.push(data);
+        this.currentIndex = this.allData.length - 1;
         return "added";
       } else {
-        this.setContext(id, ctx);
+        this.setData(id, data);
         return "updated";
       }
     },
 
-    removeContext(id: string | number | null): boolean {
+    removeData(id: string | number | null): boolean {
       if (id === null) {
-        if (this.contexts.length > 0) {
-          this.contexts.splice(id, 1);
+        if (this.allData.length > 0) {
+          this.allData.splice(id, 1);
           return true;
         }
         return false;
       }
-      if (typeof id === "number" && id >= 0 && id < this.contexts.length) {
-        this.contexts.splice(id, 1);
+      if (typeof id === "number" && id >= 0 && id < this.allData.length) {
+        this.allData.splice(id, 1);
         return true;
       }
       const idx = this.getIndexById(id);
-      if (idx >= 0 && idx < this.contexts.length) {
-        this.contexts.splice(idx, 1);
+      if (idx >= 0 && idx < this.allData.length) {
+        this.allData.splice(idx, 1);
         return true;
       }
       return false;
     },
 
-    getContext(id: string | number | null): ImageContext | null {
+    getData(id: string | number | null): ImageData | null {
       if (id === null) {
-        return this.contexts[this.currentIndex] || null;
+        return this.allData[this.currentIndex] || null;
       }
-      if (typeof id === "number" && id >= 0 && id < this.contexts.length) {
-        return this.contexts[id] || null;
+      if (typeof id === "number" && id >= 0 && id < this.allData.length) {
+        return this.allData[id] || null;
       }
       const idx = this.getIndexById(id);
-      return idx !== -1 ? this.contexts[idx] : null;
+      return idx !== -1 ? this.allData[idx] : null;
     },
 
-    setContext(id: string | number, ctx: ImageContext): boolean {
-      if (typeof id === "number" && id >= 0 && id < this.contexts.length) {
-        this.contexts[id] = ctx;
+    setData(id: string | number, data: ImageData): boolean {
+      if (typeof id === "number" && id >= 0 && id < this.allData.length) {
+        this.allData[id] = data;
         return true;
       }
       const idx = this.getIndexById(id);
       if (idx !== -1) {
-        this.contexts[idx] = ctx;
+        this.allData[idx] = data;
         return true;
       }
       return false;

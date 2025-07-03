@@ -1,10 +1,10 @@
-import type { ImageContext } from "@/@types/types";
+import type { ImageData } from "@/@types/types";
 
 export async function loadImageFile(
   file: File,
   maxWidth = 1280,
   maxHeight = 720
-): Promise<ImageContext> {
+): Promise<ImageData> {
   const key = await getSha256(file);
   return new Promise((resolve, reject) => {
     const img = new window.Image();

@@ -58,10 +58,10 @@ export default defineComponent({
     const zoomerStore = useZoomerStore();
     const imageStore = useImageStore();
     const context = computed(() => {
-      const imageCtx = imageStore.getContext(props.id);
+      const imageData = imageStore.getData(props.id);
       const zoomerCtx = zoomerStore.getContext(props.id);
       return {
-        ...imageCtx,
+        ...imageData,
         ...zoomerCtx,
       };
     });
@@ -94,7 +94,11 @@ export default defineComponent({
         context.value.displayHeight
       );
       // Draw selection rectangle
-      if (context.value.selection.w !== 0 && context.value.selection.h !== 0) {
+      if (
+        context.value.selection &&
+        context.value.selection.w !== 0 &&
+        context.value.selection.h !== 0
+      ) {
         drawSelection(mainCanvas.value);
       }
     };

@@ -12,61 +12,44 @@
         >
           {{ isPaused ? "Resume" : "Pause" }}
         </button>
-        <button
-          @click="handleShowFullImage"
-          :disabled="!currentImageContext || (!isZooming && !isPaused)"
-        >
-          Show Full Image
-        </button>
-        <!-- <button @click="addToQueue" :disabled="!hasSelection">
-          Add to Queue
-        </button>
-        <button @click="goPrev" :disabled="!canGoPrev">Prev</button>
-        <button @click="goNext" :disabled="!canGoNext">Next</button>
-        <button @click="handleExportQueue">Export Queue</button>
-        <input
-          type="file"
-          accept="application/json"
-          @change="handleImportQueue"
-        /> -->
+        <button @click="handleShowFullImage">Show Full Image</button>
       </div>
     </div>
-    <div v-if="currentZoomContext && currentImageContext">
+    <div>
       <Zoomer ref="Zoomer" :id="currentId" />
-      <!-- <GenericQueue ref="genericQueue" /> -->
       <div style="margin-top: 1em"></div>
     </div>
-    <div v-else style="margin: 1em; color: #888">
-      Please select an image and select a region.
-    </div>
   </div>
+  <Notifier :noti="noti" />
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
-import { useZoomerStore } from "./stores/zoomerStore";
 import { loadImageFile } from "@/composables/useImageLoader";
+import { NotificationData } from "@/@types/types";
+import Notifier from "@/components/Notifier.vue";
+
 import Zoomer from "./views/Zoomer.vue";
+import { useZoomerStore } from "./stores/zoomerStore";
 
 export default defineComponent({
   name: "ZoomerManager",
-  components: { Zoomer },
+  components: { Zoomer, Notifier },
   setup() {
     const imageStore = useImageStore();
     const zoomStore = useZoomerStore();
     const { isZooming, isPaused } = storeToRefs(zoomStore);
+    const noti = ref<NotificationData>({
+      message: "",
+      level: "info",
+      displayType: "message",
+      timestamp: null,
+    });
     const zoomer = ref();
-    // const genericQueue = ref();
     const currentId = ref<string | null>(null);
 
-    const currentZoomContext = computed(() =>
-      currentId.value ? zoomStore.getContext(currentId.value) : null
-    );
-    const currentImageContext = computed(() =>
-      currentId.value ? imageStore.getContext(currentId.value) : null
-    );
     const hasSelection = computed(() => {
       if (!currentId.value) return false;
       const ctx = zoomStore.getContext(currentId.value);
@@ -80,10 +63,12 @@ export default defineComponent({
       const file = files[0];
       try {
         const imgData = await loadImageFile(file);
-        imageStore.addContext(imgData);
         currentId.value = imgData.id;
+        const status = imageStore.addData(imgData);
+        handleNotify(status);
+        handleShowFullImage();
       } catch (err) {
-        alert("Failed to load image: " + (err as Error).message);
+        handleNotify("error");
       }
     };
 
@@ -104,62 +89,52 @@ export default defineComponent({
       zoomer.value?.showFullImage();
     };
 
-    // const handleExportQueue = () => {
-    //   genericQueue.value?.exportQueue();
-    // };
-    // const handleImportQueue = (e: Event) => {
-    //   const input = e.target as HTMLInputElement;
-    //   if (!input.files || !input.files[0]) return;
-    //   const file = input.files[0];
-    //   const reader = new FileReader();
-    //   reader.onload = (evt) => {
-    //     try {
-    //       const data = evt.target?.result as string;
-    //       genericQueue.value?.importQueue(data);
-    //     } catch (err) {
-    //       alert("Failed to import queue");
-    //     }
-    //   };
-    //   reader.readAsText(file);
-    // };
-
-    // const addToQueue = () => {
-    //   if (!currentId.value) return;
-    //   const ctx = zoomStore.getContext(currentId.value);
-    //   if (ctx) genericQueue.value?.addToQueue(ctx);
-    // };
-    // const goPrev = () => genericQueue.value?.goPrev();
-    // const goNext = () => genericQueue.value?.goNext();
-    // const canGoPrev = computed(
-    //   () =>
-    //     genericQueue.value?.queue?.length > 0 &&
-    //     genericQueue.value?.currentIndex > 0
-    // );
-    // const canGoNext = computed(
-    //   () =>
-    //     genericQueue.value?.queue?.length > 0 &&
-    //     genericQueue.value?.currentIndex < genericQueue.value?.queue.length - 1
-    // );
+    const handleNotify = (status: string) => {
+      switch (status) {
+        case "added":
+          noti.value = {
+            message: "圖片已載入",
+            level: "success",
+            displayType: "message",
+            timestamp: Date.now(),
+          };
+          break;
+        case "updated":
+          noti.value = {
+            message: "相同圖片已存在",
+            level: "warning",
+            displayType: "message",
+            timestamp: Date.now(),
+          };
+          break;
+        case "error":
+          noti.value = {
+            message: "載入圖片失敗",
+            level: "error",
+            displayType: "message",
+            timestamp: Date.now(),
+          };
+          break;
+        default:
+          noti.value = {
+            message: "未知狀態",
+            level: "warning",
+            displayType: "message",
+            timestamp: Date.now(),
+          };
+      }
+    };
 
     return {
+      noti,
       zoomer,
-      // genericQueue,
       isZooming,
       isPaused,
       startZoomOut,
       handlePauseOrResumeZoomOut,
       handleShowFullImage,
       currentId,
-      currentZoomContext,
-      currentImageContext,
-      // handleExportQueue,
-      // handleImportQueue,
       onFileChange,
-      // addToQueue,
-      // goPrev,
-      // goNext,
-      // canGoPrev,
-      // canGoNext,
       hasSelection,
     };
   },

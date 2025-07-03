@@ -1,4 +1,4 @@
-export interface ImageContext {
+export interface ImageData {
   id: string;
   image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
@@ -7,4 +7,11 @@ export interface ImageContext {
   naturalHeight: number;
   displayWidth: number;
   displayHeight: number;
+}
+
+export interface NotificationData {
+  message: string;
+  level: "info" | "success" | "warning" | "error";
+  displayType: "message" | "notification";
+  timestamp: number | null;
 }

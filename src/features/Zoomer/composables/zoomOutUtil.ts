@@ -1,10 +1,10 @@
-import type { ImageContext } from "@/@types/types";
+import type { ImageData } from "@/@types/types";
 import type { ZoomerContext } from "../types/ZoomerTypes";
 import { useZoomerStore } from "../stores/zoomerStore";
 
 // Utility for zoom-out animation on canvas
 export type ZoomOutParams = ZoomerContext &
-  ImageContext & {
+  ImageData & {
     onStart?: () => void;
     onFinish?: () => void;
   };

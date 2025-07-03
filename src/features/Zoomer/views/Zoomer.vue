@@ -43,7 +43,8 @@ export default defineComponent({
   props: {
     id: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   emits: [

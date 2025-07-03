@@ -14,8 +14,8 @@ export const useZoomerStore = defineStore("zoomer", {
     isZooming: false,
   }),
   actions: {
-    getContext(id: string): ZoomerContext | null {
-      return this.contexts[id] || null;
+    getContext(id: string | null): ZoomerContext | null {
+      return id ? this.contexts[id] : null;
     },
 
     setContext(id: string, context: ZoomerContext): void {

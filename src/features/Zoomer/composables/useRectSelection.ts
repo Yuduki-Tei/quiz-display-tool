@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue';
+import { ref, type Ref } from "vue";
 
 export function useRectSelection(
   aspect: Ref<number>,
@@ -19,7 +19,7 @@ export function useRectSelection(
       x: startX,
       y: startY,
       w: 0,
-      h: 0
+      h: 0,
     };
     setContext({ ...context.value, selection: newSelection });
     isDragging.value = true;
@@ -36,7 +36,7 @@ export function useRectSelection(
       x: startX,
       y: startY,
       w: dx,
-      h: dy
+      h: dy,
     };
     setContext({ ...context.value, selection: newSelection });
   };
@@ -50,12 +50,11 @@ export function useRectSelection(
   const drawSelection = (canvas: HTMLCanvasElement) => {
     if (!context.value) return;
     const rect = context.value.selection;
-    const c2d = canvas.getContext('2d');
+    const c2d = canvas.getContext("2d");
     if (!c2d) return;
     c2d.save();
-    c2d.strokeStyle = 'red';
-    c2d.lineWidth = 2;
-    c2d.setLineDash([6, 4]);
+    c2d.strokeStyle = "red";
+    c2d.lineWidth = 1.5;
     c2d.strokeRect(rect.x, rect.y, rect.w, rect.h);
     c2d.restore();
   };
@@ -65,6 +64,6 @@ export function useRectSelection(
     onMouseDown,
     onMouseMove,
     onMouseUp,
-    drawSelection
+    drawSelection,
   };
 }

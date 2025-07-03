@@ -47,15 +47,7 @@ export default defineComponent({
       default: null,
     },
   },
-  emits: [
-    "zoom-start",
-    "zoom-finish",
-    "zoom-pause",
-    "zoom-resume",
-    "show-full-image",
-    "update:selection",
-  ],
-  setup(props, { emit, expose }) {
+  setup(props, { expose }) {
     const zoomerStore = useZoomerStore();
     const imageStore = useImageStore();
     const context = computed(() => {
@@ -94,7 +86,10 @@ export default defineComponent({
         context.value.displayWidth,
         context.value.displayHeight
       );
-      // Draw selection rectangle
+      drawSelect();
+    };
+
+    const drawSelect = () => {
       if (
         context.value.selection &&
         context.value.selection.w !== 0 &&
@@ -114,7 +109,6 @@ export default defineComponent({
     };
     const handleMouseUp = () => {
       onMouseUp();
-      emit("update:selection", { ...context.value?.selection });
       drawImage();
     };
 
@@ -124,13 +118,11 @@ export default defineComponent({
     const startZoomOut = () => {
       if (!zoomCanvas.value || !context.value?.image) return;
       showZoomCanvas.value = true;
-      emit("zoom-start");
       zoomController = zoomOutUtil({
         ...context.value,
         canvas: zoomCanvas.value,
         onFinish: () => {
           showZoomCanvas.value = false;
-          emit("zoom-finish");
         },
       });
     };
@@ -138,13 +130,11 @@ export default defineComponent({
     const pauseZoomOut = () => {
       if (zoomController && typeof zoomController.pause === "function") {
         zoomController.pause();
-        emit("zoom-pause");
       }
     };
     const resumeZoomOut = () => {
       if (zoomController && typeof zoomController.resume === "function") {
         zoomController.resume();
-        emit("zoom-resume");
       }
     };
     const showFullImage = () => {
@@ -153,7 +143,7 @@ export default defineComponent({
         ...context.value,
         canvas: mainCanvas.value,
       });
-      emit("show-full-image");
+      drawSelect();
       showZoomCanvas.value = false;
       zoomController = null;
     };

@@ -12,7 +12,12 @@
         >
           {{ isPaused ? "Resume" : "Pause" }}
         </button>
-        <button @click="handleShowFullImage">Show Full Image</button>
+        <button
+          @click="handleShowFullImage"
+          :disabled="!currentId || !(isZooming || isPaused)"
+        >
+          Show Full Image
+        </button>
       </div>
     </div>
     <div>
@@ -76,15 +81,13 @@ export default defineComponent({
       zoomer.value.startZoomOut();
     };
     const handlePauseOrResumeZoomOut = () => {
-      if (!currentId.value) return;
       if (isPaused.value) {
         zoomer.value.resumeZoomOut();
       } else {
-        zoomer.value.pauseZoomOut && zoomer.value.pauseZoomOut();
+        zoomer.value.pauseZoomOut();
       }
     };
     const handleShowFullImage = () => {
-      if (!currentId.value) return;
       zoomer.value.showFullImage();
     };
 

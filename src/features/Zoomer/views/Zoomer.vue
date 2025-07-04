@@ -3,6 +3,7 @@
     <div class="canvas-container" ref="canvasContainer">
       <canvas
         ref="mainCanvas"
+        v-show="!showZoomCanvas"
         :width="context.displayWidth"
         :height="context.displayHeight"
         @mousedown="handleMouseDown"
@@ -168,5 +169,3 @@ watch(
   { immediate: true }
 );
 </script>
-
-<style src="../Zoomer.css"></style>

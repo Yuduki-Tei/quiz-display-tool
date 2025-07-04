@@ -1,9 +1,10 @@
 import { ref, type Ref } from "vue";
+import type { SelectionRect } from "../types/ZoomerTypes";
 
 export function useRectSelection(
   aspect: Ref<number>,
   context: Ref<any>,
-  setContext: (ctx: any) => void
+  setRect: (rect: SelectionRect) => void
 ) {
   const isDragging = ref(false);
   let startX = 0;
@@ -21,7 +22,7 @@ export function useRectSelection(
       w: 0,
       h: 0,
     };
-    setContext({ ...context.value, selection: newSelection });
+    setRect(newSelection);
     isDragging.value = true;
   };
 
@@ -38,7 +39,7 @@ export function useRectSelection(
       w: dx,
       h: dy,
     };
-    setContext({ ...context.value, selection: newSelection });
+    setRect(newSelection);
   };
 
   // Mouse up handler

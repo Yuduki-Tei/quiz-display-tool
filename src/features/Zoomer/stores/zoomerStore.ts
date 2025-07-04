@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import type { ZoomerContext } from "../types/ZoomerTypes";
+import type { SelectionRect } from "../types/ZoomerTypes";
 
 interface ZoomerState {
   contexts: Record<string, ZoomerContext>;
@@ -20,6 +21,12 @@ export const useZoomerStore = defineStore("zoomer", {
 
     setContext(id: string, context: ZoomerContext): void {
       this.contexts[id] = context;
+    },
+
+    setRect(id: string, rect: SelectionRect): void {
+      if (this.contexts[id]) {
+        this.contexts[id].selection = rect;
+      }
     },
 
     removeContext(id: string): boolean {

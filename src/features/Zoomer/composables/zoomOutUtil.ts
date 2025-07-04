@@ -130,7 +130,6 @@ export function startZoomOut(params: ZoomOutParams) {
         paused = true;
         pauseTime = performance.now();
         imageStore.setPaused(true);
-        imageStore.setZooming(false);
       }
     },
     resume() {
@@ -139,7 +138,6 @@ export function startZoomOut(params: ZoomOutParams) {
         start += performance.now() - pauseTime;
         animationFrameId = requestAnimationFrame(animate);
         imageStore.setPaused(false);
-        imageStore.setZooming(true);
       }
     },
     stop() {

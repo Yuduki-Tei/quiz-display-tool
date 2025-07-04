@@ -37,6 +37,7 @@ import {
   startZoomOut as zoomOutUtil,
   showFullImage as showFullImageUtil,
 } from "../composables/zoomOutUtil";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "Zoomer",
@@ -50,6 +51,7 @@ export default defineComponent({
   setup(props, { expose }) {
     const zoomerStore = useZoomerStore();
     const imageStore = useImageStore();
+    const { isZooming } = storeToRefs(zoomerStore);
     const context = computed(() => {
       const imageData = imageStore.getData(props.id);
       const zoomerCtx = zoomerStore.getContext(props.id);
@@ -58,7 +60,7 @@ export default defineComponent({
         ...zoomerCtx,
       };
     });
-    const setContext = (ctx: any) => zoomerStore.setContext(props.id, ctx);
+    const setRect = (rect: any) => zoomerStore.setRect(props.id, rect);
     const mainCanvas = ref<HTMLCanvasElement | null>(null);
     const zoomCanvas = ref<HTMLCanvasElement | null>(null);
     const showZoomCanvas = ref(false);
@@ -66,7 +68,7 @@ export default defineComponent({
       context.value?.displayWidth / context.value?.displayHeight || 1
     );
     const { isDragging, onMouseDown, onMouseMove, onMouseUp, drawSelection } =
-      useRectSelection(aspect, context, setContext);
+      useRectSelection(aspect, context, setRect);
 
     // Draw the image to the main canvas
     const drawImage = () => {
@@ -101,9 +103,11 @@ export default defineComponent({
 
     // 框選事件
     const handleMouseDown = (e: MouseEvent) => {
+      if (isZooming.value) return;
       onMouseDown(e, mainCanvas.value!);
     };
     const handleMouseMove = (e: MouseEvent) => {
+      if (isZooming.value) return;
       onMouseMove(e, mainCanvas.value!);
       if (isDragging.value) drawImage();
     };

@@ -14,7 +14,7 @@
         </button>
         <button
           @click="handleShowFullImage"
-          :disabled="!currentId || !(isZooming || isPaused)"
+          :disabled="!currentId || !isZooming"
         >
           Show Full Image
         </button>
@@ -70,6 +70,11 @@ export default defineComponent({
         const imgData = await loadImageFile(file);
         currentId.value = imgData.id;
         const status = imageStore.addData(imgData);
+        if (status === "added") {
+          zoomStore.setContext(currentId.value, {
+            selection: { x: 0, y: 0, w: 0, h: 0 },
+          });
+        }
         handleNotify(status);
         handleShowFullImage();
       } catch (err) {

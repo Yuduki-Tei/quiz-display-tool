@@ -6,41 +6,89 @@ export const useImageStore = defineStore("imageStore", {
     allData: [] as Array<ImageData>,
     currentIndex: -1,
   }),
+  getters: {
+    currentImage(state): ImageData | null {
+      if (
+        state.currentIndex >= 0 &&
+        state.currentIndex < state.allData.length
+      ) {
+        return state.allData[state.currentIndex];
+      }
+      return null;
+    },
+    canGoPrev(state): boolean {
+      return state.currentIndex > 0;
+    },
+    canGoNext(state): boolean {
+      return state.currentIndex < state.allData.length - 1;
+    },
+  },
   actions: {
+    setCurrentById(id: string) {
+      const index = this.allData.findIndex((data) => data.id === id);
+      if (index !== -1) {
+        this.currentIndex = index;
+      }
+    },
+    goToNext(): string | null {
+      if (this.canGoNext) {
+        this.currentIndex++;
+        return this.currentImage?.id || null;
+      }
+      return null;
+    },
+    goToPrev(): string | null {
+      if (this.canGoPrev) {
+        this.currentIndex--;
+        return this.currentImage?.id || null;
+      }
+      return null;
+    },
+    updateOrder(newOrder: ImageData[]) {
+      const currentId = this.currentImage?.id;
+      this.allData = newOrder;
+      if (currentId) {
+        this.setCurrentById(currentId);
+      }
+    },
+
     getIndexById(id: string): number {
       return this.allData.findIndex((c: ImageData) => c.id === id);
     },
 
     addData(data: ImageData): "added" | "updated" {
-      const id = data.id;
-      if (this.getIndexById(id) === -1) {
+      const existingIndex = this.getIndexById(data.id);
+      if (existingIndex === -1) {
         this.allData.push(data);
         this.currentIndex = this.allData.length - 1;
         return "added";
       } else {
-        this.setData(id, data);
+        this.allData[existingIndex] = data;
         return "updated";
       }
     },
 
-    removeData(id: string | number | null): boolean {
-      if (id === null) {
-        if (this.allData.length > 0) {
-          this.allData.splice(id, 1);
-          return true;
+    removeData(id: string) {
+      const indexToRemove = this.allData.findIndex((data) => data.id === id);
+      if (indexToRemove === -1) return;
+
+      const wasCurrentImage = this.currentImage?.id === id;
+
+      this.allData.splice(indexToRemove, 1);
+
+      if (this.allData.length === 0) {
+        this.currentIndex = -1;
+        return;
+      }
+
+      if (wasCurrentImage) {
+        this.currentIndex = Math.min(indexToRemove, this.allData.length - 1);
+      } else {
+        const oldCurrentId = this.currentImage?.id;
+        if (oldCurrentId) {
+          this.setCurrentById(oldCurrentId);
         }
-        return false;
       }
-      if (typeof id === "number" && id >= 0 && id < this.allData.length) {
-        this.allData.splice(id, 1);
-        return true;
-      }
-      const idx = this.getIndexById(id);
-      if (idx >= 0 && idx < this.allData.length) {
-        this.allData.splice(idx, 1);
-        return true;
-      }
-      return false;
     },
 
     getData(id: string | number | null): ImageData | null {

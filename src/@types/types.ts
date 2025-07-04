@@ -2,6 +2,7 @@ export interface ImageData {
   id: string;
   image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
+  thumbnailSrc: string | null;
   renderable: ImageBitmap | null;
   naturalWidth: number;
   naturalHeight: number;

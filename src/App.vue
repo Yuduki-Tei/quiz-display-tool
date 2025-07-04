@@ -1,12 +1,7 @@
 <template>
   <div id="app">
     <div class="theme-switch-bar">
-      <el-switch
-        v-model="isDark"
-        active-text="🌙 暗色模式"
-        inactive-text="☀️ 亮色模式"
-        @change="toggleTheme"
-      />
+      <el-switch v-model="isDark" active-text="🌙 暗色模式" inactive-text="☀️ 亮色模式" @change="toggleTheme" />
     </div>
     <ZoomerManager />
   </div>
@@ -32,9 +27,13 @@ watch(isDark, toggleTheme, { immediate: true });
 
 <style scoped>
 .theme-switch-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1000;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 1rem 2rem 0 0;
+  padding: 1rem 1rem;
 }
 </style>

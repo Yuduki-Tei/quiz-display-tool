@@ -1,19 +1,11 @@
 <template>
   <div id="app">
-    <ImageZoomerManager />
+    <ZoomerManager />
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import ImageZoomerManager from './features/ImageZoomer/ImageZoomerManager.vue';
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    ImageZoomerManager
-  }
-});
+<script setup lang="ts">
+import ZoomerManager from "./features/Zoomer/ZoomerManager.vue";
 </script>
 
 <style>

@@ -1,22 +1,28 @@
-import { ref, type Ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useImageZoomerStore } from '../stores/imageZoomerStore';
+import { ref, type Ref } from "vue";
+import type { SelectionRect } from "../types/ZoomerTypes";
 
-export function useRectSelection(aspect: Ref<number>) {
-  const imageStore = useImageZoomerStore();
-  const { context } = storeToRefs(imageStore);
+export function useRectSelection(
+  aspect: Ref<number>,
+  context: Ref<any>,
+  setRect: (rect: SelectionRect) => void
+) {
   const isDragging = ref(false);
+  let startX = 0;
+  let startY = 0;
 
   // Mouse down handler
   const onMouseDown = (e: MouseEvent, canvas: HTMLCanvasElement) => {
     const bounds = canvas.getBoundingClientRect();
     if (!context.value) return;
-    context.value.selection = {
-      x: e.clientX - bounds.left,
-      y: e.clientY - bounds.top,
+    startX = e.clientX - bounds.left;
+    startY = e.clientY - bounds.top;
+    const newSelection = {
+      x: startX,
+      y: startY,
       w: 0,
-      h: 0
+      h: 0,
     };
+    setRect(newSelection);
     isDragging.value = true;
   };
 
@@ -25,10 +31,15 @@ export function useRectSelection(aspect: Ref<number>) {
     if (!isDragging.value || !context.value) return;
     const bounds = canvas.getBoundingClientRect();
     const mx = e.clientX - bounds.left;
-    const dx = mx - context.value.selection.x;
+    const dx = mx - startX;
     const dy = dx / aspect.value;
-    context.value.selection.w = dx;
-    context.value.selection.h = dy;
+    const newSelection = {
+      x: startX,
+      y: startY,
+      w: dx,
+      h: dy,
+    };
+    setRect(newSelection);
   };
 
   // Mouse up handler
@@ -40,14 +51,13 @@ export function useRectSelection(aspect: Ref<number>) {
   const drawSelection = (canvas: HTMLCanvasElement) => {
     if (!context.value) return;
     const rect = context.value.selection;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.save();
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h);
-    ctx.restore();
+    const c2d = canvas.getContext("2d");
+    if (!c2d) return;
+    c2d.save();
+    c2d.strokeStyle = "red";
+    c2d.lineWidth = 1.5;
+    c2d.strokeRect(rect.x, rect.y, rect.w, rect.h);
+    c2d.restore();
   };
 
   return {
@@ -55,6 +65,6 @@ export function useRectSelection(aspect: Ref<number>) {
     onMouseDown,
     onMouseMove,
     onMouseUp,
-    drawSelection
+    drawSelection,
   };
 }

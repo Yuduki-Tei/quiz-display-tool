@@ -1,3 +1,13 @@
+/**
+ * @module zoomOutUtil
+ * @description Provides zoom-out animation functionality for a canvas.
+ *
+ * @warning This module is designed as a singleton and uses a global animation
+ * controller (`currentController`). It does NOT support running multiple
+ * zoom animations simultaneously from different component instances.
+ * Calling `startZoomOut` will always stop any previously running animation.
+ */
+
 import type { ImageData } from "@/@types/types";
 import type { ZoomerContext } from "../types/ZoomerTypes";
 import { useZoomerStore } from "../stores/zoomerStore";

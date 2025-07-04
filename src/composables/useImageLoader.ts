@@ -1,3 +1,5 @@
+// src/composables/useImageLoader.ts
+
 import type { ImageData } from "@/@types/types";
 
 export async function loadImageFile(
@@ -6,6 +8,7 @@ export async function loadImageFile(
   maxHeight = 720
 ): Promise<ImageData> {
   const key = await getSha256(file);
+  const objectURL = URL.createObjectURL(file);
   return new Promise((resolve, reject) => {
     const img = new window.Image();
     img.onload = () => {
@@ -16,12 +19,14 @@ export async function loadImageFile(
       const scale = Math.min(maxWidth / w, maxHeight / h, 1);
       w = Math.round(w * scale);
       h = Math.round(h * scale);
+
       createImageBitmap(img).then((bitmap) => {
         resolve({
           id: key,
           image: file,
-          canvas: null,
           renderable: bitmap,
+          canvas: null,
+          thumbnailSrc: objectURL,
           naturalWidth,
           naturalHeight,
           displayWidth: w,
@@ -29,8 +34,11 @@ export async function loadImageFile(
         });
       });
     };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
+    img.onerror = (err) => {
+      URL.revokeObjectURL(objectURL);
+      reject(err);
+    };
+    img.src = objectURL;
   });
 }
 

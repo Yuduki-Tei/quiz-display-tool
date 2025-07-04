@@ -66,6 +66,7 @@
 </template>
 
 <script setup lang="ts">
+// 1. 從 'vue' 匯入 computed，並移除 ref 對 currentId 的使用
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
@@ -79,12 +80,14 @@ import { Menu, Upload, ArrowLeft, ArrowRight } from "@element-plus/icons-vue";
 const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
 
-const { canGoPrev, canGoNext } = storeToRefs(imageStore);
+const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
 const { isZooming, isPaused } = storeToRefs(zoomStore);
 
 const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-const currentId = ref<string | null>(null);
+
+const currentId = computed(() => currentImage.value?.id || null);
+
 const notificationStatus = ref<string | null>(null);
 const notificationTimestamp = ref<number | null>(null);
 
@@ -108,7 +111,6 @@ const onFileChange = async (e: Event) => {
   try {
     const imgData = await loadImageFile(file);
     const status = imageStore.addData(imgData);
-    currentId.value = imageStore.currentImage?.id || null;
     if (status === "added" && currentId.value) {
       zoomStore.setContext(currentId.value, {
         selection: { x: 0, y: 0, w: 0, h: 0 },
@@ -126,23 +128,16 @@ const onFileChange = async (e: Event) => {
 };
 
 const handleImageSelect = (id: string) => {
-  setCurrent(id);
+  imageStore.setCurrentById(id);
   isSidebarVisible.value = false;
 };
 
-const setCurrent = (id: string) => {
-  imageStore.setCurrentById(id);
-  currentId.value = id;
-};
-
 const goToPrev = () => {
-  const newId = imageStore.goToPrev();
-  if (newId) currentId.value = newId;
+  imageStore.goToPrev();
 };
 
 const goToNext = () => {
-  const newId = imageStore.goToNext();
-  if (newId) currentId.value = newId;
+  imageStore.goToNext();
 };
 
 const startZoomOut = () => zoomer.value?.startZoomOut();

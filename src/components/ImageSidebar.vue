@@ -1,6 +1,19 @@
 <template>
   <div class="image-sidebar-ep">
-    <h4 class="sidebar-title">圖片列表</h4>
+    <div class="sidebar-header">
+      <h4 class="sidebar-title">圖片列表</h4>
+      <el-tooltip
+        :content="showThumbnails ? '隱藏資訊' : '顯示資訊'"
+        placement="top"
+      >
+        <el-switch
+          v-model="showThumbnails"
+          :active-action-icon="View"
+          :inactive-action-icon="Hide"
+          size="small"
+        />
+      </el-tooltip>
+    </div>
     <el-scrollbar>
       <vuedraggable
         v-if="imageList.length > 0"
@@ -17,7 +30,7 @@
             @click="selectImage(element.id)"
           >
             <el-image
-              :src="element.renderable?.src"
+              :src="showThumbnails ? element.thumbnailSrc : ''"
               fit="cover"
               class="thumbnail-ep"
             >
@@ -27,7 +40,20 @@
                 </div>
               </template>
             </el-image>
-            <span class="filename">{{ element.file?.name || element.id }}</span>
+            <span class="filename">{{
+              showThumbnails
+                ? element.image.name
+                : imageStore.getIndexById(element.id) + 1
+            }}</span>
+            <el-button
+              type="danger"
+              :icon="Delete"
+              size="small"
+              circle
+              plain
+              class="delete-btn"
+              @click.stop="handleDelete(element.id)"
+            />
           </div>
         </template>
       </vuedraggable>
@@ -37,11 +63,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
 import vuedraggable from "vuedraggable";
-import { Picture } from "@element-plus/icons-vue";
+import { Picture, Delete, View, Hide } from "@element-plus/icons-vue";
 
 const props = defineProps<{
   currentId: string | null;
@@ -54,6 +80,8 @@ const emit = defineEmits<{
 const imageStore = useImageStore();
 const { allData } = storeToRefs(imageStore);
 
+const showThumbnails = ref(true);
+
 const imageList = computed({
   get: () => allData.value,
   set: (newOrder) => {
@@ -64,6 +92,12 @@ const imageList = computed({
 const selectImage = (id: string) => {
   emit("select-image", id);
 };
+
+const handleDelete = (id: string) => {
+  // 在正式應用中，你可能會想在這裡加入一個確認對話框
+  // ElMessageBox.confirm('確定要刪除這張圖片嗎？', '提示', { ... })
+  imageStore.removeData(id);
+};
 </script>
 
 <style scoped>
@@ -73,8 +107,13 @@ const selectImage = (id: string) => {
   flex-direction: column;
   background-color: var(--el-bg-color-page);
 }
-.sidebar-title {
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1rem 1rem 0.5rem;
+}
+.sidebar-title {
   margin: 0;
   font-weight: 500;
   color: var(--el-text-color-primary);
@@ -88,11 +127,23 @@ const selectImage = (id: string) => {
   padding: 8px;
   cursor: pointer;
   border-radius: 4px;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, box-shadow 0.3s;
   margin-bottom: 4px;
+  position: relative;
 }
 .list-item-ep:hover {
   background-color: var(--el-fill-color-light);
+}
+.list-item-ep .delete-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.list-item-ep:hover .delete-btn {
+  opacity: 1;
 }
 .list-item-ep.is-active {
   background-color: var(--el-color-primary-light-9);
@@ -105,6 +156,7 @@ const selectImage = (id: string) => {
   border-radius: 4px;
   flex-shrink: 0;
   background-color: var(--el-fill-color);
+  border: 1px solid var(--el-border-color-lighter);
 }
 .image-slot-error {
   display: flex;
@@ -121,6 +173,7 @@ const selectImage = (id: string) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding-right: 30px; /* 避免文字跟刪除按鈕重疊 */
 }
 .ghost {
   opacity: 0.5;

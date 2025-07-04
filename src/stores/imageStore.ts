@@ -55,6 +55,7 @@ export const useImageStore = defineStore("imageStore", {
     getIndexById(id: string): number {
       return this.allData.findIndex((c: ImageData) => c.id === id);
     },
+
     addData(data: ImageData): "added" | "updated" {
       const existingIndex = this.getIndexById(data.id);
       if (existingIndex === -1) {
@@ -67,24 +68,27 @@ export const useImageStore = defineStore("imageStore", {
       }
     },
 
-    removeData(id: string | number | null): boolean {
-      if (id === null) {
-        if (this.allData.length > 0) {
-          this.allData.splice(id, 1);
-          return true;
+    removeData(id: string) {
+      const indexToRemove = this.allData.findIndex((data) => data.id === id);
+      if (indexToRemove === -1) return;
+
+      const wasCurrentImage = this.currentImage?.id === id;
+
+      this.allData.splice(indexToRemove, 1);
+
+      if (this.allData.length === 0) {
+        this.currentIndex = -1;
+        return;
+      }
+
+      if (wasCurrentImage) {
+        this.currentIndex = Math.min(indexToRemove, this.allData.length - 1);
+      } else {
+        const oldCurrentId = this.currentImage?.id;
+        if (oldCurrentId) {
+          this.setCurrentById(oldCurrentId);
         }
-        return false;
       }
-      if (typeof id === "number" && id >= 0 && id < this.allData.length) {
-        this.allData.splice(id, 1);
-        return true;
-      }
-      const idx = this.getIndexById(id);
-      if (idx >= 0 && idx < this.allData.length) {
-        this.allData.splice(idx, 1);
-        return true;
-      }
-      return false;
     },
 
     getData(id: string | number | null): ImageData | null {

@@ -25,127 +25,76 @@
       <div style="margin-top: 1em"></div>
     </div>
   </div>
-  <Notifier :noti="noti" />
+  <Notifier :status="notificationStatus" :timestamp="notificationTimestamp" />
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+<script setup lang="ts">
+import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
+import { useZoomerStore } from "./stores/zoomerStore";
 import { loadImageFile } from "@/composables/useImageLoader";
-import { NotificationData } from "@/@types/types";
+import Zoomer from "./views/Zoomer.vue";
 import Notifier from "@/components/Notifier.vue";
 
-import Zoomer from "./views/Zoomer.vue";
-import { useZoomerStore } from "./stores/zoomerStore";
+const imageStore = useImageStore();
+const zoomStore = useZoomerStore();
+const { isZooming, isPaused } = storeToRefs(zoomStore);
 
-export default defineComponent({
-  name: "ZoomerManager",
-  components: { Zoomer, Notifier },
-  setup() {
-    const imageStore = useImageStore();
-    const zoomStore = useZoomerStore();
-    const { isZooming, isPaused } = storeToRefs(zoomStore);
-    const noti = ref<NotificationData>({
-      message: "",
-      level: "info",
-      displayType: "message",
-      timestamp: null,
-    });
-    const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
-    const currentId = ref<string | null>(null);
+const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
 
-    const hasSelection = computed(() => {
-      if (!currentId.value) return false;
-      const ctx = zoomStore.getContext(currentId.value);
-      const sel = ctx?.selection;
-      return !!(ctx && sel && sel.w && sel.h);
-    });
+const currentId = ref<string | null>(null);
+const notificationStatus = ref<string | null>(null);
+const notificationTimestamp = ref<number | null>(null);
 
-    const onFileChange = async (e: Event) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (!files || !files[0]) return;
-      const file = files[0];
-      try {
-        const imgData = await loadImageFile(file);
-        currentId.value = imgData.id;
-        const status = imageStore.addData(imgData);
-        if (status === "added") {
-          zoomStore.setContext(currentId.value, {
-            selection: { x: 0, y: 0, w: 0, h: 0 },
-          });
-        }
-        handleNotify(status);
-        handleShowFullImage();
-      } catch (err) {
-        handleNotify("error");
-      }
-    };
-
-    const startZoomOut = () => {
-      zoomer.value.startZoomOut();
-    };
-    const handlePauseOrResumeZoomOut = () => {
-      if (isPaused.value) {
-        zoomer.value.resumeZoomOut();
-      } else {
-        zoomer.value.pauseZoomOut();
-      }
-    };
-    const handleShowFullImage = () => {
-      zoomer.value.showFullImage();
-    };
-
-    const handleNotify = (status: string) => {
-      switch (status) {
-        case "added":
-          noti.value = {
-            message: "圖片已載入",
-            level: "success",
-            displayType: "message",
-            timestamp: Date.now(),
-          };
-          break;
-        case "updated":
-          noti.value = {
-            message: "相同圖片已存在",
-            level: "warning",
-            displayType: "message",
-            timestamp: Date.now(),
-          };
-          break;
-        case "error":
-          noti.value = {
-            message: "載入圖片失敗",
-            level: "error",
-            displayType: "message",
-            timestamp: Date.now(),
-          };
-          break;
-        default:
-          noti.value = {
-            message: "未知狀態",
-            level: "warning",
-            displayType: "message",
-            timestamp: Date.now(),
-          };
-      }
-    };
-
-    return {
-      noti,
-      zoomer,
-      isZooming,
-      isPaused,
-      startZoomOut,
-      handlePauseOrResumeZoomOut,
-      handleShowFullImage,
-      currentId,
-      onFileChange,
-      hasSelection,
-    };
-  },
+const hasSelection = computed(() => {
+  if (!currentId.value) return false;
+  const ctx = zoomStore.getContext(currentId.value);
+  const sel = ctx?.selection;
+  return !!(ctx && sel && sel.w && sel.h);
 });
+
+const onFileChange = async (e: Event) => {
+  const files = (e.target as HTMLInputElement).files;
+  if (!files || !files[0]) return;
+  const file = files[0];
+
+  try {
+    const imgData = await loadImageFile(file);
+    currentId.value = imgData.id;
+    const status = imageStore.addData(imgData);
+
+    if (status === "added") {
+      zoomStore.setContext(currentId.value, {
+        selection: { x: 0, y: 0, w: 0, h: 0 },
+      });
+    }
+
+    notificationStatus.value = status;
+    notificationTimestamp.value = Date.now();
+
+    handleShowFullImage();
+  } catch (err) {
+    notificationStatus.value = "error";
+    notificationTimestamp.value = Date.now();
+  }
+};
+
+const startZoomOut = () => {
+  zoomer.value?.startZoomOut();
+};
+
+const handlePauseOrResumeZoomOut = () => {
+  if (isPaused.value) {
+    zoomer.value?.resumeZoomOut();
+  } else {
+    zoomer.value?.pauseZoomOut();
+  }
+};
+
+const handleShowFullImage = () => {
+  zoomer.value?.showFullImage();
+};
 </script>
 
 <style scoped>

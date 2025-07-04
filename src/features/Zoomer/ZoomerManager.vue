@@ -3,7 +3,7 @@
     <div class="top-bar">
       <input type="file" accept="image/*" @change="onFileChange" />
       <div class="button-row">
-        <button @click="startZoomOut" :disabled="!hasSelection">
+        <button @click="startZoomOut" :disabled="!hasSelection || isZooming">
           Zoom Out
         </button>
         <button

@@ -2,51 +2,26 @@
   <el-container class="manager-container">
     <el-main class="main-content">
       <div class="top-bar">
-        <el-button @click="isSidebarVisible = true">
-          <el-icon><Menu /></el-icon>
-        </el-button>
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/*"
-          @change="onFileChange"
-          style="display: none"
-        />
-        <el-button type="primary" @click="triggerFileInput">
-          <el-icon><Upload /></el-icon>
-          載入圖片
-        </el-button>
+        <Button :type="isZooming ? 'info' : 'primary'" @click="isSidebarVisible = true" :disabled="isZooming"
+          icon="Expand" />
+        <input ref="fileInput" type="file" accept="image/*" @change="onFileChange" style="display: none" />
+        <Button :type="isZooming ? 'info' : 'primary'" @click="triggerFileInput" :disabled="isZooming" icon="Plus" />
         <el-divider direction="vertical" />
         <el-button-group>
-          <el-button @click="goToPrev" :disabled="!canGoPrev">
-            <el-icon><ArrowLeft /></el-icon>
-            Prev
-          </el-button>
-          <el-button @click="goToNext" :disabled="!canGoNext">
-            Next
-            <el-icon><ArrowRight /></el-icon>
-          </el-button>
+          <Button :type="canGoPrev ? 'primary' : 'info'" @click="goToPrev" :disabled="!canGoPrev" icon="Back" />
+          <Button :type="canGoNext ? 'primary' : 'info'" @click="goToNext" :disabled="!canGoNext" icon="Right" />
         </el-button-group>
         <el-divider direction="vertical" />
         <el-button-group>
-          <el-button
-            @click="startZoomOut"
-            :disabled="!hasSelection || isZooming"
-          >
-            Zoom Out
-          </el-button>
-          <el-button
-            @click="handlePauseOrResumeZoomOut"
-            :disabled="!isZooming && !isPaused"
-          >
-            {{ isPaused ? "Resume" : "Pause" }}
-          </el-button>
-          <el-button
-            @click="handleShowFullImage"
-            :disabled="!currentId || !isZooming"
-          >
-            Show Full Image
-          </el-button>
+          <Button :type="!hasSelection || isZooming ? 'info' : 'primary'" @click="startZoomOut"
+            :disabled="!hasSelection || isZooming" icon="Search" />
+          <Button :type="(!isZooming && !isPaused) ? 'info' : 'primary'" @click="handlePauseOrResumeZoomOut"
+            :disabled="!isZooming && !isPaused">
+            <Icon v-if="isPaused" name="VideoPlay" />
+            <Icon v-else name="VideoPause" />
+          </Button>
+          <Button :type="(!currentId || !isZooming) ? 'info' : 'primary'" @click="handleShowFullImage"
+            :disabled="!currentId || !isZooming" icon="FullScreen" />
         </el-button-group>
       </div>
       <div class="zoomer-area">
@@ -55,18 +30,12 @@
     </el-main>
   </el-container>
   <Notifier :status="notificationStatus" :timestamp="notificationTimestamp" />
-  <el-drawer
-    v-model="isSidebarVisible"
-    direction="ltr"
-    size="280px"
-    :with-header="false"
-  >
+  <el-drawer v-model="isSidebarVisible" direction="ltr" size="280px" :with-header="false">
     <ImageSidebar :current-id="currentId" @select-image="handleImageSelect" />
   </el-drawer>
 </template>
 
 <script setup lang="ts">
-// 1. 從 'vue' 匯入 computed，並移除 ref 對 currentId 的使用
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
@@ -75,7 +44,8 @@ import { loadImageFile } from "@/composables/useImageLoader";
 import Zoomer from "./views/Zoomer.vue";
 import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
-import { Menu, Upload, ArrowLeft, ArrowRight } from "@element-plus/icons-vue";
+import Icon from "@/components/Icon.vue";
+import Button from "@/components/Button.vue";
 
 const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
@@ -153,11 +123,13 @@ const handleShowFullImage = () => zoomer.value?.showFullImage();
   height: 100vh;
   background-color: var(--el-bg-color);
 }
+
 .main-content {
   padding: 0;
   display: flex;
   flex-direction: column;
 }
+
 .top-bar {
   flex-shrink: 0;
   padding: 1rem;
@@ -168,6 +140,7 @@ const handleShowFullImage = () => zoomer.value?.showFullImage();
   border-bottom: 1px solid var(--el-border-color-light);
   background-color: var(--el-bg-color);
 }
+
 .zoomer-area {
   flex-grow: 1;
   padding: 1rem;
@@ -177,12 +150,15 @@ const handleShowFullImage = () => zoomer.value?.showFullImage();
   justify-content: center;
   align-items: center;
 }
+
 .el-button-group {
   margin: 0 8px;
 }
+
 .el-divider--vertical {
   height: 1.5em;
 }
+
 .el-drawer__body {
   padding: 0 !important;
 }

@@ -1,42 +1,19 @@
 <template>
   <div class="image-sidebar-ep">
     <div class="sidebar-header">
-      <h4 class="sidebar-title">圖片列表</h4>
-      <el-tooltip
-        :content="showThumbnails ? '隱藏資訊' : '顯示資訊'"
-        placement="top"
-      >
-        <el-switch
-          v-model="showThumbnails"
-          :active-action-icon="View"
-          :inactive-action-icon="Hide"
-          size="small"
-        />
-      </el-tooltip>
+      <h4 class="sidebar-title">
+      </h4>
+      <el-switch v-model="showThumbnails" :active-action-icon="View" :inactive-action-icon="Hide" size="small" />
     </div>
     <el-scrollbar>
-      <vuedraggable
-        v-if="imageList.length > 0"
-        v-model="imageList"
-        item-key="id"
-        class="draggable-list"
-        ghost-class="ghost"
-        tag="div"
-      >
+      <vuedraggable v-if="imageList.length > 0" v-model="imageList" item-key="id" class="draggable-list"
+        ghost-class="ghost" tag="div">
         <template #item="{ element }">
-          <div
-            class="list-item-ep"
-            :class="{ 'is-active': element.id === currentId }"
-            @click="selectImage(element.id)"
-          >
-            <el-image
-              :src="showThumbnails ? element.thumbnailSrc : ''"
-              fit="cover"
-              class="thumbnail-ep"
-            >
+          <div class="list-item-ep" :class="{ 'is-active': element.id === currentId }" @click="selectImage(element.id)">
+            <el-image :src="showThumbnails ? element.thumbnailSrc : ''" fit="cover" class="thumbnail-ep">
               <template #error>
                 <div class="image-slot-error">
-                  <el-icon><Picture /></el-icon>
+                  <Icon name="Picture" />
                 </div>
               </template>
             </el-image>
@@ -45,19 +22,12 @@
                 ? element.image.name
                 : imageStore.getIndexById(element.id) + 1
             }}</span>
-            <el-button
-              type="danger"
-              :icon="Delete"
-              size="small"
-              circle
-              plain
-              class="delete-btn"
-              @click.stop="handleDelete(element.id)"
-            />
+            <Button type="danger" size="small" circle plain class="delete-btn" icon="Delete"
+              @click.stop="handleDelete(element.id)" />
           </div>
         </template>
       </vuedraggable>
-      <el-empty v-else description="尚未載入圖片" />
+      <el-empty v-else description=" " />
     </el-scrollbar>
   </div>
 </template>
@@ -67,7 +37,9 @@ import { ref, computed } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { storeToRefs } from "pinia";
 import vuedraggable from "vuedraggable";
-import { Picture, Delete, View, Hide } from "@element-plus/icons-vue";
+import Icon from "@/components/Icon.vue";
+import Button from "@/components/Button.vue";
+import { View, Hide } from "@element-plus/icons-vue";
 
 const props = defineProps<{
   currentId: string | null;
@@ -107,20 +79,24 @@ const handleDelete = (id: string) => {
   flex-direction: column;
   background-color: var(--el-bg-color-page);
 }
+
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1rem 0.5rem;
 }
+
 .sidebar-title {
   margin: 0;
   font-weight: 500;
   color: var(--el-text-color-primary);
 }
+
 .el-scrollbar {
   padding: 0 1rem 1rem;
 }
+
 .list-item-ep {
   display: flex;
   align-items: center;
@@ -131,9 +107,11 @@ const handleDelete = (id: string) => {
   margin-bottom: 4px;
   position: relative;
 }
+
 .list-item-ep:hover {
   background-color: var(--el-fill-color-light);
 }
+
 .list-item-ep .delete-btn {
   position: absolute;
   right: 8px;
@@ -142,13 +120,16 @@ const handleDelete = (id: string) => {
   opacity: 0;
   transition: opacity 0.2s;
 }
+
 .list-item-ep:hover .delete-btn {
   opacity: 1;
 }
+
 .list-item-ep.is-active {
   background-color: var(--el-color-primary-light-9);
   color: var(--el-color-primary);
 }
+
 .thumbnail-ep {
   width: 40px;
   height: 40px;
@@ -158,6 +139,7 @@ const handleDelete = (id: string) => {
   background-color: var(--el-fill-color);
   border: 1px solid var(--el-border-color-lighter);
 }
+
 .image-slot-error {
   display: flex;
   justify-content: center;
@@ -168,13 +150,16 @@ const handleDelete = (id: string) => {
   color: var(--el-text-color-secondary);
   font-size: 20px;
 }
+
 .filename {
   font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding-right: 30px; /* 避免文字跟刪除按鈕重疊 */
+  padding-right: 30px;
+  /* 避免文字跟刪除按鈕重疊 */
 }
+
 .ghost {
   opacity: 0.5;
   background: var(--el-color-primary-light-8);

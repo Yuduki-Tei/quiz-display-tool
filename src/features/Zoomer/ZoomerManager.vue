@@ -16,16 +16,21 @@
           <Button :type="!hasSelection || isZooming ? 'info' : 'primary'" @click="startZoomOut"
             :disabled="!hasSelection || isZooming" icon="Search" />
           <Button :type="(!isZooming && !isPaused) ? 'info' : 'primary'" @click="handlePauseOrResumeZoomOut"
-            :disabled="!isZooming && !isPaused">
-            <Icon v-if="isPaused" name="VideoPlay" />
-            <Icon v-else name="VideoPause" />
+            :disabled="!isZooming && !isPaused" :icon="isPaused ? 'VideoPlay' : 'VideoPause'">
           </Button>
-          <Button :type="(!currentId || !isZooming) ? 'info' : 'primary'" @click="handleShowFullImage"
+          <Button :type="(!currentId || !isZooming) ? 'info' : 'warning'" @click="handleShowFullImage"
             :disabled="!currentId || !isZooming" icon="FullScreen" />
         </el-button-group>
+        <el-divider direction="vertical" />
+        <div class="duration-control">
+          <el-slider v-model="durationSec" :min="1" :max="50" :step="1" style="width: 120px;" />
+          <el-input-number v-model="durationSec" :min="1" :max="50" :step="1" size="small"
+            style="width: 80px; margin-left: 8px;" />
+          <span style="margin-left: 4px; color: var(--el-text-color-secondary);">秒</span>
+        </div>
       </div>
       <div class="zoomer-area">
-        <Zoomer ref="zoomer" :id="currentId" />
+        <Zoomer ref="zoomer" :id="currentId" :duration="duration" />
       </div>
     </el-main>
   </el-container>
@@ -44,7 +49,6 @@ import { loadImageFile } from "@/composables/useImageLoader";
 import Zoomer from "./views/Zoomer.vue";
 import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
-import Icon from "@/components/Icon.vue";
 import Button from "@/components/Button.vue";
 
 const imageStore = useImageStore();
@@ -62,7 +66,7 @@ const notificationStatus = ref<string | null>(null);
 const notificationTimestamp = ref<number | null>(null);
 
 const isSidebarVisible = ref(false);
-
+const duration = ref(30000);
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
@@ -116,6 +120,11 @@ const handlePauseOrResumeZoomOut = () => {
   else zoomer.value?.pauseZoomOut();
 };
 const handleShowFullImage = () => zoomer.value?.showFullImage();
+
+const durationSec = computed({
+  get: () => Math.round(duration.value / 1000),
+  set: v => { duration.value = v * 1000 }
+});
 </script>
 
 <style scoped>
@@ -161,5 +170,12 @@ const handleShowFullImage = () => zoomer.value?.showFullImage();
 
 .el-drawer__body {
   padding: 0 !important;
+}
+
+.duration-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
 }
 </style>

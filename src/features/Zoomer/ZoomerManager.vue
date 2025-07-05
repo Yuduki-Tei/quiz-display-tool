@@ -23,10 +23,10 @@
         </el-button-group>
         <el-divider direction="vertical" />
         <div class="duration-control">
-          <el-slider v-model="durationSec" :min="1" :max="50" :step="1" style="width: 120px;" />
+          <el-slider v-model="durationSec" :min="1" :max="50" :step="1" style="width: 120px;" :disabled="isZooming"
+            :show-tooltip="false" />
           <el-input-number v-model="durationSec" :min="1" :max="50" :step="1" size="small"
-            style="width: 80px; margin-left: 8px;" />
-          <span style="margin-left: 4px; color: var(--el-text-color-secondary);">秒</span>
+            style="width: 80px; margin-left: 8px;" :disabled="isZooming" />
         </div>
       </div>
       <div class="zoomer-area">

@@ -13,7 +13,7 @@
             class="list-item-ep"
             :class="{
               'is-active': element.id === currentId,
-              'not-selected': !(extraStore?.hasSelection?.(element.id)),
+              'not-selected': !extraStore?.hasSelection?.(element.id),
             }"
             @click="selectImage(element.id)"
           >
@@ -56,7 +56,7 @@ import DataManager from './DataManager.vue';
 
 const props = defineProps<{
   currentId: string | null;
-  storeType?: 'zoomer' | 'filter'; // 追加: どのstoreを使うか指定
+  storeType?: "zoomer" | "filter"; // 追加: どのstoreを使うか指定
 }>();
 
 const emit = defineEmits<{
@@ -67,9 +67,9 @@ const imageStore = useImageStore();
 const { allData } = storeToRefs(imageStore);
 
 let extraStore: any = null;
-if (props.storeType === 'zoomer') {
+if (props.storeType === "zoomer") {
   extraStore = useZoomerStore();
-} else if (props.storeType === 'filter') {
+} else if (props.storeType === "filter") {
   // import { useFilterStore } from ...
   // extraStore = useFilterStore();
 }

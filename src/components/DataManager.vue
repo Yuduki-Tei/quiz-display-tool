@@ -1,14 +1,7 @@
 '''<template>
   <div>
     <el-dropdown>
-      <Button
-        type="primary"
-        size="small"
-        circle
-        plain
-        icon="MoreFilled"
-        icon-size="16"
-      />
+      <Button type="primary" size="small" circle plain icon="MoreFilled" icon-size="16" />
       <template #dropdown>
         <el-dropdown-menu>
           <el-dropdown-item @click="handleExport">匯出</el-dropdown-item>
@@ -16,13 +9,7 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <input
-      ref="importInput"
-      type="file"
-      accept=".zip"
-      style="display: none"
-      @change="handleImport"
-    />
+    <input ref="importInput" type="file" accept=".zip" style="display: none" @change="handleImport" />
   </div>
 </template>
 
@@ -34,6 +21,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { loadImageFile } from '@/composables/useImageLoader';
 import Button from "@/components/Button.vue";
+import { useMessageBox } from "@/composables/useMessageBox";
 
 const imageStore = useImageStore();
 const zoomerStore = useZoomerStore();
@@ -44,12 +32,48 @@ const triggerImport = () => {
   importInput.value?.click();
 };
 
+import { generateRandomSelection } from "@/features/Zoomer/composables/zoomOutUtil";
+
+const { confirm } = useMessageBox();
+
 const handleExport = async () => {
+  const unselectedImageIds: string[] = [];
+  imageStore.allData.forEach((imageData) => {
+    let { x, y, w, h } = zoomerStore.getContext(imageData.id)?.selection
+    if (!x && !y) {
+      unselectedImageIds.push(imageData.id);
+    }
+  });
+
+  if (unselectedImageIds.length > 0) {
+    try {
+      await confirm(
+        `有 ${unselectedImageIds.length} 張圖片尚未框選區域。是否要為這些圖片隨機選取一塊區域？`,
+        "警告"
+      );
+
+      unselectedImageIds.forEach((id) => {
+        const imageData = imageStore.allData.find((data) => data.id === id);
+        if (imageData) {
+          const randomSelection = generateRandomSelection(
+            imageData.displayWidth,
+            imageData.displayHeight
+          );
+          zoomerStore.setRect(id, randomSelection);
+        }
+      });
+    } catch (error) {
+      // User cancelled the operation
+      console.log("Export cancelled by user.");
+      return;
+    }
+  }
+
   const zip = new JSZip();
 
   const sessionData = {
     imageStore: {
-      allData: imageStore.allData.map(d => ({
+      allData: imageStore.allData.map((d) => ({
         id: d.id,
         name: d.name,
         naturalWidth: d.naturalWidth,
@@ -67,7 +91,7 @@ const handleExport = async () => {
   zip.file("session.json", JSON.stringify(sessionData, null, 2));
 
   const imageFolder = zip.folder("images");
-  imageStore.allData.forEach(data => {
+  imageStore.allData.forEach((data) => {
     if (data.image) {
       imageFolder.file(data.name, data.image);
     }

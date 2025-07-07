@@ -44,5 +44,12 @@ export const useZoomerStore = defineStore("zoomer", {
     setZooming(zooming: boolean): void {
       this.isZooming = zooming;
     },
+
+    hasSelection(id: string): boolean {
+      const context = this.getContext(id);
+      return context
+        ? context.selection.w !== 0 || context.selection.h !== 0
+        : false;
+    },
   },
 });

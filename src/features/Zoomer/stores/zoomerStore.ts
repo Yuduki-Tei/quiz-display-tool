@@ -47,9 +47,11 @@ export const useZoomerStore = defineStore("zoomer", {
 
     hasSelection(id: string): boolean {
       const context = this.getContext(id);
-      return context
-        ? context.selection.w !== 0 || context.selection.h !== 0
-        : false;
+      return context ? !!(context.selection.w && context.selection.h) : false;
+    },
+
+    importData(data: { contexts: Record<string, ZoomerContext> }) {
+      this.contexts = data.contexts;
     },
   },
 });

@@ -73,8 +73,14 @@ export const useImageStore = defineStore("imageStore", {
       if (indexToRemove === -1) return;
 
       const wasCurrentImage = this.currentImage?.id === id;
+      const removedImage = this.allData[indexToRemove]; // 获取被移除的图片数据
 
       this.allData.splice(indexToRemove, 1);
+
+      // 撤销 objectURL，如果存在
+      if (removedImage && removedImage.thumbnailSrc && removedImage.thumbnailSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(removedImage.thumbnailSrc);
+      }
 
       if (this.allData.length === 0) {
         this.currentIndex = -1;
@@ -83,12 +89,10 @@ export const useImageStore = defineStore("imageStore", {
 
       if (wasCurrentImage) {
         this.currentIndex = Math.min(indexToRemove, this.allData.length - 1);
-      } else {
-        const oldCurrentId = this.currentImage?.id;
-        if (oldCurrentId) {
-          this.setCurrentById(oldCurrentId);
-        }
+      } else if (this.currentIndex > indexToRemove) { // Only adjust if current index was after the removed item
+        this.currentIndex--;
       }
+      // No need to call setCurrentById(oldCurrentId) if current index is not changed or already adjusted.
     },
 
     getData(id: string | number | null): ImageData | null {
@@ -113,6 +117,11 @@ export const useImageStore = defineStore("imageStore", {
         return true;
       }
       return false;
+    },
+
+    importData(data: { allData: ImageData[]; currentIndex: number }) {
+      this.allData = data.allData;
+      this.currentIndex = data.currentIndex;
     },
   },
 });

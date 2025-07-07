@@ -23,6 +23,7 @@ export async function loadImageFile(
       createImageBitmap(img).then((bitmap) => {
         resolve({
           id: key,
+          name: file.name, // Add this line
           image: file,
           renderable: bitmap,
           canvas: null,

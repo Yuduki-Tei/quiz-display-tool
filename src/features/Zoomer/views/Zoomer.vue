@@ -72,7 +72,7 @@ const drawSelect = () => {
 };
 
 const drawImage = () => {
-  if (!mainCanvas.value || !context.value?.image) return;
+  if (!mainCanvas.value || !context.value?.renderable) return;
   const ctx = mainCanvas.value.getContext("2d");
   if (!ctx) return;
   ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
@@ -107,7 +107,7 @@ const handleMouseUp = () => {
 let zoomController: ReturnType<typeof zoomOutUtil> | null = null;
 
 const startZoomOut = () => {
-  if (!zoomCanvas.value || !context.value?.image) return;
+  if (!zoomCanvas.value || !context.value?.renderable) return;
   showZoomCanvas.value = true;
   zoomController = zoomOutUtil({
     ...context.value,
@@ -128,7 +128,7 @@ const resumeZoomOut = () => {
 };
 
 const showFullImage = () => {
-  if (!mainCanvas.value || !context.value?.image) return;
+  if (!mainCanvas.value || !context.value?.renderable) return;
   showFullImageUtil({
     ...context.value,
     canvas: mainCanvas.value,

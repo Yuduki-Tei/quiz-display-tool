@@ -1,5 +1,6 @@
 export interface ImageData {
   id: string;
+  name: string; // Add name property
   image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
   thumbnailSrc: string | null;

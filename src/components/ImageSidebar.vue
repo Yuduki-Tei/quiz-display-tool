@@ -9,11 +9,19 @@
       <vuedraggable v-if="imageList.length > 0" v-model="imageList" item-key="id" class="draggable-list"
         ghost-class="ghost" tag="div">
         <template #item="{ element }">
-          <div class="list-item-ep" :class="{
-            'is-active': element.id === currentId,
-            'not-selected': !zoomerStore.hasSelection(element.id),
-          }" @click="selectImage(element.id)">
-            <el-image :src="showThumbnails ? element.thumbnailSrc : ''" fit="cover" class="thumbnail-ep">
+          <div
+            class="list-item-ep"
+            :class="{
+              'is-active': element.id === currentId,
+              'not-selected': !(extraStore?.hasSelection?.(element.id)),
+            }"
+            @click="selectImage(element.id)"
+          >
+            <el-image
+              :src="showThumbnails ? element.thumbnailSrc : ''"
+              fit="cover"
+              class="thumbnail-ep"
+            >
               <template #error>
                 <div class="image-slot-error">
                   <Icon name="Picture" />
@@ -48,6 +56,7 @@ import DataManager from './DataManager.vue';
 
 const props = defineProps<{
   currentId: string | null;
+  storeType?: 'zoomer' | 'filter'; // 追加: どのstoreを使うか指定
 }>();
 
 const emit = defineEmits<{
@@ -56,7 +65,14 @@ const emit = defineEmits<{
 
 const imageStore = useImageStore();
 const { allData } = storeToRefs(imageStore);
-const zoomerStore = useZoomerStore();
+
+let extraStore: any = null;
+if (props.storeType === 'zoomer') {
+  extraStore = useZoomerStore();
+} else if (props.storeType === 'filter') {
+  // import { useFilterStore } from ...
+  // extraStore = useFilterStore();
+}
 
 const showThumbnails = ref(true);
 

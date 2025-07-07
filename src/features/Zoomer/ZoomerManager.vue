@@ -2,31 +2,82 @@
   <el-container class="manager-container">
     <el-main class="main-content">
       <div class="top-bar">
-        <Button :type="isZooming ? 'info' : 'primary'" @click="isSidebarVisible = true" :disabled="isZooming"
-          icon="Expand" />
-        <input ref="fileInput" type="file" accept="image/*" @change="onFileChange" style="display: none" />
-        <Button :type="isZooming ? 'info' : 'primary'" @click="triggerFileInput" :disabled="isZooming" icon="Plus" />
+        <Button
+          :type="isZooming ? 'info' : 'primary'"
+          @click="isSidebarVisible = true"
+          :disabled="isZooming"
+          icon="Expand"
+        />
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/*"
+          @change="onFileChange"
+          style="display: none"
+        />
+        <Button
+          :type="isZooming ? 'info' : 'primary'"
+          @click="triggerFileInput"
+          :disabled="isZooming"
+          icon="Plus"
+        />
         <el-divider direction="vertical" />
         <el-button-group>
-          <Button :type="canGoPrev ? 'primary' : 'info'" @click="goToPrev" :disabled="!canGoPrev" icon="Back" />
-          <Button :type="canGoNext ? 'primary' : 'info'" @click="goToNext" :disabled="!canGoNext" icon="Right" />
+          <Button
+            :type="canGoPrev ? 'primary' : 'info'"
+            @click="goToPrev"
+            :disabled="!canGoPrev"
+            icon="Back"
+          />
+          <Button
+            :type="canGoNext ? 'primary' : 'info'"
+            @click="goToNext"
+            :disabled="!canGoNext"
+            icon="Right"
+          />
         </el-button-group>
         <el-divider direction="vertical" />
         <el-button-group>
-          <Button :type="!hasSelection || isZooming ? 'info' : 'primary'" @click="startZoomOut"
-            :disabled="!hasSelection || isZooming" icon="Search" />
-          <Button :type="(!isZooming && !isPaused) ? 'info' : 'primary'" @click="handlePauseOrResumeZoomOut"
-            :disabled="!isZooming && !isPaused" :icon="isPaused ? 'VideoPlay' : 'VideoPause'">
+          <Button
+            :type="!hasSelection || isZooming ? 'info' : 'primary'"
+            @click="startZoomOut"
+            :disabled="!hasSelection || isZooming"
+            icon="Search"
+          />
+          <Button
+            :type="!isZooming && !isPaused ? 'info' : 'primary'"
+            @click="handlePauseOrResumeZoomOut"
+            :disabled="!isZooming && !isPaused"
+            :icon="isPaused ? 'VideoPlay' : 'VideoPause'"
+          >
           </Button>
-          <Button :type="(!currentId || !isZooming) ? 'info' : 'warning'" @click="handleShowFullImage"
-            :disabled="!currentId || !isZooming" icon="FullScreen" />
+          <Button
+            :type="!currentId || !isZooming ? 'info' : 'warning'"
+            @click="handleShowFullImage"
+            :disabled="!currentId || !isZooming"
+            icon="FullScreen"
+          />
         </el-button-group>
         <el-divider direction="vertical" />
         <div class="duration-control">
-          <el-slider v-model="durationSec" :min="1" :max="50" :step="1" style="width: 120px;" :disabled="isZooming"
-            :show-tooltip="false" />
-          <el-input-number v-model="durationSec" :min="1" :max="50" :step="1" size="small"
-            style="width: 80px; margin-left: 8px;" :disabled="isZooming" />
+          <el-slider
+            v-model="durationSec"
+            :min="1"
+            :max="50"
+            :step="1"
+            style="width: 120px"
+            :disabled="isZooming"
+            :show-tooltip="false"
+          />
+          <el-input-number
+            v-model="durationSec"
+            :min="1"
+            :max="50"
+            :step="1"
+            size="small"
+            style="width: 80px; margin-left: 8px"
+            :disabled="isZooming"
+          />
         </div>
       </div>
       <div class="zoomer-area">
@@ -35,8 +86,17 @@
     </el-main>
   </el-container>
   <Notifier :status="notificationStatus" :timestamp="notificationTimestamp" />
-  <el-drawer v-model="isSidebarVisible" direction="ltr" size="280px" :with-header="false">
-    <ImageSidebar :current-id="currentId" @select-image="handleImageSelect" />
+  <el-drawer
+    v-model="isSidebarVisible"
+    direction="ltr"
+    size="280px"
+    :with-header="false"
+  >
+    <ImageSidebar
+      :current-id="currentId"
+      storeType="zoomer"
+      @select-image="handleImageSelect"
+    />
   </el-drawer>
 </template>
 
@@ -123,7 +183,9 @@ const handleShowFullImage = () => zoomer.value?.showFullImage();
 
 const durationSec = computed({
   get: () => Math.round(duration.value / 1000),
-  set: v => { duration.value = v * 1000 }
+  set: (v) => {
+    duration.value = v * 1000;
+  },
 });
 </script>
 

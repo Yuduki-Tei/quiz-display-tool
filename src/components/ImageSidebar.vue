@@ -2,21 +2,12 @@
   <div class="image-sidebar-ep">
     <div class="sidebar-header">
       <h4 class="sidebar-title"></h4>
-      <el-switch
-        v-model="showThumbnails"
-        :active-action-icon="View"
-        :inactive-action-icon="Hide"
-      />
+      <el-switch v-model="showThumbnails" :active-action-icon="View" :inactive-action-icon="Hide" />
+      <DataManager />
     </div>
     <el-scrollbar>
-      <vuedraggable
-        v-if="imageList.length > 0"
-        v-model="imageList"
-        item-key="id"
-        class="draggable-list"
-        ghost-class="ghost"
-        tag="div"
-      >
+      <vuedraggable v-if="imageList.length > 0" v-model="imageList" item-key="id" class="draggable-list"
+        ghost-class="ghost" tag="div">
         <template #item="{ element }">
           <div
             class="list-item-ep"
@@ -42,16 +33,8 @@
                 ? element.name
                 : imageStore.getIndexById(element.id) + 1
             }}</span>
-            <Button
-              type="danger"
-              size="small"
-              circle
-              plain
-              class="delete-btn"
-              icon="Delete"
-              icon-size="16"
-              @click.stop="handleDelete(element.id)"
-            />
+            <Button type="danger" size="small" circle plain class="delete-btn" icon="Delete" icon-size="16"
+              @click.stop="handleDelete(element.id)" />
           </div>
         </template>
       </vuedraggable>
@@ -111,6 +94,7 @@ const selectImage = (id: string) => {
 const handleDelete = (id: string) => {
   imageStore.removeData(id);
 };
+
 </script>
 
 <style scoped>
@@ -171,6 +155,7 @@ const handleDelete = (id: string) => {
 .list-item-ep.not-selected {
   color: var(--el-color-warning);
 }
+
 .list-item-ep.not-selected.is-active {
   background-color: var(--el-color-warning-light-9);
 }

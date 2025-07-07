@@ -95,6 +95,7 @@ export const useImageStore = defineStore("imageStore", {
       } else if (this.currentIndex > indexToRemove) {
         this.currentIndex--;
       }
+      // No need to call setCurrentById(oldCurrentId) if current index is not changed or already adjusted.
     },
 
     getData(id: string | number | null): ImageData | null {

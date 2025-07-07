@@ -85,6 +85,7 @@ const emit = defineEmits<{
 
 const imageStore = useImageStore();
 const { allData } = storeToRefs(imageStore);
+const zoomerStore = useZoomerStore();
 
 let extraStore: any = null;
 if (props.storeType === "zoomer") {
@@ -135,6 +136,7 @@ const handleDelete = (id: string) => {
   transition: background-color 0.3s, box-shadow 0.3s;
   margin-bottom: 4px;
   position: relative;
+  color: var(--el-text-color);
 }
 
 .list-item-ep:hover {
@@ -162,6 +164,13 @@ const handleDelete = (id: string) => {
   color: var(--el-color-warning);
 }
 
+.list-item-ep.not-selected.is-active {
+  background-color: var(--el-color-warning-light-9);
+}
+
+.list-item-ep.not-selected {
+  color: var(--el-color-warning);
+}
 .list-item-ep.not-selected.is-active {
   background-color: var(--el-color-warning-light-9);
 }

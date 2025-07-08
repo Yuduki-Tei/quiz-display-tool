@@ -1,21 +1,7 @@
 <template>
-  <div>
-    <el-dropdown>
-      <Button
-        type="primary"
-        size="small"
-        circle
-        plain
-        icon="Files"
-        icon-size="16"
-      />
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item @click="handleExport">匯出</el-dropdown-item>
-          <el-dropdown-item @click="triggerImport">匯入</el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+  <div class="data-manager-btns">
+    <Button type="primary" icon="DocumentAdd" @click="triggerImport" />
+    <Button type="primary" icon="Download" @click="handleExport" />
     <input
       ref="importInput"
       type="file"
@@ -41,6 +27,7 @@ import * as JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Button from "@/components/Button.vue";
+import Icon from "@/components/Icon.vue";
 import Notifier from "@/components/Notifier.vue";
 import { generateRandomSelection } from "@/features/Zoomer/composables/zoomOutUtil";
 
@@ -188,3 +175,11 @@ const handleImport = (event: Event) => {
   reader.readAsArrayBuffer(file);
 };
 </script>
+
+<style scoped>
+.data-manager-btns {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+</style>

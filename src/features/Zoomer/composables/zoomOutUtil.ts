@@ -40,7 +40,7 @@ export function startZoomOut(params: ZoomOutParams) {
     displayWidth,
     displayHeight,
     selection,
-    duration = 10000,
+    duration,
     onFinish,
   } = params;
 
@@ -156,24 +156,6 @@ export function stopZoomOut() {
     currentController.stop();
     currentController = null;
   }
-}
-
-export function generateRandomSelection(
-  displayWidth: number,
-  displayHeight: number
-) {
-  const minSize = 50; // 最小選取區域大小
-  const x = Math.random() * (displayWidth - minSize);
-  const y = Math.random() * (displayHeight - minSize);
-  const w = minSize + Math.random() * (displayWidth - x - minSize);
-  const h = minSize + Math.random() * (displayHeight - y - minSize);
-
-  return {
-    x: Math.max(0, Math.floor(x)),
-    y: Math.max(0, Math.floor(y)),
-    w: Math.min(displayWidth - Math.floor(x), Math.floor(w)),
-    h: Math.min(displayHeight - Math.floor(y), Math.floor(h)),
-  };
 }
 
 export function showFullImage(params: ZoomOutParams) {

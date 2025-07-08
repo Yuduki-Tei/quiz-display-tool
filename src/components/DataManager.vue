@@ -32,7 +32,8 @@ import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Button from "@/components/Button.vue";
 import Notifier from "@/components/Notifier.vue";
-import { generateRandomSelection } from "@/features/Zoomer/composables/zoomOutUtil";
+import { randomSelection } from "@/features/Zoomer/composables/useRectSelection";
+import { SelectionRect } from "@/features/Zoomer/types/ZoomerTypes";
 
 const imageStore = useImageStore();
 const zoomerStore = useZoomerStore();
@@ -85,11 +86,11 @@ const handleExport = async () => {
     unselectedImageIds.forEach((id) => {
       const imageData = imageStore.allData.find((data) => data.id === id);
       if (imageData) {
-        const randomSelection = generateRandomSelection(
+        const rect: SelectionRect = randomSelection(
           imageData.displayWidth,
           imageData.displayHeight
         );
-        zoomerStore.setRect(id, randomSelection);
+        zoomerStore.setRect(id, rect);
       }
     });
   }

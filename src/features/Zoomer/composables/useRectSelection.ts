@@ -68,3 +68,22 @@ export function useRectSelection(
     drawSelection,
   };
 }
+export function randomSelection(
+  displayWidth: number,
+  displayHeight: number
+): SelectionRect {
+  const minSize = Math.min(displayWidth, displayHeight) / 10;
+  const maxSize = Math.min(displayWidth, displayHeight) / 5;
+  const aspectRatio = displayWidth / displayHeight;
+  const w = Math.random() * (maxSize - minSize) + minSize;
+  const h = w / aspectRatio;
+  const x = Math.random() * (displayWidth - w);
+  const y = Math.random() * (displayHeight - h);
+
+  return {
+    x: Math.max(0, Math.floor(x)),
+    y: Math.max(0, Math.floor(y)),
+    w: Math.min(displayWidth - Math.floor(x), Math.floor(w)),
+    h: Math.min(displayHeight - Math.floor(y), Math.floor(h)),
+  };
+}

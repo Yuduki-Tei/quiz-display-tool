@@ -1,6 +1,6 @@
 export interface ImageData {
   id: string;
-  name: string; // Add name property
+  name: string;
   image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
   thumbnailSrc: string | null;
@@ -9,11 +9,4 @@ export interface ImageData {
   naturalHeight: number;
   displayWidth: number;
   displayHeight: number;
-}
-
-export interface NotificationData {
-  message: string;
-  level: "info" | "success" | "warning" | "error";
-  displayType: "message" | "notification";
-  timestamp: number | null;
 }

@@ -185,7 +185,6 @@ const durationSec = computed({
 <style scoped>
 .manager-container {
   height: 100vh;
-  background-color: var(--el-bg-color);
 }
 
 .main-content {
@@ -201,15 +200,13 @@ const durationSec = computed({
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--el-border-color-light);
-  background-color: var(--el-bg-color);
+  border-bottom: 1px solid var(--el-color-primary);
 }
 
 .zoomer-area {
   flex-grow: 1;
   padding: 1rem;
   overflow: auto;
-  background-color: var(--el-bg-color-page);
   display: flex;
   justify-content: center;
   align-items: center;

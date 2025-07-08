@@ -1,7 +1,17 @@
 <template>
   <div class="data-manager-btns">
-    <Button type="primary" icon="DocumentAdd" @click="triggerImport" />
-    <Button type="primary" icon="Download" @click="handleExport" />
+    <Button
+      type="primary"
+      icon="DocumentAdd"
+      @click="triggerImport"
+      :disabled="isDataExists"
+    />
+    <Button
+      type="primary"
+      icon="Download"
+      @click="handleExport"
+      :disabled="!isDataExists"
+    />
     <input
       ref="importInput"
       type="file"
@@ -14,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "@/features/Zoomer/stores/zoomerStore";
 import JSZip from "jszip";
@@ -30,6 +40,9 @@ const importInput = ref<HTMLInputElement | null>(null);
 const status = ref<string | null>(null);
 const timestamp = ref<number | null>(null);
 let confirmResolver: ((result: boolean) => void) | null = null;
+const isDataExists = computed(() => {
+  return imageStore.allData.length > 0;
+});
 
 const triggerImport = () => {
   importInput.value?.click();

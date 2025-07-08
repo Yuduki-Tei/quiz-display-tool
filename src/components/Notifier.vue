@@ -34,7 +34,7 @@ const messageMap: Record<
   imported: { message: "匯入成功", level: "success" },
   cancel: { message: "已取消操作", level: "info" },
   "export-confirm": {
-    message: "有部分圖片尚未框選區域。是否要為這些圖片隨機選取一塊區域？",
+    message: "有部分圖片尚未框選區域。是否要為這些圖片隨機選取一塊區域後匯出？",
     level: "warning",
     mode: "confirm",
     title: "確認",

@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, computed, useAttrs, useSlots } from "vue";
+import { computed, useAttrs, useSlots } from "vue";
 import Icon from "@/components/Icon.vue";
 
 const props = withDefaults(

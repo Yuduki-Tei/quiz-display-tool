@@ -28,13 +28,29 @@
     "overlay": #242424,
   ),
   $border-color: (
-    "": #036363,
+    "": #039393,
     "light": #414141,
     "lighter": #5b5b5b,
     "extra-light": #6f6f6f,
   ),
   $text-color: (
     "": rgba(255, 255, 255, 0.87),
+    "regular": rgba(255, 255, 255, 0.87),
+  ),
+  $input: (
+    bg-color: #414141,
+    text-color: rgba(255, 255, 255, 0.87),
+  ),
+
+  $button: (
+    divide-border-color: #6f6f6f,
+    text-color: rgba(255, 255, 255, 0.87),
+  ),
+  $fill-color: (
+    "": #039393,
+    "light": #059c9c,
+    "lighter": #05d8d8,
+    "extra-light": #04f5f5,
   )
 );
 

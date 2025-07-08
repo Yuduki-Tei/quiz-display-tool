@@ -75,7 +75,6 @@
             :max="50"
             :step="1"
             size="small"
-            style="width: 80px; margin-left: 8px"
             :disabled="isZooming"
           />
         </div>
@@ -233,5 +232,9 @@ const durationSec = computed({
   align-items: center;
   gap: 0.5rem;
   margin-left: 1rem;
+}
+.el-input-number {
+  width: 80px;
+  margin-left: 8px;
 }
 </style>

@@ -6,7 +6,7 @@
         size="small"
         circle
         plain
-        icon="MoreFilled"
+        icon="Files"
         icon-size="16"
       />
       <template #dropdown>

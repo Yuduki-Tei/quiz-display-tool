@@ -2,10 +2,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  --el-switch-off-color: var(--el-color-info);
-  --el-switch-on-color: var(--el-color-primary);
-  --el-button-disabled-bg-color: var(--el-color-info) !important;
-  --el-button-disabled-text-color: var(--el-text-color) !important;
 }
 
 html,

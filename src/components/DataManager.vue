@@ -10,13 +10,7 @@
       @change="handleImport"
     />
   </div>
-  <Notifier
-    :status="status"
-    :timestamp="timestamp"
-    :display-type="displayType"
-    :mode="mode"
-    @confirm="onConfirm"
-  />
+  <Notifier :status="status" :timestamp="timestamp" @confirm="onConfirm" />
 </template>
 
 <script setup lang="ts">
@@ -27,7 +21,6 @@ import * as JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Button from "@/components/Button.vue";
-import Icon from "@/components/Icon.vue";
 import Notifier from "@/components/Notifier.vue";
 import { generateRandomSelection } from "@/features/Zoomer/composables/zoomOutUtil";
 
@@ -44,7 +37,6 @@ const triggerImport = () => {
   importInput.value?.click();
 };
 
-// 通知用の追加情報を渡すための汎用payload
 const notify = (type: string) => {
   status.value = type;
   timestamp.value = Date.now();

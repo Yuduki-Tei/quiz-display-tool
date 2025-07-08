@@ -206,23 +206,18 @@ const durationSec = computed({
 .zoomer-area {
   flex-grow: 1;
   padding: 1rem;
-  overflow: auto;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .el-button-group {
-  margin: 0 8px;
+  margin: 0 1rem;
 }
 
 .el-divider--vertical {
-  height: 1.5em;
+  height: 2em;
   border-left: 1px solid var(--el-color-primary-light-5);
-}
-
-.el-drawer__body {
-  padding: 0 !important;
 }
 
 .duration-control {

@@ -121,6 +121,7 @@ const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const currentId = computed(() => currentImage.value?.id || null);
+const hasSelection = computed(() => zoomStore.hasSelection(currentId.value));
 
 const notificationStatus = ref<string | null>(null);
 const notificationTimestamp = ref<number | null>(null);
@@ -130,13 +131,6 @@ const duration = ref(30000);
 const triggerFileInput = () => {
   fileInput.value?.click();
 };
-
-const hasSelection = computed(() => {
-  if (!currentId.value) return false;
-  const ctx = zoomStore.getContext(currentId.value);
-  const sel = ctx?.selection;
-  return !!(ctx && sel && sel.w && sel.h);
-});
 
 const onFileChange = async (e: Event) => {
   const files = (e.target as HTMLInputElement).files;

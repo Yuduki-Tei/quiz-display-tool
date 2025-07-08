@@ -1,6 +1,6 @@
 <template>
   <div class="image-sidebar-ep">
-    <div class="sidebar-header" style="padding-right: 0; padding-bottom: 1rem">
+    <div class="sidebar-header">
       <h4 class="sidebar-title"></h4>
       <el-switch
         v-model="showThumbnails"
@@ -194,6 +194,10 @@ const handleDelete = (id: string) => {
 
 .ghost {
   opacity: 0.5;
+}
+.sidebar-header {
+  padding-right: 0;
+  padding-bottom: 1rem;
 }
 
 .sidebar-footer {

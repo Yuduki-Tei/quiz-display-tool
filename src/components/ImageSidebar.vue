@@ -7,7 +7,6 @@
         :active-action-icon="View"
         :inactive-action-icon="Hide"
       />
-      <DataManager />
     </div>
     <el-scrollbar>
       <vuedraggable
@@ -58,6 +57,9 @@
       </vuedraggable>
       <el-empty v-else description=" " />
     </el-scrollbar>
+    <div class="sidebar-footer">
+      <DataManager />
+    </div>
   </div>
 </template>
 
@@ -192,5 +194,12 @@ const handleDelete = (id: string) => {
 
 .ghost {
   opacity: 0.5;
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid var(--el-color-primary-light-5);
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

@@ -200,7 +200,7 @@ const durationSec = computed({
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--el-color-primary);
+  border-bottom: 1px solid var(--el-color-primary-light-5);
 }
 
 .zoomer-area {

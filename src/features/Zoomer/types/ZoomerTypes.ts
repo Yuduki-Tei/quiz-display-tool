@@ -7,5 +7,5 @@ export interface SelectionRect {
 
 export interface ZoomerContext {
   selection: SelectionRect;
-  duration?: number;
+  duration: number;
 }

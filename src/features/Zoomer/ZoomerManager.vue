@@ -80,7 +80,7 @@
         </div>
       </div>
       <div class="zoomer-area">
-        <Zoomer ref="zoomer" :id="currentId" :duration="duration" />
+        <Zoomer ref="zoomer" :id="currentId" />
       </div>
     </el-main>
   </el-container>
@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "./stores/zoomerStore";
@@ -140,6 +140,7 @@ const onFileChange = async (e: Event) => {
     const status = imageStore.addData(imgData);
     if (status === "added" && currentId.value) {
       zoomStore.setContext(currentId.value, {
+        duration: 30000,
         selection: { x: 0, y: 0, w: 0, h: 0 },
       });
     }
@@ -178,7 +179,22 @@ const durationSec = computed({
   get: () => Math.round(duration.value / 1000),
   set: (v) => {
     duration.value = v * 1000;
+    if (currentId.value) {
+      zoomStore.setContext(currentId.value, {
+        duration: duration.value,
+        selection: zoomStore.getContext(currentId.value).selection,
+      });
+    }
   },
+});
+
+watch(currentId, (id) => {
+  if (id) {
+    const ctx = zoomStore.getContext(id);
+    if (ctx && typeof ctx.duration === "number") {
+      duration.value = ctx.duration;
+    }
+  }
 });
 </script>
 

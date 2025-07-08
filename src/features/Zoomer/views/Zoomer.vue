@@ -1,10 +1,22 @@
 <template>
   <div class="image-zoomer">
     <div class="canvas-container" ref="canvasContainer">
-      <canvas ref="mainCanvas" v-show="!showZoomCanvas" :width="context.displayWidth" :height="context.displayHeight"
-        @mousedown="handleMouseDown" @mousemove="handleMouseMove" @mouseup="handleMouseUp"></canvas>
-      <canvas ref="zoomCanvas" v-show="showZoomCanvas" :width="context.displayWidth" :height="context.displayHeight"
-        class="zoom-canvas"></canvas>
+      <canvas
+        ref="mainCanvas"
+        v-show="!showZoomCanvas"
+        :width="context.displayWidth"
+        :height="context.displayHeight"
+        @mousedown="handleMouseDown"
+        @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
+      ></canvas>
+      <canvas
+        ref="zoomCanvas"
+        v-show="showZoomCanvas"
+        :width="context.displayWidth"
+        :height="context.displayHeight"
+        class="zoom-canvas"
+      ></canvas>
     </div>
     <slot></slot>
   </div>
@@ -25,7 +37,6 @@ import type { SelectionRect } from "../types/ZoomerTypes";
 const props = withDefaults(
   defineProps<{
     id: string | null;
-    duration: number;
   }>(),
   {
     id: null,
@@ -112,7 +123,6 @@ const startZoomOut = () => {
   zoomController = zoomOutUtil({
     ...context.value,
     canvas: zoomCanvas.value,
-    duration: props.duration,
     onFinish: () => {
       showZoomCanvas.value = false;
     },

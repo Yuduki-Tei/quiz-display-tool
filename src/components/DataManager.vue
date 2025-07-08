@@ -17,7 +17,7 @@
 import { ref } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "@/features/Zoomer/stores/zoomerStore";
-import * as JSZip from "jszip";
+import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Button from "@/components/Button.vue";

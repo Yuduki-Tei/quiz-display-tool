@@ -218,6 +218,7 @@ const durationSec = computed({
 
 .el-divider--vertical {
   height: 1.5em;
+  border-left: 1px solid var(--el-color-primary-light-5);
 }
 
 .el-drawer__body {

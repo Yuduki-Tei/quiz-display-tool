@@ -27,7 +27,7 @@
             @click="selectImage(element.id)"
           >
             <el-image
-              :src="showThumbnails ? !element.thumbnailSrc : ''"
+              :src="showThumbnails ? element.thumbnailSrc : ''"
               fit="cover"
               class="thumbnail-ep"
             >

@@ -29,8 +29,6 @@ const zoomerStore = useZoomerStore();
 const importInput = ref<HTMLInputElement | null>(null);
 const status = ref<string | null>(null);
 const timestamp = ref<number | null>(null);
-const displayType = ref<"message" | "notification">("message");
-const mode = ref<"message" | "confirm">("message");
 let confirmResolver: ((result: boolean) => void) | null = null;
 
 const triggerImport = () => {
@@ -43,7 +41,6 @@ const notify = (type: string) => {
 };
 
 const showConfirm = (type: string) => {
-  mode.value = "confirm";
   status.value = type;
   timestamp.value = Date.now();
   return new Promise<boolean>((resolve) => {
@@ -52,7 +49,6 @@ const showConfirm = (type: string) => {
 };
 
 const onConfirm = (result: boolean) => {
-  mode.value = "message";
   if (confirmResolver) {
     confirmResolver(result);
     confirmResolver = null;

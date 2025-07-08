@@ -14,8 +14,13 @@ export function useRectSelection(
   const onMouseDown = (e: MouseEvent, canvas: HTMLCanvasElement) => {
     const bounds = canvas.getBoundingClientRect();
     if (!context.value) return;
-    startX = e.clientX - bounds.left;
-    startY = e.clientY - bounds.top;
+
+    const scaleX = canvas.width / bounds.width; //prevention of unintended css zooming
+    const scaleY = canvas.height / bounds.height;
+
+    if (!context.value) return;
+    startX = (e.clientX - bounds.left) * scaleX;
+    startY = (e.clientY - bounds.top) * scaleY;
     const newSelection = {
       x: startX,
       y: startY,

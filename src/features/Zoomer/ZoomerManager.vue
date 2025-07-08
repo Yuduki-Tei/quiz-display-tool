@@ -3,7 +3,7 @@
     <el-main class="main-content">
       <div class="top-bar">
         <Button
-          :type="isZooming ? 'info' : 'primary'"
+          type="primary"
           @click="isSidebarVisible = true"
           :disabled="isZooming"
           icon="Expand"
@@ -16,7 +16,7 @@
           style="display: none"
         />
         <Button
-          :type="isZooming ? 'info' : 'primary'"
+          type="primary"
           @click="triggerFileInput"
           :disabled="isZooming"
           icon="Plus"
@@ -24,13 +24,13 @@
         <el-divider direction="vertical" />
         <el-button-group>
           <Button
-            :type="canGoPrev ? 'primary' : 'info'"
+            type="info"
             @click="goToPrev"
             :disabled="!canGoPrev"
             icon="Back"
           />
           <Button
-            :type="canGoNext ? 'primary' : 'info'"
+            type="info"
             @click="goToNext"
             :disabled="!canGoNext"
             icon="Right"
@@ -39,26 +39,33 @@
         <el-divider direction="vertical" />
         <el-button-group>
           <Button
-            :type="!hasSelection || isZooming ? 'info' : 'primary'"
+            type="info"
             @click="startZoomOut"
             :disabled="!hasSelection || isZooming"
             icon="Search"
           />
           <Button
-            :type="!isZooming && !isPaused ? 'info' : 'primary'"
+            type="info"
             @click="handlePauseOrResumeZoomOut"
             :disabled="!isZooming && !isPaused"
             :icon="isPaused ? 'VideoPlay' : 'VideoPause'"
           >
           </Button>
           <Button
-            :type="!currentId || !isZooming ? 'info' : 'warning'"
+            type="warning"
             @click="handleShowFullImage"
             :disabled="!currentId || !isZooming"
             icon="FullScreen"
           />
         </el-button-group>
         <el-divider direction="vertical" />
+        <Button
+          type="primary"
+          :icon="displayModes.find((m) => m.value === displayMode)?.icon"
+          :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
+          @click="cycleDisplayMode"
+          :disabled="isZooming"
+        />
         <div class="duration-control">
           <el-slider
             v-model="durationSec"
@@ -80,7 +87,7 @@
         </div>
       </div>
       <div class="zoomer-area">
-        <Zoomer ref="zoomer" :id="currentId" />
+        <Zoomer ref="zoomer" :id="currentId" :displayMode="displayMode" />
       </div>
     </el-main>
   </el-container>
@@ -187,6 +194,17 @@ const durationSec = computed({
     }
   },
 });
+
+const displayModes = [
+  { value: "full", icon: "Picture", tooltip: "顯示完整圖片" },
+  { value: "selection", icon: "Crop", tooltip: "只顯示框選區域" },
+  { value: "none", icon: "Hide", tooltip: "隱藏圖片" },
+];
+const displayMode = ref<string>("full");
+const cycleDisplayMode = () => {
+  const idx = displayModes.findIndex((m) => m.value === displayMode.value);
+  displayMode.value = displayModes[(idx + 1) % displayModes.length].value;
+};
 
 watch(currentId, (id) => {
   if (id) {

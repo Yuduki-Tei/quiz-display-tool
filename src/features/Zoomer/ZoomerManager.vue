@@ -2,86 +2,84 @@
   <el-container class="manager-container">
     <el-main class="main-content">
       <div class="top-bar">
-        <Button
-          type="primary"
-          @click="isSidebarVisible = true"
-          :disabled="isZooming"
-          icon="Expand"
-        />
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/*"
-          @change="onFileChange"
-          style="display: none"
-        />
-        <Button
-          type="primary"
-          @click="triggerFileInput"
-          :disabled="isZooming"
-          icon="Plus"
-        />
-        <el-divider direction="vertical" />
-        <el-button-group>
+        <div class="top-bar-left">
           <Button
-            type="info"
-            @click="goToPrev"
-            :disabled="!canGoPrev"
-            icon="Back"
-          />
-          <Button
-            type="info"
-            @click="goToNext"
-            :disabled="!canGoNext"
-            icon="Right"
-          />
-        </el-button-group>
-        <el-divider direction="vertical" />
-        <el-button-group>
-          <Button
-            type="info"
-            @click="startZoomOut"
-            :disabled="!hasSelection || isZooming"
-            icon="Search"
-          />
-          <Button
-            type="info"
-            @click="handlePauseOrResumeZoomOut"
-            :disabled="!isZooming && !isPaused"
-            :icon="isPaused ? 'VideoPlay' : 'VideoPause'"
-          >
-          </Button>
-          <Button
-            type="warning"
-            @click="handleShowFullImage"
-            :disabled="!currentId || !isZooming"
-            icon="FullScreen"
-          />
-        </el-button-group>
-        <el-divider direction="vertical" />
-        <Button
-          type="primary"
-          :icon="displayModes.find((m) => m.value === displayMode)?.icon"
-          :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
-          @click="cycleDisplayMode"
-          :disabled="isZooming"
-        />
-        <div class="duration-control">
-          <el-slider
-            v-model="durationSec"
-            :min="1"
-            :max="50"
-            :step="1"
-            style="width: 120px"
+            type="primary"
+            @click="isSidebarVisible = true"
             :disabled="isZooming"
-            :show-tooltip="false"
+            icon="Expand"
           />
-          <el-input-number
-            v-model="durationSec"
-            :min="1"
-            :max="50"
-            :step="1"
-            size="small"
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            @change="onFileChange"
+            style="display: none"
+          />
+          <Button
+            type="primary"
+            @click="triggerFileInput"
+            :disabled="isZooming"
+            icon="Plus"
+          />
+          <el-divider direction="vertical" />
+          <el-button-group>
+            <Button
+              type="info"
+              @click="goToPrev"
+              :disabled="!canGoPrev"
+              icon="Back"
+            />
+            <Button
+              type="info"
+              @click="goToNext"
+              :disabled="!canGoNext"
+              icon="Right"
+            />
+          </el-button-group>
+        </div>
+        <div class="top-bar-center">
+          <el-button-group>
+            <Button
+              type="primary"
+              @click="handleZoomControl"
+              :disabled="!hasSelection && !isZooming"
+              :icon="isZooming && !isPaused ? 'VideoPause' : 'VideoPlay'"
+            />
+            <Button
+              type="warning"
+              @click="handleShowFullImage"
+              :disabled="!currentId || !isZooming"
+              icon="FullScreen"
+            />
+          </el-button-group>
+          <el-divider direction="vertical" />
+          <div class="duration-control">
+            <el-slider
+              v-model="durationSec"
+              :min="1"
+              :max="50"
+              :step="1"
+              style="width: 120px"
+              :disabled="isZooming"
+              :show-tooltip="false"
+            />
+            <el-input-number
+              v-model="durationSec"
+              :min="1"
+              :max="50"
+              :step="1"
+              size="small"
+              :disabled="isZooming"
+            />
+          </div>
+        </div>
+        <div class="top-bar-right">
+          <Button
+            type="primary"
+            :icon="displayModes.find((m) => m.value === displayMode)?.icon"
+            :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
+            @click="cycleDisplayMode"
             :disabled="isZooming"
           />
         </div>
@@ -175,10 +173,13 @@ const goToNext = () => {
   imageStore.goToNext();
 };
 
-const startZoomOut = () => zoomer.value?.startZoomOut();
-const handlePauseOrResumeZoomOut = () => {
-  if (isPaused.value) zoomer.value?.resumeZoomOut();
-  else zoomer.value?.pauseZoomOut();
+const handleZoomControl = () => {
+  if (!isZooming.value) {
+    zoomer.value?.startZoomOut();
+  } else {
+    if (isPaused.value) zoomer.value?.resumeZoomOut();
+    else zoomer.value?.pauseZoomOut();
+  }
 };
 const handleShowFullImage = () => zoomer.value?.showFullImage();
 
@@ -232,9 +233,30 @@ watch(currentId, (id) => {
   padding: 1rem;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--el-color-primary-light-5);
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--el-color-primary-light-5);
+  flex: 1;
+}
+
+.top-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+  flex: 2;
+}
+
+.top-bar-right {
+  display: flex;
+  justify-content: flex-end;
+  flex: 1;
 }
 
 .zoomer-area {
@@ -246,7 +268,7 @@ watch(currentId, (id) => {
 }
 
 .el-button-group {
-  margin: 0 1rem;
+  margin: 0;
 }
 
 .el-divider--vertical {
@@ -258,7 +280,6 @@ watch(currentId, (id) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: 1rem;
 }
 .el-input-number {
   width: 80px;

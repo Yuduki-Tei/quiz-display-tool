@@ -1,10 +1,12 @@
-export interface PanelAmount{
-    x: number;
-    y: number;
+export interface PanelAmount {
+  x: number;
+  y: number;
 }
 
 export interface PanelContext {
-    amount: PanelAmount;
-    duration: number;
-    revealType: string;
+  amount: PanelAmount;
+  revealed: [number, number][];
+  revealType: "auto" | "manual";
+  order?: [number, number][];
+  duration?: number;
 }

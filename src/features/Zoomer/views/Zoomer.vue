@@ -18,7 +18,6 @@
         class="zoom-canvas"
       ></canvas>
     </div>
-    <slot></slot>
   </div>
 </template>
 

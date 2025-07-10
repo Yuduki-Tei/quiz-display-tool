@@ -5,10 +5,16 @@
         ref="mainCanvas"
         :width="context.displayWidth"
         :height="context.displayHeight"
+        style="pointer-events: none"
       ></canvas>
-      <canvas ref="panelCanvas" class="panelCanvas"></canvas>
+      <canvas
+        ref="panelCanvas"
+        class="panelCanvas"
+        :width="context.displayWidth"
+        :height="context.displayHeight"
+        style="position: absolute"
+      ></canvas>
     </div>
-    <slot></slot>
   </div>
 </template>
 
@@ -41,7 +47,6 @@ const context = computed(() => {
 const drawImage = () => {
   if (!mainCanvas.value || !context.value) return;
   const ctx = mainCanvas.value.getContext("2d");
-  console.log("Drawing image on main canvas", context.value);
   if (!ctx) return;
   ctx.drawImage(
     context.value.renderable,
@@ -51,12 +56,37 @@ const drawImage = () => {
     context.value.displayHeight
   );
 };
+
+/**
+ *
+ * @param {number} x
+ * @param {number} y
+ */
+function drawGrid(x: number, y: number) {
+  if (!panelCanvas.value || !context.value) return;
+  const ctx = panelCanvas.value.getContext("2d");
+  if (!ctx) return;
+  ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
+  const w = context.value.displayWidth / x;
+  const h = context.value.displayHeight / y;
+  ctx.strokeStyle = "rgba(0,0,0,0.5)";
+  ctx.lineWidth = 1;
+  ctx.fillStyle = "rgba(0,0,0,0.5)";
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      ctx.fillRect(i * w, j * h, w, h);
+      ctx.strokeRect(i * w, j * h, w, h);
+    }
+  }
+}
+
 watch(
   () => props.id,
   (newId) => {
     if (newId) {
       nextTick(() => {
         drawImage();
+        drawGrid(5, 5);
       });
     }
   },

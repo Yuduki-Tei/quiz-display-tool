@@ -1,8 +1,8 @@
 <template>
-  <el-container class="manager-container">
-    <el-main class="main-content">
-      <div class="top-bar">
-        <div class="top-bar-left">
+  <el-container class="manager-layout">
+    <el-main class="manager-main">
+      <div class="manager-top-bar">
+        <div class="manager-top-bar-left">
           <Button
             type="primary"
             @click="isSidebarVisible = true"
@@ -33,7 +33,7 @@
           </el-button-group>
         </div>
       </div>
-      <div class="panel-area">
+      <div class="display-area">
         <Panel :id="currentId" />
       </div>
     </el-main>
@@ -107,35 +107,3 @@ const goToNext = () => {
   imageStore.goToNext();
 };
 </script>
-
-<style scoped>
-.manager-container {
-  height: 100vh;
-}
-.main-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.top-bar {
-  flex-shrink: 0;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--el-color-primary-light-5);
-}
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex: 1;
-}
-.panel-area {
-  flex-grow: 1;
-  padding: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>

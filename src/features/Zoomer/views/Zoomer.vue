@@ -1,6 +1,6 @@
 <template>
-  <div class="image-zoomer">
-    <div class="canvas-container" ref="canvasContainer">
+  <div class="display-root">
+    <div class="display-canvas-container" ref="canvasContainer">
       <canvas
         ref="mainCanvas"
         v-show="!isZooming && props.displayMode !== 'none'"

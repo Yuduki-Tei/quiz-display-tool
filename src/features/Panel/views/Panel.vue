@@ -1,6 +1,6 @@
 <template>
-  <div class="panel-display">
-    <div class="canvas-container" ref="canvasContainer">
+  <div class="display-root">
+    <div class="display-canvas-container" ref="canvasContainer">
       <canvas
         ref="mainCanvas"
         :width="context.displayWidth"

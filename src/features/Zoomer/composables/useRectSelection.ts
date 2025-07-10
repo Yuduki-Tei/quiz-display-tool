@@ -58,11 +58,9 @@ export function useRectSelection(
     const rect = context.value.selection;
     const c2d = canvas.getContext("2d");
     if (!c2d) return;
-    c2d.save();
     c2d.strokeStyle = "red";
     c2d.lineWidth = 1.5;
     c2d.strokeRect(rect.x, rect.y, rect.w, rect.h);
-    c2d.restore();
   };
 
   return {

@@ -76,7 +76,7 @@ import DataManager from "./DataManager.vue";
 
 const props = defineProps<{
   currentId: string | null;
-  storeType?: "zoomer" | "filter"; // 追加: どのstoreを使うか指定
+  storeType?: "zoomer" | "panel"; // 追加: どのstoreを使うか指定
 }>();
 
 const emit = defineEmits<{
@@ -89,7 +89,7 @@ const { allData } = storeToRefs(imageStore);
 let extraStore: any = null;
 if (props.storeType === "zoomer") {
   extraStore = useZoomerStore();
-} else if (props.storeType === "filter") {
+} else if (props.storeType === "panel") {
   // import { useFilterStore } from ...
   // extraStore = useFilterStore();
 }

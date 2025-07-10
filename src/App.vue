@@ -1,11 +1,24 @@
 <template>
   <div id="app">
-    <ZoomerManager />
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 2000">
+      <button @click="toggleManager" style="padding: 0.5em 1em">
+        {{ showPanel ? "切換 Zoomer" : "切換 Panel" }}
+      </button>
+    </div>
+    <ZoomerManager v-if="!showPanel" />
+    <PanelManager v-else />
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import ZoomerManager from "./features/Zoomer/ZoomerManager.vue";
+import PanelManager from "./features/Panel/PanelManager.vue";
+
+const showPanel = ref(false);
+const toggleManager = () => {
+  showPanel.value = !showPanel.value;
+};
 </script>
 
 <style scoped>

@@ -117,13 +117,10 @@ const drawImage = () => {
     );
   } else if (props.displayMode === "full" || isZooming.value) {
     // show full image
-    ctx.drawImage(
-      context.value.renderable,
-      0,
-      0,
-      context.value.displayWidth,
-      context.value.displayHeight
-    );
+    showFullImageUtil({
+      ...context.value,
+      canvas: mainCanvas.value,
+    });
     drawSelect();
   }
 };
@@ -190,7 +187,7 @@ watch(
   (newId) => {
     if (newId) {
       nextTick(() => {
-        showFullImage();
+        drawImage();
       });
     }
   },

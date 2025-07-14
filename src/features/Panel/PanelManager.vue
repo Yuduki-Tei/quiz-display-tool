@@ -32,6 +32,22 @@
             />
           </el-button-group>
         </div>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            margin-left: 1em;
+          "
+        >
+          <el-select v-model="gridX" size="small" style="width: 60px">
+            <el-option v-for="n in 100" :key="`x-${n}`" :value="n" :label="n" />
+          </el-select>
+          <Icon name="Close" />
+          <el-select v-model="gridY" size="small" style="width: 60px">
+            <el-option v-for="n in 100" :key="`y-${n}`" :value="n" :label="n" />
+          </el-select>
+        </div>
       </div>
       <div class="display-area">
         <Panel :id="currentId" />
@@ -54,16 +70,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
+import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Panel from "../Panel/views/Panel.vue";
 import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
 import Button from "@/components/Button.vue";
+import Icon from "@/components/Icon.vue";
 
 const imageStore = useImageStore();
+const panelStore = usePanelStore();
 const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -71,6 +90,8 @@ const currentId = computed(() => currentImage.value?.id || null);
 const notificationStatus = ref<string | null>(null);
 const notificationTimestamp = ref<number | null>(null);
 const isSidebarVisible = ref(false);
+const gridX = ref(5);
+const gridY = ref(5);
 
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -83,6 +104,13 @@ const onFileChange = async (e: Event) => {
   try {
     const imgData = await loadImageFile(file);
     const status = imageStore.addData(imgData);
+    if (status === "added" && currentId.value) {
+      panelStore.setContext(currentId.value, {
+        revealed: [],
+        revealType: "manual",
+        amount: { x: gridX.value, y: gridY.value },
+      });
+    }
     notificationStatus.value = status;
     notificationTimestamp.value = Date.now();
   } catch (err) {
@@ -106,4 +134,10 @@ const goToPrev = () => {
 const goToNext = () => {
   imageStore.goToNext();
 };
+
+watch([gridX, gridY, currentId], ([x, y, id]) => {
+  if (id) {
+    panelStore.setAmount(id, { x, y });
+  }
+});
 </script>

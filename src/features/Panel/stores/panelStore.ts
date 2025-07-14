@@ -8,7 +8,7 @@ interface PanelState {
   isPaused: boolean;
 }
 
-export const usePanelStore = defineStore("zoomer", {
+export const usePanelStore = defineStore("panel", {
   state: (): PanelState => ({
     contexts: {},
     isPaused: false,

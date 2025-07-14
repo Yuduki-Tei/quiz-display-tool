@@ -12,7 +12,8 @@
         class="panelCanvas"
         :width="context.displayWidth"
         :height="context.displayHeight"
-        style="position: absolute"
+        style="position: absolute; cursor: pointer"
+        @click="onPanelClick"
       ></canvas>
     </div>
   </div>
@@ -21,7 +22,8 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
 import { useImageStore } from "@/stores/imageStore";
-
+import { drawGrid, handlePanelClick } from "../composables/panelUtil";
+import { usePanelStore } from "../stores/panelStore";
 const props = withDefaults(
   defineProps<{
     id?: string | null;
@@ -34,20 +36,51 @@ const props = withDefaults(
 );
 
 const imageStore = useImageStore();
+const panelStore = usePanelStore();
 
 const mainCanvas = ref<HTMLCanvasElement | null>(null);
 const panelCanvas = ref<HTMLCanvasElement | null>(null);
-const context = computed(() => {
+const context:any = computed(() => {
+  if (!props.id) return {};
   const imageData = imageStore.getData(props.id);
+  const panelContext = panelStore.getContext(props.id);
   return {
     ...imageData,
+    ...panelContext,
   };
 });
+
+const onPanelClick = (e: MouseEvent) => {
+  if (!panelCanvas.value || !context.value) return;
+  handlePanelClick(e, panelCanvas, context);
+  drawGrid(panelCanvas, context);
+};
+watch(
+  () => props.id,
+  (newId) => {
+    if (newId) {
+      nextTick(() => {
+        drawImage();
+        drawGrid(panelCanvas, context);
+      });
+    }
+  },
+  { immediate: true }
+);
+
+watch(
+  () => context.value?.revealed,
+  () => {
+    drawGrid(panelCanvas, context);
+  },
+  { deep: true }
+);
 
 const drawImage = () => {
   if (!mainCanvas.value || !context.value) return;
   const ctx = mainCanvas.value.getContext("2d");
   if (!ctx) return;
+  ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
   ctx.drawImage(
     context.value.renderable,
     0,
@@ -56,40 +89,4 @@ const drawImage = () => {
     context.value.displayHeight
   );
 };
-
-/**
- *
- * @param {number} x
- * @param {number} y
- */
-function drawGrid(x: number, y: number) {
-  if (!panelCanvas.value || !context.value) return;
-  const ctx = panelCanvas.value.getContext("2d");
-  if (!ctx) return;
-  ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
-  const w = context.value.displayWidth / x;
-  const h = context.value.displayHeight / y;
-  ctx.strokeStyle = "rgba(0,0,0,0.5)";
-  ctx.lineWidth = 1;
-  ctx.fillStyle = "rgba(0,0,0,0.5)";
-  for (let i = 0; i < x; i++) {
-    for (let j = 0; j < y; j++) {
-      ctx.fillRect(i * w, j * h, w, h);
-      ctx.strokeRect(i * w, j * h, w, h);
-    }
-  }
-}
-
-watch(
-  () => props.id,
-  (newId) => {
-    if (newId) {
-      nextTick(() => {
-        drawImage();
-        drawGrid(5, 5);
-      });
-    }
-  },
-  { immediate: true }
-);
 </script>

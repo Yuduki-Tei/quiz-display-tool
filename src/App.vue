@@ -5,8 +5,8 @@
         {{ showPanel ? "切換 Zoomer" : "切換 Panel" }}
       </button>
     </div>
-    <!-- <ZoomerManager v-if="!showPanel" /> -->
-    <PanelManager />
+    <ZoomerManager v-if="!showPanel" />
+    <PanelManager v-else />
   </div>
 </template>
 

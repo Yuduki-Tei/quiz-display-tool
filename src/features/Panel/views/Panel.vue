@@ -40,7 +40,7 @@ const panelStore = usePanelStore();
 
 const mainCanvas = ref<HTMLCanvasElement | null>(null);
 const panelCanvas = ref<HTMLCanvasElement | null>(null);
-const context:any = computed(() => {
+const context: any = computed(() => {
   if (!props.id) return {};
   const imageData = imageStore.getData(props.id);
   const panelContext = panelStore.getContext(props.id);
@@ -51,10 +51,44 @@ const context:any = computed(() => {
 });
 
 const onPanelClick = (e: MouseEvent) => {
-  if (!panelCanvas.value || !context.value) return;
+  if (!panelCanvas.value || !context.value || panelStore.isRevealing) return;
   handlePanelClick(e, panelCanvas, context);
   drawGrid(panelCanvas, context);
 };
+
+// Auto reveal methods
+const startAutoReveal = () => {
+  if (!props.id) return false;
+
+  const panelContext = panelStore.getContext(props.id);
+  if (!panelContext || !panelStore.canReveal(panelContext)) return false;
+
+  panelStore.startAutoReveal(props.id, panelContext.duration || 5000);
+  return true;
+};
+
+const pauseAutoReveal = () => {
+  panelStore.setPaused(true);
+  return true;
+};
+
+const resumeAutoReveal = () => {
+  panelStore.setPaused(false);
+  return true;
+};
+
+const stopAutoReveal = () => {
+  panelStore.stopAutoReveal();
+  return true;
+};
+
+// Export methods to be used by parent component
+defineExpose({
+  startAutoReveal,
+  pauseAutoReveal,
+  resumeAutoReveal,
+  stopAutoReveal,
+});
 watch(
   () => props.id,
   (newId) => {

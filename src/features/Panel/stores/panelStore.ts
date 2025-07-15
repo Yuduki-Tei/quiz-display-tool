@@ -34,6 +34,10 @@ export const usePanelStore = defineStore("panel", {
       return context ? !!(context.amount.x && context.amount.y) : false;
     },
 
+    hasContext(id: string): boolean {
+      return !!this.contexts[id];
+    },
+
     removeContext(id: string): boolean {
       if (this.contexts[id]) {
         delete this.contexts[id];

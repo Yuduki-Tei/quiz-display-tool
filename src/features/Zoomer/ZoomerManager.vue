@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "./stores/zoomerStore";
@@ -213,6 +213,20 @@ watch(currentId, (id) => {
     if (ctx && typeof ctx.duration === "number") {
       duration.value = ctx.duration;
     }
+  }
+});
+
+onMounted(() => {
+  const images = imageStore.getAllImages();
+  if (images.length > 0) {
+    images.forEach((image) => {
+      if (!zoomStore.hasContext(image.id)) {
+        zoomStore.setContext(image.id, {
+          duration: duration.value,
+          selection: { x: 0, y: 0, w: 0, h: 0 },
+        });
+      }
+    });
   }
 });
 </script>

@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { usePanelStore } from "./stores/panelStore";
@@ -138,6 +138,21 @@ const goToNext = () => {
 watch([gridX, gridY, currentId], ([x, y, id]) => {
   if (id) {
     panelStore.setAmount(id, { x, y });
+  }
+});
+
+onMounted(() => {
+  const images = imageStore.getAllImages();
+  if (images.length > 0) {
+    images.forEach((image) => {
+      if (!panelStore.hasContext(image.id)) {
+        panelStore.setContext(image.id, {
+          revealed: [],
+          revealType: "manual",
+          amount: { x: gridX.value, y: gridY.value },
+        });
+      }
+    });
   }
 });
 </script>

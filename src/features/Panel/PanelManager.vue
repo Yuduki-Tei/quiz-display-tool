@@ -39,16 +39,17 @@
           </el-button-group>
         </div>
         <div class="top-bar-center">
+          <Button
+            type="primary"
+            @click="handleRevealControl"
+            :disabled="isManual"
+            :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+          />
           <el-button-group>
-            <Button
-              type="primary"
-              @click="handleRevealControl"
-              :disabled="isManual"
-              :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
-            />
+            <Button type="warning" @click="handleCoverAll" icon="PhEyeClosed" />
             <Button
               type="warning"
-              @click="handleRevealOrCoverAll"
+              @click="handleRevealAll"
               icon="PhFrameCorners"
             />
           </el-button-group>
@@ -90,7 +91,7 @@
               :max="10"
               :step="0.1"
               style="width: 120px"
-              :disabled="isRevealing"
+              :disabled="isManual || isRevealing"
               :show-tooltip="false"
             />
             <el-input-number
@@ -99,7 +100,7 @@
               :max="10"
               :step="0.1"
               size="small"
-              :disabled="isRevealing"
+              :disabled="isManual || isRevealing"
             />
           </div>
         </div>
@@ -180,8 +181,8 @@ const notificationTimestamp = ref<number | null>(null);
 const isSidebarVisible = ref(false);
 const gridX = ref(5);
 const gridY = ref(5);
-const duration = ref(5000); // 5 seconds default
-const isManual = ref<boolean>(true); // true: manual mode, false: auto mode
+const duration = ref(1000);
+const isManual = ref<boolean>(true);
 const autoRevealMode = ref<string>("random");
 const availableRevealModes = getRevealModes();
 
@@ -249,15 +250,12 @@ const handleRevealControl = () => {
   }
 };
 
-const handleRevealOrCoverAll = () => {
-  if (currentId.value) {
-    const ctx = panelStore.getContext(currentId.value);
-    if (ctx && ctx.revealed.length > 0) {
-      panel.value?.coverAllPanels();
-    } else {
-      panel.value?.revealAllPanels();
-    }
-  }
+const handleRevealAll = () => {
+  panel.value?.revealAllPanels();
+};
+
+const handleCoverAll = () => {
+  panel.value?.coverAllPanels();
 };
 
 const durationSec = computed({
@@ -278,7 +276,7 @@ const durationSec = computed({
 
 const revealTypeButtons = [
   { value: true, icon: "PhHandPointing", tooltip: "手動めくりモード" },
-  { value: false, icon: "PhPlay", tooltip: "自動めくりモード" },
+  { value: false, icon: "PhPlayCircle", tooltip: "自動めくりモード" },
 ];
 
 const toggleManualMode = () => {

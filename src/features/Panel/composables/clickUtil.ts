@@ -104,18 +104,19 @@ export function handlePanelClick(
   const j = findIndexFromCoord(y, heights);
 
   if (i === -1 || j === -1) return;
-  if (isPanelRevealed(context.value, i, j)) return;
 
-  revealPanel(context.value, i, j);
+  flipPanel(context.value, i, j);
 }
 
 export function isPanelRevealed(ctx: any, i: number, j: number): boolean {
   return ctx.revealed.some(([rx, ry]) => rx === i && ry === j);
 }
 
-export function revealPanel(ctx: any, i: number, j: number) {
+export function flipPanel(ctx: any, i: number, j: number) {
   if (!isPanelRevealed(ctx, i, j)) {
     ctx.revealed.push([i, j]);
+  } else {
+    ctx.revealed = ctx.revealed.filter(([rx, ry]) => !(rx === i && ry === j));
   }
 }
 

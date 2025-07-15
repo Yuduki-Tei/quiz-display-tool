@@ -6,8 +6,8 @@
           <Button
             type="primary"
             @click="isSidebarVisible = true"
+            icon="PhSidebarSimple"
             :disabled="isRevealing"
-            icon="Expand"
           />
           <input
             ref="fileInput"
@@ -19,8 +19,8 @@
           <Button
             type="primary"
             @click="triggerFileInput"
+            icon="PhPlus"
             :disabled="isRevealing"
-            icon="Plus"
           />
           <el-divider direction="vertical" />
           <el-button-group>
@@ -28,13 +28,13 @@
               type="info"
               @click="goToPrev"
               :disabled="!canGoPrev"
-              icon="Back"
+              icon="PhArrowLeft"
             />
             <Button
               type="info"
               @click="goToNext"
               :disabled="!canGoNext"
-              icon="Right"
+              icon="PhArrowRight"
             />
           </el-button-group>
         </div>

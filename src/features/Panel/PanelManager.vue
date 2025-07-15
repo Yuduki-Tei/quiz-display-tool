@@ -44,7 +44,7 @@
               type="primary"
               @click="handleRevealControl"
               :disabled="!canReveal"
-              :icon="isRevealing && !isPaused ? 'VideoPause' : 'VideoPlay'"
+              :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
             />
           </el-button-group>
           <el-divider direction="vertical" />
@@ -62,7 +62,7 @@
                 :label="n"
               />
             </el-select>
-            <Icon name="Close" />
+            <Icon name="PhX" />
             <el-select
               v-model="gridY"
               size="small"
@@ -263,8 +263,8 @@ const durationSec = computed({
 });
 
 const revealTypeButtons = [
-  { value: "manual", icon: "EditPen", tooltip: "手動めくりモード" },
-  { value: "auto", icon: "VideoPlay", tooltip: "自動めくりモード" },
+  { value: "manual", icon: "PhHandPointing", tooltip: "手動めくりモード" },
+  { value: "auto", icon: "PhPlay", tooltip: "自動めくりモード" },
 ];
 
 const cycleRevealMode = () => {

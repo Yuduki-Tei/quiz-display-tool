@@ -125,5 +125,9 @@ export const useImageStore = defineStore("imageStore", {
       this.allData = data.allData;
       this.currentIndex = data.currentIndex;
     },
+
+    getAllImages(): ImageData[] {
+      return this.allData;
+    },
   },
 });

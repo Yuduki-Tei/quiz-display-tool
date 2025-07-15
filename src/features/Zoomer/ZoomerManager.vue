@@ -1,8 +1,8 @@
 <template>
-  <el-container class="manager-container">
-    <el-main class="main-content">
-      <div class="top-bar">
-        <div class="top-bar-left">
+  <el-container class="manager-layout">
+    <el-main class="manager-main">
+      <div class="manager-top-bar">
+        <div class="manager-top-bar-left">
           <Button
             type="primary"
             @click="isSidebarVisible = true"
@@ -84,7 +84,7 @@
           />
         </div>
       </div>
-      <div class="zoomer-area">
+      <div class="display-area">
         <Zoomer ref="zoomer" :id="currentId" :displayMode="displayMode" />
       </div>
     </el-main>
@@ -98,14 +98,14 @@
   >
     <ImageSidebar
       :current-id="currentId"
-      storeType="zoomer"
+      :extra-store="zoomStore"
       @select-image="handleImageSelect"
     />
   </el-drawer>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "./stores/zoomerStore";
@@ -215,74 +215,18 @@ watch(currentId, (id) => {
     }
   }
 });
+
+onMounted(() => {
+  const images = imageStore.getAllImages();
+  if (images.length > 0) {
+    images.forEach((image) => {
+      if (!zoomStore.hasContext(image.id)) {
+        zoomStore.setContext(image.id, {
+          duration: duration.value,
+          selection: { x: 0, y: 0, w: 0, h: 0 },
+        });
+      }
+    });
+  }
+});
 </script>
-
-<style scoped>
-.manager-container {
-  height: 100vh;
-}
-
-.main-content {
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.top-bar {
-  flex-shrink: 0;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--el-color-primary-light-5);
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.top-bar-center {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  justify-content: center;
-  flex: 2;
-}
-
-.top-bar-right {
-  display: flex;
-  justify-content: flex-end;
-  flex: 1;
-}
-
-.zoomer-area {
-  flex-grow: 1;
-  padding: 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.el-button-group {
-  margin: 0;
-}
-
-.el-divider--vertical {
-  height: 2em;
-  border-left: 1px solid var(--el-color-primary-light-5);
-}
-
-.duration-control {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.el-input-number {
-  width: 80px;
-  margin-left: 8px;
-}
-</style>

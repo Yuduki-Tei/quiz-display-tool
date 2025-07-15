@@ -63,7 +63,7 @@
   >
     <ImageSidebar
       :current-id="currentId"
-      storeType="panel"
+      :extra-store="panelStore"
       @select-image="handleImageSelect"
     />
   </el-drawer>

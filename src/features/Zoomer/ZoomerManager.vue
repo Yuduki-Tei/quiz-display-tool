@@ -98,7 +98,7 @@
   >
     <ImageSidebar
       :current-id="currentId"
-      storeType="zoomer"
+      :extra-store="zoomStore"
       @select-image="handleImageSelect"
     />
   </el-drawer>

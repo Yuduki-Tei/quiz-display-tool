@@ -29,6 +29,11 @@ export const usePanelStore = defineStore("panel", {
       }
     },
 
+    hasSelection(id: string): boolean {
+      const context = this.getContext(id);
+      return context ? !!(context.amount.x && context.amount.y) : false;
+    },
+
     removeContext(id: string): boolean {
       if (this.contexts[id]) {
         delete this.contexts[id];

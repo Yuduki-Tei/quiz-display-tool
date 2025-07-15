@@ -66,7 +66,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useImageStore } from "@/stores/imageStore";
-import { useZoomerStore } from "@/features/Zoomer/stores/zoomerStore";
 import { storeToRefs } from "pinia";
 import vuedraggable from "vuedraggable";
 import Icon from "@/components/Icon.vue";
@@ -76,7 +75,7 @@ import DataManager from "./DataManager.vue";
 
 const props = defineProps<{
   currentId: string | null;
-  storeType?: "zoomer" | "panel"; // 追加: どのstoreを使うか指定
+  extraStore: any;
 }>();
 
 const emit = defineEmits<{
@@ -86,14 +85,7 @@ const emit = defineEmits<{
 const imageStore = useImageStore();
 const { allData } = storeToRefs(imageStore);
 
-let extraStore: any = null;
-if (props.storeType === "zoomer") {
-  extraStore = useZoomerStore();
-} else if (props.storeType === "panel") {
-  // import { useFilterStore } from ...
-  // extraStore = useFilterStore();
-}
-
+const extraStore = props.extraStore;
 const showThumbnails = ref(true);
 
 const imageList = computed({

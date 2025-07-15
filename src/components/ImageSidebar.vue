@@ -2,11 +2,7 @@
   <div class="image-sidebar-ep">
     <div class="sidebar-header">
       <h4 class="sidebar-title"></h4>
-      <el-switch
-        v-model="showThumbnails"
-        :active-action-icon="View"
-        :inactive-action-icon="Hide"
-      />
+      <el-switch v-model="showThumbnails" />
     </div>
     <el-scrollbar>
       <vuedraggable
@@ -33,7 +29,7 @@
             >
               <template #error>
                 <div class="image-slot-error">
-                  <Icon name="Picture" />
+                  <Icon name="PhImage" />
                 </div>
               </template>
             </el-image>
@@ -48,7 +44,7 @@
               circle
               plain
               class="delete-btn"
-              icon="Delete"
+              icon="PhTrash"
               icon-size="16"
               @click.stop="handleDelete(element.id)"
             />
@@ -70,7 +66,6 @@ import { storeToRefs } from "pinia";
 import vuedraggable from "vuedraggable";
 import Icon from "@/components/Icon.vue";
 import Button from "@/components/Button.vue";
-import { View, Hide } from "@element-plus/icons-vue";
 import DataManager from "./DataManager.vue";
 
 const props = defineProps<{

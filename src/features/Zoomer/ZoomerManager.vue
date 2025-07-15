@@ -7,7 +7,7 @@
             type="primary"
             @click="isSidebarVisible = true"
             :disabled="isZooming"
-            icon="Expand"
+            icon="PhSidebarSimple"
           />
           <input
             ref="fileInput"
@@ -20,7 +20,7 @@
             type="primary"
             @click="triggerFileInput"
             :disabled="isZooming"
-            icon="Plus"
+            icon="PhPlus"
           />
           <el-divider direction="vertical" />
           <el-button-group>
@@ -28,13 +28,13 @@
               type="info"
               @click="goToPrev"
               :disabled="!canGoPrev"
-              icon="Back"
+              icon="PhArrowLeft"
             />
             <Button
               type="info"
               @click="goToNext"
               :disabled="!canGoNext"
-              icon="Right"
+              icon="PhArrowRight"
             />
           </el-button-group>
         </div>
@@ -44,13 +44,13 @@
               type="primary"
               @click="handleZoomControl"
               :disabled="!hasSelection && !isZooming"
-              :icon="isZooming && !isPaused ? 'VideoPause' : 'VideoPlay'"
+              :icon="isZooming && !isPaused ? 'PhPause' : 'PhPlay'"
             />
             <Button
               type="warning"
               @click="handleShowFullImage"
               :disabled="!currentId || !isZooming"
-              icon="FullScreen"
+              icon="PhCornersOut"
             />
           </el-button-group>
           <el-divider direction="vertical" />
@@ -197,9 +197,9 @@ const durationSec = computed({
 });
 
 const displayModes = [
-  { value: "full", icon: "Picture", tooltip: "顯示完整圖片" },
-  { value: "selection", icon: "Crop", tooltip: "只顯示框選區域" },
-  { value: "none", icon: "Hide", tooltip: "隱藏圖片" },
+  { value: "full", icon: "PhImage", tooltip: "顯示完整圖片" },
+  { value: "selection", icon: "PhCrop", tooltip: "只顯示框選區域" },
+  { value: "none", icon: "PhEyeSlash", tooltip: "隱藏圖片" },
 ];
 const displayMode = ref<string>("full");
 const cycleDisplayMode = () => {

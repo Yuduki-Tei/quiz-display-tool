@@ -6,7 +6,7 @@
           <Button
             type="primary"
             @click="isSidebarVisible = true"
-            icon="Expand"
+            icon="PhSidebarSimple"
           />
           <input
             ref="fileInput"
@@ -15,20 +15,20 @@
             @change="onFileChange"
             style="display: none"
           />
-          <Button type="primary" @click="triggerFileInput" icon="Plus" />
+          <Button type="primary" @click="triggerFileInput" icon="PhPlus" />
           <el-divider direction="vertical" />
           <el-button-group>
             <Button
               type="info"
               @click="goToPrev"
               :disabled="!canGoPrev"
-              icon="Back"
+              icon="PhArrowLeft"
             />
             <Button
               type="info"
               @click="goToNext"
               :disabled="!canGoNext"
-              icon="Right"
+              icon="PhArrowRight"
             />
           </el-button-group>
         </div>
@@ -43,7 +43,7 @@
           <el-select v-model="gridX" size="small" style="width: 60px">
             <el-option v-for="n in 100" :key="`x-${n}`" :value="n" :label="n" />
           </el-select>
-          <Icon name="Close" />
+          <Icon name="PhX" />
           <el-select v-model="gridY" size="small" style="width: 60px">
             <el-option v-for="n in 100" :key="`y-${n}`" :value="n" :label="n" />
           </el-select>

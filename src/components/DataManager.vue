@@ -2,13 +2,13 @@
   <div class="data-manager-btns">
     <Button
       type="primary"
-      icon="DocumentAdd"
+      icon="PhBoxArrowUp"
       @click="triggerImport"
       :disabled="isDataExists"
     />
     <Button
       type="primary"
-      icon="Download"
+      icon="PhBoxArrowDown"
       @click="handleExport"
       :disabled="!isDataExists"
     />

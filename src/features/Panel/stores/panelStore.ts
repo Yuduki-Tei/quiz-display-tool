@@ -1,14 +1,10 @@
 import { defineStore } from "pinia";
-import type { PanelAmount } from "../types/PanelTypes";
-import { PanelContext } from "../types/PanelTypes";
-import { generateRevealOrder } from "../composables/revealUtil";
+import type { PanelAmount, PanelContext } from "../types/PanelTypes";
 
 interface PanelState {
   contexts: Record<string, PanelContext>;
   isRevealing: boolean;
   isPaused: boolean;
-  revealTimer: number | null;
-  currentRevealIndex: number;
 }
 
 export const usePanelStore = defineStore("panel", {
@@ -16,33 +12,49 @@ export const usePanelStore = defineStore("panel", {
     contexts: {},
     isPaused: false,
     isRevealing: false,
-    revealTimer: null,
-    currentRevealIndex: 0,
   }),
   actions: {
+    /**
+     * Get panel context by id
+     */
     getContext(id: string | null): PanelContext | null {
       return id ? this.contexts[id] : null;
     },
 
+    /**
+     * Set panel context
+     */
     setContext(id: string, context: PanelContext): void {
       this.contexts[id] = context;
     },
 
+    /**
+     * Set panel grid dimensions
+     */
     setAmount(id: string, amount: PanelAmount): void {
       if (this.contexts[id]) {
         this.contexts[id].amount = amount;
       }
     },
 
+    /**
+     * Check if panel has grid dimensions set
+     */
     hasSelection(id: string): boolean {
       const context = this.getContext(id);
       return context ? !!(context.amount.x && context.amount.y) : false;
     },
 
+    /**
+     * Check if panel context exists
+     */
     hasContext(id: string): boolean {
       return !!this.contexts[id];
     },
 
+    /**
+     * Remove panel context
+     */
     removeContext(id: string): boolean {
       if (this.contexts[id]) {
         delete this.contexts[id];
@@ -51,18 +63,30 @@ export const usePanelStore = defineStore("panel", {
       return false;
     },
 
+    /**
+     * Set reveal animation pause state
+     */
     setPaused(paused: boolean): void {
       this.isPaused = paused;
     },
 
-    setRevealing(reavealing: boolean): void {
-      this.isRevealing = reavealing;
+    /**
+     * Set reveal animation active state
+     */
+    setRevealing(revealing: boolean): void {
+      this.isRevealing = revealing;
     },
 
+    /**
+     * Import panel contexts data
+     */
     importData(data: { contexts: Record<string, PanelContext> }) {
       this.contexts = data.contexts;
     },
 
+    /**
+     * Check if more panels can be revealed
+     */
     canReveal(context: PanelContext): boolean {
       if (!context) return false;
 
@@ -73,66 +97,31 @@ export const usePanelStore = defineStore("panel", {
       return revealedCount < totalPanels;
     },
 
-    setRevealOrder(id: string): void {
-      if (!this.contexts[id]) return;
-
-      const context = this.contexts[id];
-      const revealMode = context.revealMode || "random";
-
-      // Use the utility function to generate reveal order
-      this.contexts[id].order = generateRevealOrder(
-        revealMode,
-        context.amount,
-        context.revealed
-      );
-
-      this.currentRevealIndex = 0;
-    },
-
-    revealNextPanel(id: string): boolean {
-      if (
-        !this.contexts[id] ||
-        !this.contexts[id].order ||
-        this.currentRevealIndex >= this.contexts[id].order.length
-      ) {
-        return false;
+    /**
+     * Set the reveal order for a panel
+     */
+    setOrder(id: string, order: [number, number][]): void {
+      if (this.contexts[id]) {
+        this.contexts[id].order = order;
       }
-
-      const nextPanel = this.contexts[id].order[this.currentRevealIndex];
-      this.contexts[id].revealed.push(nextPanel);
-      this.currentRevealIndex++;
-
-      return this.currentRevealIndex < this.contexts[id].order.length;
     },
 
-    startAutoReveal(id: string, duration: number): void {
-      if (this.isRevealing || !this.contexts[id]) return;
-
-      this.setRevealOrder(id);
-      this.isRevealing = true;
-      this.isPaused = false;
-
-      const revealNext = () => {
-        if (!this.isRevealing || this.isPaused) return;
-
-        const hasMore = this.revealNextPanel(id);
-        if (hasMore) {
-          this.revealTimer = window.setTimeout(revealNext, duration);
-        } else {
-          this.isRevealing = false;
-        }
-      };
-
-      revealNext();
-    },
-
-    stopAutoReveal(): void {
-      if (this.revealTimer) {
-        clearTimeout(this.revealTimer);
-        this.revealTimer = null;
+    /**
+     * Add a panel to the revealed list
+     */
+    addRevealedPanel(id: string, panel: [number, number]): void {
+      if (this.contexts[id]) {
+        this.contexts[id].revealed.push(panel);
       }
-      this.isRevealing = false;
-      this.isPaused = false;
+    },
+
+    /**
+     * Clear all revealed panels for a specific panel context
+     */
+    clearRevealedPanels(id: string): void {
+      if (this.contexts[id]) {
+        this.contexts[id].revealed = [];
+      }
     },
   },
 });

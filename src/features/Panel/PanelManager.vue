@@ -43,8 +43,13 @@
             <Button
               type="primary"
               @click="handleRevealControl"
-              :disabled="!canReveal"
+              :disabled="isManual"
               :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+            />
+            <Button
+              type="warning"
+              @click="handleRevealOrCoverAll"
+              icon="PhFrameCorners"
             />
           </el-button-group>
           <el-divider direction="vertical" />
@@ -81,18 +86,18 @@
           <div class="duration-control">
             <el-slider
               v-model="durationSec"
-              :min="1"
-              :max="20"
-              :step="1"
+              :min="0.1"
+              :max="10"
+              :step="0.1"
               style="width: 120px"
               :disabled="isRevealing"
               :show-tooltip="false"
             />
             <el-input-number
               v-model="durationSec"
-              :min="1"
-              :max="20"
-              :step="1"
+              :min="0.1"
+              :max="10"
+              :step="0.1"
               size="small"
               :disabled="isRevealing"
             />
@@ -100,9 +105,9 @@
         </div>
         <div class="top-bar-right">
           <el-select
-            v-model="revealPatternMode"
+            v-model="autoRevealMode"
             size="small"
-            :disabled="isRevealing"
+            :disabled="isRevealing || isManual"
             placeholder="めくりパターン"
             style="width: 130px; margin-right: 10px"
           >
@@ -120,17 +125,17 @@
           </el-select>
           <Button
             type="primary"
-            :icon="revealTypeButtons.find((m) => m.value === revealMode)?.icon"
+            :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
             :title="
-              revealTypeButtons.find((m) => m.value === revealMode)?.tooltip
+              revealTypeButtons.find((b) => b.value === isManual)?.tooltip
             "
-            @click="cycleRevealMode"
+            @click="toggleManualMode"
             :disabled="isRevealing"
           />
         </div>
       </div>
       <div class="display-area">
-        <Panel ref="panel" :id="currentId" :displayMode="revealMode" />
+        <Panel ref="panel" :id="currentId" :isManualMode="isManual" />
       </div>
     </el-main>
   </el-container>
@@ -155,7 +160,7 @@ import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
-import { getRevealModes } from "./composables/revealUtil";
+import { getRevealModes } from "./composables/revealPatterns";
 import Panel from "../Panel/views/Panel.vue";
 import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
@@ -176,9 +181,8 @@ const isSidebarVisible = ref(false);
 const gridX = ref(5);
 const gridY = ref(5);
 const duration = ref(5000); // 5 seconds default
-const canReveal = computed(() => !!currentId.value);
-const revealMode = ref<string>("manual");
-const revealPatternMode = ref<string>("random");
+const isManual = ref<boolean>(true); // true: manual mode, false: auto mode
+const autoRevealMode = ref<string>("random");
 const availableRevealModes = getRevealModes();
 
 const triggerFileInput = () => {
@@ -195,8 +199,8 @@ const onFileChange = async (e: Event) => {
     if (status === "added" && currentId.value) {
       panelStore.setContext(currentId.value, {
         revealed: [],
-        revealType: "manual",
-        revealMode: "random",
+        isManual: true,
+        autoRevealMode: "random",
         amount: { x: gridX.value, y: gridY.value },
       });
     }
@@ -226,13 +230,12 @@ const goToNext = () => {
 
 const handleRevealControl = () => {
   if (!isRevealing.value) {
-    // パネルを開始する前に現在のRevealModeをStoreに設定
     if (currentId.value) {
       const ctx = panelStore.getContext(currentId.value);
       if (ctx) {
         panelStore.setContext(currentId.value, {
           ...ctx,
-          revealMode: revealPatternMode.value,
+          autoRevealMode: autoRevealMode.value,
         });
       }
     }
@@ -246,10 +249,21 @@ const handleRevealControl = () => {
   }
 };
 
+const handleRevealOrCoverAll = () => {
+  if (currentId.value) {
+    const ctx = panelStore.getContext(currentId.value);
+    if (ctx && ctx.revealed.length > 0) {
+      panel.value?.coverAllPanels();
+    } else {
+      panel.value?.revealAllPanels();
+    }
+  }
+};
+
 const durationSec = computed({
-  get: () => Math.round(duration.value / 1000),
+  get: () => duration.value / 1000,
   set: (v) => {
-    duration.value = v * 1000;
+    duration.value = Math.round(v * 1000);
     if (currentId.value) {
       const ctx = panelStore.getContext(currentId.value);
       if (ctx) {
@@ -263,21 +277,20 @@ const durationSec = computed({
 });
 
 const revealTypeButtons = [
-  { value: "manual", icon: "PhHandPointing", tooltip: "手動めくりモード" },
-  { value: "auto", icon: "PhPlay", tooltip: "自動めくりモード" },
+  { value: true, icon: "PhHandPointing", tooltip: "手動めくりモード" },
+  { value: false, icon: "PhPlay", tooltip: "自動めくりモード" },
 ];
 
-const cycleRevealMode = () => {
-  const idx = revealTypeButtons.findIndex((m) => m.value === revealMode.value);
-  revealMode.value =
-    revealTypeButtons[(idx + 1) % revealTypeButtons.length].value;
+const toggleManualMode = () => {
+  // Booleanを反転させる
+  isManual.value = !isManual.value;
 
   if (currentId.value) {
     const ctx = panelStore.getContext(currentId.value);
     if (ctx) {
       panelStore.setContext(currentId.value, {
         ...ctx,
-        revealType: revealMode.value as "auto" | "manual",
+        isManual: isManual.value,
       });
     }
   }
@@ -292,25 +305,21 @@ watch([gridX, gridY, currentId], ([x, y, id]) => {
 watch(currentId, (id) => {
   if (id) {
     const ctx = panelStore.getContext(id);
-    if (ctx && typeof ctx.duration === "number") {
-      duration.value = ctx.duration;
-    }
-    if (ctx && typeof ctx.revealType === "string") {
-      revealMode.value = ctx.revealType;
-    }
-    if (ctx && typeof ctx.revealMode === "string") {
-      revealPatternMode.value = ctx.revealMode;
+    if (ctx) {
+      duration.value = ctx.duration || 5000;
+      isManual.value = ctx.isManual;
+      autoRevealMode.value = ctx.autoRevealMode;
     }
   }
 });
 
-watch(revealPatternMode, (newMode) => {
+watch(autoRevealMode, (newMode) => {
   if (currentId.value) {
     const ctx = panelStore.getContext(currentId.value);
     if (ctx) {
       panelStore.setContext(currentId.value, {
         ...ctx,
-        revealMode: newMode,
+        autoRevealMode: newMode,
       });
     }
   }
@@ -323,8 +332,8 @@ onMounted(() => {
       if (!panelStore.hasContext(image.id)) {
         panelStore.setContext(image.id, {
           revealed: [],
-          revealType: "manual",
-          revealMode: "random",
+          isManual: true,
+          autoRevealMode: "random",
           amount: { x: gridX.value, y: gridY.value },
           duration: duration.value,
         });

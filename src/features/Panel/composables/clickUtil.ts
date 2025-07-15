@@ -1,5 +1,5 @@
 /**
- * @module panelUtil
+ * @module clickUtil
  * @description Provides flip animation functionality for a canvas.
  */
 

@@ -46,11 +46,17 @@
             :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
           />
           <el-button-group>
-            <Button type="warning" @click="handleCoverAll" icon="PhEyeClosed" />
+            <Button
+              type="warning"
+              @click="handleCoverAll"
+              icon="PhEyeClosed"
+              :disabled="!canHideAll"
+            />
             <Button
               type="warning"
               @click="handleRevealAll"
               icon="PhFrameCorners"
+              :disabled="!canShowAll"
             />
           </el-button-group>
           <el-divider direction="vertical" />
@@ -175,13 +181,13 @@ const { isRevealing, isPaused } = storeToRefs(panelStore);
 
 const panel = ref<InstanceType<typeof Panel> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-const currentId = computed(() => currentImage.value?.id || null);
+const currentId = computed((): string | null => currentImage.value?.id || null);
 const notificationStatus = ref<string | null>(null);
 const notificationTimestamp = ref<number | null>(null);
 const isSidebarVisible = ref(false);
-const gridX = ref(5);
-const gridY = ref(5);
-const duration = ref(1000);
+const gridX = ref<number>(5);
+const gridY = ref<number>(5);
+const duration = ref<number>(1000);
 const isManual = ref<boolean>(true);
 const autoRevealMode = ref<string>("random");
 const availableRevealModes = getRevealModes();
@@ -280,7 +286,6 @@ const revealTypeButtons = [
 ];
 
 const toggleManualMode = () => {
-  // Booleanを反転させる
   isManual.value = !isManual.value;
 
   if (currentId.value) {
@@ -293,6 +298,16 @@ const toggleManualMode = () => {
     }
   }
 };
+
+const canShowAll = computed(
+  (): boolean =>
+    panelStore.getContext(currentId.value)?.revealed.length <=
+    panelStore.getContext(currentId.value)?.amount.x *
+      panelStore.getContext(currentId.value)?.amount.x
+);
+const canHideAll = computed(
+  (): boolean => panelStore.getContext(currentId.value)?.revealed.length > 0
+);
 
 watch([gridX, gridY, currentId], ([x, y, id]) => {
   if (id) {

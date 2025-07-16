@@ -12,7 +12,7 @@ type StartPoint =
   | "bottomRight"
   | "bottomLeft"
   | "center";
-type Direction = "clockwise" | "counter-clockwise";
+type Direction = "clockwise" | "counterClockwise";
 
 interface SpiralOptions {
   startPoint?: StartPoint;
@@ -225,7 +225,7 @@ export function getSpiralSubModes() {
   };
   const directionLabels: Record<Direction, string> = {
     clockwise: "順時針",
-    "counter-clockwise": "逆時針",
+    counterClockwise: "逆時針",
   };
 
   const subModes: { value: string; label: string }[] = [];

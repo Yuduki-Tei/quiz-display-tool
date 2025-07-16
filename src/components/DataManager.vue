@@ -20,7 +20,6 @@
       @change="handleImport"
     />
   </div>
-  <Notifier :status="status" :timestamp="timestamp" @confirm="onConfirm" />
 </template>
 
 <script setup lang="ts">
@@ -31,42 +30,20 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
 import Button from "@/components/Button.vue";
-import Notifier from "@/components/Notifier.vue";
 import { randomSelection } from "@/features/Zoomer/composables/useRectSelection";
 import { SelectionRect } from "@/features/Zoomer/types/ZoomerTypes";
+import { useNotifier } from "@/composables/useNotifier";
 
 const imageStore = useImageStore();
 const zoomerStore = useZoomerStore();
 const importInput = ref<HTMLInputElement | null>(null);
-const status = ref<string | null>(null);
-const timestamp = ref<number | null>(null);
-let confirmResolver: ((result: boolean) => void) | null = null;
+const { notify } = useNotifier();
 const isDataExists = computed(() => {
   return imageStore.allData.length > 0;
 });
 
 const triggerImport = () => {
   importInput.value?.click();
-};
-
-const notify = (type: string) => {
-  status.value = type;
-  timestamp.value = Date.now();
-};
-
-const showConfirm = (type: string) => {
-  status.value = type;
-  timestamp.value = Date.now();
-  return new Promise<boolean>((resolve) => {
-    confirmResolver = resolve;
-  });
-};
-
-const onConfirm = (result: boolean) => {
-  if (confirmResolver) {
-    confirmResolver(result);
-    confirmResolver = null;
-  }
 };
 
 const handleExport = async () => {
@@ -78,7 +55,7 @@ const handleExport = async () => {
   });
 
   if (unselectedImageIds.length > 0) {
-    const confirmed = await showConfirm("export-confirm");
+    const confirmed = await notify("export-confirm");
     if (!confirmed) {
       notify("cancel");
       return;

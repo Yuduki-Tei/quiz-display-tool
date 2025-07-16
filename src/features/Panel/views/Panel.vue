@@ -22,16 +22,25 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
 import { useImageStore } from "@/stores/imageStore";
-import { drawGrid, handlePanelClick } from "../composables/panelUtil";
+import { drawGrid, handlePanelClick } from "../composables/clickUtil";
 import { usePanelStore } from "../stores/panelStore";
+import {
+  startReveal,
+  stopReveal,
+  pauseReveal,
+  resumeReveal,
+  revealAll,
+  coverAll,
+} from "../composables/revealUtil";
+
 const props = withDefaults(
   defineProps<{
     id?: string | null;
-    displayMode?: string;
+    isManualMode?: boolean;
   }>(),
   {
     id: null,
-    displayMode: "manual",
+    isManualMode: true,
   }
 );
 
@@ -40,7 +49,7 @@ const panelStore = usePanelStore();
 
 const mainCanvas = ref<HTMLCanvasElement | null>(null);
 const panelCanvas = ref<HTMLCanvasElement | null>(null);
-const context:any = computed(() => {
+const context: any = computed(() => {
   if (!props.id) return {};
   const imageData = imageStore.getData(props.id);
   const panelContext = panelStore.getContext(props.id);
@@ -51,10 +60,75 @@ const context:any = computed(() => {
 });
 
 const onPanelClick = (e: MouseEvent) => {
-  if (!panelCanvas.value || !context.value) return;
+  // 手動モード以外ではクリックイベントを無視
+  if (
+    !panelCanvas.value ||
+    !context.value ||
+    panelStore.isRevealing ||
+    !props.isManualMode
+  )
+    return;
   handlePanelClick(e, panelCanvas, context);
   drawGrid(panelCanvas, context);
 };
+
+// Auto reveal methods
+const startAutoReveal = () => {
+  if (!props.id) return false;
+
+  const panelContext = panelStore.getContext(props.id);
+  if (!panelContext || !panelStore.canReveal(panelContext)) return false;
+
+  startReveal({
+    id: props.id,
+    duration: panelContext.duration || 5000,
+    onReveal: () => {
+      // Redraw grid when a panel is revealed
+      drawGrid(panelCanvas, context);
+    },
+  });
+  return true;
+};
+
+const pauseAutoReveal = () => {
+  pauseReveal();
+  return true;
+};
+
+const resumeAutoReveal = () => {
+  resumeReveal();
+  return true;
+};
+
+const stopAutoReveal = () => {
+  stopReveal();
+  return true;
+};
+
+const revealAllPanels = () => {
+  if (!props.id) return false;
+
+  return revealAll(props.id, () => {
+    drawGrid(panelCanvas, context);
+  });
+};
+
+const coverAllPanels = () => {
+  if (!props.id) return false;
+
+  return coverAll(props.id, () => {
+    drawGrid(panelCanvas, context);
+  });
+};
+
+defineExpose({
+  startAutoReveal,
+  pauseAutoReveal,
+  resumeAutoReveal,
+  stopAutoReveal,
+  revealAllPanels,
+  coverAllPanels,
+});
 watch(
   () => props.id,
   (newId) => {
@@ -70,8 +144,10 @@ watch(
 
 watch(
   () => context.value?.revealed,
-  () => {
-    drawGrid(panelCanvas, context);
+  (data) => {
+    if (data) {
+      drawGrid(panelCanvas, context);
+    }
   },
   { deep: true }
 );

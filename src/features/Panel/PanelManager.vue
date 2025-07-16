@@ -166,6 +166,7 @@ import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
+import { getRevealModes } from "./composables/revealPatterns";
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";

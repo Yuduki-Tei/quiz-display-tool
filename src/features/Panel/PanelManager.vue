@@ -210,23 +210,9 @@ const duration = ref<number>(1000);
 const isManual = ref<boolean>(true);
 const mainMode = ref<string>("");
 const subMode = ref<string>("");
-const autoRevealMode = computed<string>({
-  get() {
-    if (mainMode.value === "spiral") {
-      return `spiral-${subMode.value || "topLeft-clockwise"}`;
-    }
-    return panelStore.getContext(currentId.value)?.autoRevealMode;
-  },
-  set(newValue: string) {
-    if (newValue.startsWith("spiral-")) {
-      const parts = newValue.split("-");
-      mainMode.value = "spiral";
-      subMode.value = `${parts[1]}-${parts[2]}`;
-    } else {
-      mainMode.value = newValue;
-    }
-  },
-});
+const autoRevealMode = computed(
+  () => mainMode.value + (subMode.value ? `-${subMode.value}` : "")
+);
 
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -244,6 +230,7 @@ const onFileChange = async (e: Event) => {
         revealed: [],
         isManual: isManual.value,
         autoRevealMode: autoRevealMode.value,
+        duration: duration.value,
         amount: { x: gridX.value, y: gridY.value },
       });
     }
@@ -298,18 +285,24 @@ const handleCoverAll = () => {
   panel.value?.coverAllPanels();
 };
 
+const modeGet = (mode: string): string[] => {
+  if (mode.startsWith("spiral")) {
+    return ["spiral", mode.replace("spiral-", "")];
+  } else {
+    return [mode, ""];
+  }
+};
+
 const durationSec = computed({
   get: () => duration.value / 1000,
   set: (v) => {
     duration.value = Math.round(v * 1000);
-    if (currentId.value) {
-      const ctx = panelStore.getContext(currentId.value);
-      if (ctx) {
-        panelStore.setContext(currentId.value, {
-          ...ctx,
-          duration: duration.value,
-        });
-      }
+    const ctx = panelStore.getContext(currentId.value);
+    if (ctx) {
+      panelStore.setContext(currentId.value, {
+        ...ctx,
+        duration: duration.value,
+      });
     }
   },
 });
@@ -321,54 +314,50 @@ const revealTypeButtons = [
 
 const toggleManualMode = () => {
   isManual.value = !isManual.value;
-
-  if (currentId.value) {
-    const ctx = panelStore.getContext(currentId.value);
-    if (ctx) {
-      panelStore.setContext(currentId.value, {
-        ...ctx,
-        isManual: isManual.value,
-      });
-    }
+  const ctx = panelStore.getContext(currentId.value);
+  if (ctx) {
+    panelStore.setContext(currentId.value, {
+      ...ctx,
+      isManual: isManual.value,
+    });
   }
 };
 
 const canShowAll = computed(
-  (): boolean =>
-    panelStore.getContext(currentId.value)?.revealed.length <
-    panelStore.getContext(currentId.value)?.amount.x *
-      panelStore.getContext(currentId.value)?.amount.y
+  (): boolean =>{
+    const ctx = panelStore.getContext(currentId.value);
+    return ctx && ctx.revealed.length < ctx.amount.x * ctx.amount.y}
 );
 const canHideAll = computed(
   (): boolean => panelStore.getContext(currentId.value)?.revealed.length > 0
 );
 
-watch([gridX, gridY, currentId], ([x, y, id]) => {
-  if (id) {
-    panelStore.setAmount(id, { x, y });
+watch([gridX, gridY], ([x, y]) => {
+  if (currentId.value) {
+    panelStore.setAmount(currentId.value, { x, y });
   }
 });
 
 watch(currentId, (id) => {
-  if (id) {
-    const ctx = panelStore.getContext(id);
-    if (ctx) {
-      duration.value = ctx.duration || 1000;
-      isManual.value = ctx.isManual;
-      autoRevealMode.value = ctx.autoRevealMode;
-    }
+  const ctx = panelStore.getContext(id);
+  if (ctx) {
+    console.log("main, sub change");
+    duration.value = ctx.duration || 1000;
+    isManual.value = ctx.isManual;
+    gridX.value = ctx.amount.x
+    gridY.value = ctx.amount.y;
+    [mainMode.value, subMode.value] = modeGet(ctx.autoRevealMode);
   }
 });
 
-watch(autoRevealMode, (newMode) => {
-  if (currentId.value) {
-    const ctx = panelStore.getContext(currentId.value);
-    if (ctx) {
-      panelStore.setContext(currentId.value, {
-        ...ctx,
-        autoRevealMode: newMode,
-      });
-    }
+watch(autoRevealMode, () => {
+  const ctx = panelStore.getContext(currentId.value);
+  if (ctx) {
+    console.log("context set");
+    panelStore.setContext(currentId.value, {
+      ...ctx,
+      autoRevealMode: autoRevealMode.value,
+    });
   }
 });
 

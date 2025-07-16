@@ -112,12 +112,12 @@
         </div>
         <div class="top-bar-right">
           <el-select
+            class="text-select"
             v-model="mainMode"
             size="small"
             :disabled="isRevealing || isManual"
             v-show="!isManual"
             placeholder="選擇自動翻面模式"
-            style="width: 130px; margin-right: 10px"
           >
             <el-option
               v-for="mode in getMainRevealModes()"
@@ -132,12 +132,12 @@
             </el-option>
           </el-select>
           <el-select
+            class="text-select"
             v-model="subMode"
             v-show="mainMode === 'spiral'"
             size="small"
             :disabled="isRevealing || isManual"
             placeholder="起點與方向"
-            style="width: 160px; margin-right: 10px"
           >
             <el-option
               v-for="subMode in getSpiralSubModes()"
@@ -323,11 +323,10 @@ const toggleManualMode = () => {
   }
 };
 
-const canShowAll = computed(
-  (): boolean =>{
-    const ctx = panelStore.getContext(currentId.value);
-    return ctx && ctx.revealed.length < ctx.amount.x * ctx.amount.y}
-);
+const canShowAll = computed((): boolean => {
+  const ctx = panelStore.getContext(currentId.value);
+  return ctx && ctx.revealed.length < ctx.amount.x * ctx.amount.y;
+});
 const canHideAll = computed(
   (): boolean => panelStore.getContext(currentId.value)?.revealed.length > 0
 );
@@ -344,7 +343,7 @@ watch(currentId, (id) => {
     console.log("main, sub change");
     duration.value = ctx.duration || 1000;
     isManual.value = ctx.isManual;
-    gridX.value = ctx.amount.x
+    gridX.value = ctx.amount.x;
     gridY.value = ctx.amount.y;
     [mainMode.value, subMode.value] = modeGet(ctx.autoRevealMode);
   }

@@ -203,7 +203,7 @@ function generateSpiralCoords(
  */
 export function getMainRevealModes() {
   return [
-    { value: "random", label: "隨機", icon: "Sort" },
+    { value: "random", label: "隨機", icon: "PhShuffle" },
     { value: "topToBottom", label: "由上而下", icon: "Bottom" },
     { value: "bottomToTop", label: "由下而上", icon: "Top" },
     { value: "leftToRight", label: "由左而右", icon: "Right" },

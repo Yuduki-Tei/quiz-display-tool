@@ -96,6 +96,7 @@ const selectImage = (id: string) => {
 
 const handleDelete = (id: string) => {
   imageStore.removeData(id);
+  extraStore.removeContext(id);
 };
 </script>
 

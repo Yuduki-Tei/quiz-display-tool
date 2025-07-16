@@ -144,8 +144,10 @@ watch(
 
 watch(
   () => context.value?.revealed,
-  () => {
-    drawGrid(panelCanvas, context);
+  (data) => {
+    if (data) {
+      drawGrid(panelCanvas, context);
+    }
   },
   { deep: true }
 );

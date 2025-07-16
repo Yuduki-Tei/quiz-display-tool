@@ -146,7 +146,6 @@
       </div>
     </el-main>
   </el-container>
-  <Notifier :status="notificationStatus" :timestamp="notificationTimestamp" />
   <el-drawer
     v-model="isSidebarVisible"
     direction="ltr"
@@ -168,8 +167,8 @@ import { useImageStore } from "@/stores/imageStore";
 import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
 import { getRevealModes } from "./composables/revealPatterns";
+import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
-import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
@@ -182,8 +181,7 @@ const { isRevealing, isPaused } = storeToRefs(panelStore);
 const panel = ref<InstanceType<typeof Panel> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const currentId = computed((): string | null => currentImage.value?.id || null);
-const notificationStatus = ref<string | null>(null);
-const notificationTimestamp = ref<number | null>(null);
+const { notify } = useNotifier();
 const isSidebarVisible = ref(false);
 const gridX = ref<number>(5);
 const gridY = ref<number>(5);
@@ -211,11 +209,9 @@ const onFileChange = async (e: Event) => {
         amount: { x: gridX.value, y: gridY.value },
       });
     }
-    notificationStatus.value = status;
-    notificationTimestamp.value = Date.now();
+    notify(status);
   } catch (err) {
-    notificationStatus.value = "error";
-    notificationTimestamp.value = Date.now();
+    notify("error");
   }
   if (fileInput.value) {
     fileInput.value.value = "";

@@ -10,3 +10,10 @@ export interface ImageData {
   displayWidth: number;
   displayHeight: number;
 }
+
+export interface NotifierOptions {
+  mode?: "message" | "notification" | "confirm";
+  duration?: number;
+  title?: string;
+  [key: string]: any;
+}

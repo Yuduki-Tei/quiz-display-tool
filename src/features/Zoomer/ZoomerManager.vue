@@ -89,7 +89,6 @@
       </div>
     </el-main>
   </el-container>
-  <Notifier :status="notificationStatus" :timestamp="notificationTimestamp" />
   <el-drawer
     v-model="isSidebarVisible"
     direction="ltr"
@@ -110,8 +109,8 @@ import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { useZoomerStore } from "./stores/zoomerStore";
 import { loadImageFile } from "@/composables/useImageLoader";
+import { useNotifier } from "@/composables/useNotifier";
 import Zoomer from "./views/Zoomer.vue";
-import Notifier from "@/components/Notifier.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
 import Button from "@/components/Button.vue";
 
@@ -127,8 +126,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const currentId = computed(() => currentImage.value?.id || null);
 const hasSelection = computed(() => zoomStore.hasSelection(currentId.value));
 
-const notificationStatus = ref<string | null>(null);
-const notificationTimestamp = ref<number | null>(null);
+const { notify } = useNotifier();
 
 const isSidebarVisible = ref(false);
 const duration = ref(30000);
@@ -149,11 +147,9 @@ const onFileChange = async (e: Event) => {
         selection: { x: 0, y: 0, w: 0, h: 0 },
       });
     }
-    notificationStatus.value = status;
-    notificationTimestamp.value = Date.now();
+    notify(status);
   } catch (err) {
-    notificationStatus.value = "error";
-    notificationTimestamp.value = Date.now();
+    notify("error");
   }
   if (fileInput.value) {
     fileInput.value.value = "";

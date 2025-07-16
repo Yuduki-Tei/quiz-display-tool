@@ -64,7 +64,6 @@
 }
 
 .top-bar-right {
-  align-items: center;
   display: flex;
   justify-content: flex-end;
   flex: 1;

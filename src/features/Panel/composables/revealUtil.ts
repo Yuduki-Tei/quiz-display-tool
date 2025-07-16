@@ -103,7 +103,8 @@ export function startReveal(params: RevealParams) {
   if (!context.order || context.order.length === 0) {
     const order = generateRevealOrder(
       context.autoRevealMode || "random",
-      context.amount
+      context.amount,
+      context.revealed
     );
     store.setOrder(params.id, order);
   }

@@ -148,7 +148,6 @@ const handleImport = (event: Event) => {
       }
     } catch (error) {
       notify("error");
-      console.error("Error processing zip file:", error);
     }
   };
   reader.readAsArrayBuffer(file);

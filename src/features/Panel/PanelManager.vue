@@ -134,10 +134,30 @@
           <el-select
             class="text-select"
             v-model="subMode"
+            v-show="mainMode === 'linear'"
+            size="small"
+            :disabled="isRevealing || isManual"
+            placeholder="方向優先度"
+          >
+            <el-option
+              v-for="subMode in getLinearSubModes()"
+              :key="subMode.value"
+              :label="subMode.label"
+              :value="subMode.value"
+            >
+              <div style="display: flex; align-items: center">
+                <Icon :name="subMode.icon" style="margin-right: 5px" />
+                <span>{{ subMode.label }}</span>
+              </div>
+            </el-option>
+          </el-select>
+          <el-select
+            class="text-select"
+            v-model="subMode"
             v-show="mainMode === 'spiral'"
             size="small"
             :disabled="isRevealing || isManual"
-            placeholder="起點與方向"
+            placeholder="方向與起點"
           >
             <el-option
               v-for="subMode in getSpiralSubModes()"
@@ -145,7 +165,10 @@
               :label="subMode.label"
               :value="subMode.value"
             >
-              <span>{{ subMode.label }}</span>
+              <div style="display: flex; align-items: center">
+                <Icon :name="subMode.icon" style="margin-right: 5px" />
+                <span>{{ subMode.label }}</span>
+              </div>
             </el-option>
           </el-select>
           <Button
@@ -187,6 +210,7 @@ import { loadImageFile } from "@/composables/useImageLoader";
 import {
   getMainRevealModes,
   getSpiralSubModes,
+  getLinearSubModes,
 } from "./composables/revealPatterns";
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
@@ -288,6 +312,8 @@ const handleCoverAll = () => {
 const modeGet = (mode: string): string[] => {
   if (mode.startsWith("spiral")) {
     return ["spiral", mode.replace("spiral-", "")];
+  } else if (mode.startsWith("linear")) {
+    return ["linear", mode.replace("linear-", "")];
   } else {
     return [mode, ""];
   }
@@ -340,7 +366,6 @@ watch([gridX, gridY], ([x, y]) => {
 watch(currentId, (id) => {
   const ctx = panelStore.getContext(id);
   if (ctx) {
-    console.log("main, sub change");
     duration.value = ctx.duration || 1000;
     isManual.value = ctx.isManual;
     gridX.value = ctx.amount.x;
@@ -352,7 +377,6 @@ watch(currentId, (id) => {
 watch(autoRevealMode, () => {
   const ctx = panelStore.getContext(currentId.value);
   if (ctx) {
-    console.log("context set");
     panelStore.setContext(currentId.value, {
       ...ctx,
       autoRevealMode: autoRevealMode.value,

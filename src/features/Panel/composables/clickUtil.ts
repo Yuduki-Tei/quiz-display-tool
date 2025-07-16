@@ -40,6 +40,18 @@ function findIndexFromCoord(coord: number, sizes: number[]): number {
   return -1;
 }
 
+function isPanelRevealed(ctx: any, i: number, j: number): boolean {
+  return ctx.revealed.some(([rx, ry]) => rx === i && ry === j);
+}
+
+function flipPanel(ctx: any, i: number, j: number) {
+  if (!isPanelRevealed(ctx, i, j)) {
+    ctx.revealed.push([i, j]);
+  } else {
+    ctx.revealed = ctx.revealed.filter(([rx, ry]) => !(rx === i && ry === j));
+  }
+}
+
 export function drawGrid(
   canvas: Ref<HTMLCanvasElement | null>,
   context: Ref<any>
@@ -106,20 +118,4 @@ export function handlePanelClick(
   if (i === -1 || j === -1) return;
 
   flipPanel(context.value, i, j);
-}
-
-export function isPanelRevealed(ctx: any, i: number, j: number): boolean {
-  return ctx.revealed.some(([rx, ry]) => rx === i && ry === j);
-}
-
-export function flipPanel(ctx: any, i: number, j: number) {
-  if (!isPanelRevealed(ctx, i, j)) {
-    ctx.revealed.push([i, j]);
-  } else {
-    ctx.revealed = ctx.revealed.filter(([rx, ry]) => !(rx === i && ry === j));
-  }
-}
-
-export function resetRevealed(ctx: any) {
-  ctx.revealed.length = 0;
 }

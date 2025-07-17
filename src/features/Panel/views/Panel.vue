@@ -24,6 +24,7 @@ import { ref, computed, nextTick, watch } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import { drawGrid, handlePanelClick } from "../composables/clickUtil";
 import { usePanelStore } from "../stores/panelStore";
+import { PanelCombinedContext } from "../types/PanelTypes";
 import {
   startReveal,
   stopReveal,
@@ -49,18 +50,17 @@ const panelStore = usePanelStore();
 
 const mainCanvas = ref<HTMLCanvasElement | null>(null);
 const panelCanvas = ref<HTMLCanvasElement | null>(null);
-const context: any = computed(() => {
+const context = computed<PanelCombinedContext | Record<string, never>>(() => {
   if (!props.id) return {};
   const imageData = imageStore.getData(props.id);
   const panelContext = panelStore.getContext(props.id);
   return {
     ...imageData,
     ...panelContext,
-  };
+  } as PanelCombinedContext;
 });
 
 const onPanelClick = (e: MouseEvent) => {
-  // 手動モード以外ではクリックイベントを無視
   if (
     !panelCanvas.value ||
     !context.value ||
@@ -154,15 +154,17 @@ watch(
 
 const drawImage = () => {
   if (!mainCanvas.value || !context.value) return;
+  
+  const contextValue = context.value as PanelCombinedContext;
   const ctx = mainCanvas.value.getContext("2d");
   if (!ctx) return;
-  ctx.clearRect(0, 0, context.value.displayWidth, context.value.displayHeight);
+  ctx.clearRect(0, 0, contextValue.displayWidth, contextValue.displayHeight);
   ctx.drawImage(
-    context.value.renderable,
+    contextValue.renderable,
     0,
     0,
-    context.value.displayWidth,
-    context.value.displayHeight
+    contextValue.displayWidth,
+    contextValue.displayHeight
   );
 };
 </script>

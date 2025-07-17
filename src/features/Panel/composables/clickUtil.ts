@@ -3,7 +3,9 @@
  * @description Provides flip animation functionality for a canvas.
  */
 
-import { Ref } from "vue";
+import { Ref, ComputedRef } from "vue";
+import { usePanelStore } from "../stores/panelStore";
+import { PanelCombinedContext } from "../types/PanelTypes";
 
 function getDistributedSizes(
   totalLength: number,
@@ -40,28 +42,38 @@ function findIndexFromCoord(coord: number, sizes: number[]): number {
   return -1;
 }
 
-function isPanelRevealed(ctx: any, i: number, j: number): boolean {
+function isPanelRevealed(
+  ctx: PanelCombinedContext,
+  i: number,
+  j: number
+): boolean {
   return ctx.revealed.some(([rx, ry]) => rx === i && ry === j);
 }
 
-function flipPanel(ctx: any, i: number, j: number) {
+function flipPanel(ctx: PanelCombinedContext, i: number, j: number) {
+  const id = ctx.id;
+  const store = usePanelStore();
+  const context = store.getContext(id);
   if (!isPanelRevealed(ctx, i, j)) {
-    ctx.revealed.push([i, j]);
+    context.revealed.push([i, j]);
   } else {
-    ctx.revealed = ctx.revealed.filter(([rx, ry]) => !(rx === i && ry === j));
+    context.revealed = ctx.revealed.filter(
+      ([rx, ry]) => !(rx === i && ry === j)
+    );
   }
 }
 
 export function drawGrid(
   canvas: Ref<HTMLCanvasElement | null>,
-  context: Ref<any>
+  context: ComputedRef<PanelCombinedContext | Record<string, never>>
 ) {
   if (!canvas.value || !context.value) return;
   const ctx = canvas.value.getContext("2d");
   if (!ctx) return;
 
-  const { displayWidth, displayHeight } = context.value;
-  const { x: numCols, y: numRows } = context.value.amount;
+  const contextValue = context.value as PanelCombinedContext;
+  const { displayWidth, displayHeight } = contextValue;
+  const { x: numCols, y: numRows } = contextValue.amount;
 
   ctx.clearRect(0, 0, displayWidth, displayHeight);
 
@@ -83,7 +95,7 @@ export function drawGrid(
     for (let i = 0; i < numCols; i++) {
       const rectWidth = widths[i];
 
-      if (!isPanelRevealed(context.value, i, j)) {
+      if (!isPanelRevealed(contextValue, i, j)) {
         ctx.fillRect(currentX, currentY, rectWidth, rectHeight);
         if (toStroke) {
           ctx.strokeRect(currentX, currentY, rectWidth, rectHeight);
@@ -98,12 +110,12 @@ export function drawGrid(
 export function handlePanelClick(
   e: MouseEvent,
   panelCanvas: Ref<HTMLCanvasElement | null>,
-  context: Ref<any>
+  context: ComputedRef<PanelCombinedContext | Record<string, never>>
 ) {
   if (!panelCanvas.value || !context.value) return;
-
-  const { displayWidth, displayHeight } = context.value;
-  const { x: numCols, y: numRows } = context.value.amount;
+  const contextValue = context.value as PanelCombinedContext;
+  const { displayWidth, displayHeight } = contextValue;
+  const { x: numCols, y: numRows } = contextValue.amount;
 
   const bounds = panelCanvas.value.getBoundingClientRect();
   const x = ((e.clientX - bounds.left) / bounds.width) * displayWidth;
@@ -117,5 +129,5 @@ export function handlePanelClick(
 
   if (i === -1 || j === -1) return;
 
-  flipPanel(context.value, i, j);
+  flipPanel(contextValue, i, j);
 }

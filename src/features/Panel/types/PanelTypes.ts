@@ -11,3 +11,16 @@ export interface PanelContext {
   order?: [number, number][];
   duration?: number;
 }
+
+export interface PanelCombinedContext extends PanelContext {
+  id: string;
+  name: string;
+  image: Blob | File | null;
+  canvas: HTMLCanvasElement | null;
+  thumbnailSrc: string | null;
+  renderable: ImageBitmap | null;
+  naturalWidth: number;
+  naturalHeight: number;
+  displayWidth: number;
+  displayHeight: number;
+}

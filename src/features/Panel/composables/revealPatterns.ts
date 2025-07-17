@@ -301,25 +301,25 @@ export function getSpiralSubModes() {
  * Returns sub modes for linear patterns
  */
 export function getLinearSubModes() {
-  const verticalLables: Record<string, string> = {
+  const verticalLabels: Record<string, string> = {
     Right: "向右",
     Left: "向左",
   };
-  const horizontalLables: Record<string, string> = {
+  const horizontalLabels: Record<string, string> = {
     Down: "向下",
     Up: "向上",
   };
   const subModes: { value: string; label: string; icon: string }[] = [];
-  for (const hor in horizontalLables) {
-    for (const ver in verticalLables) {
+  for (const hor in horizontalLabels) {
+    for (const ver in verticalLabels) {
       subModes.push({
         value: `${ver}-${hor}`,
-        label: `先${verticalLables[ver]}後${horizontalLables[hor]}`,
+        label: `先${verticalLabels[ver]}後${horizontalLabels[hor]}`,
         icon: `PhArrowElbow${ver}${hor}`,
       });
       subModes.push({
         value: `${hor}-${ver}`,
-        label: `先${horizontalLables[hor]}後${verticalLables[ver]}`,
+        label: `先${horizontalLabels[hor]}後${verticalLabels[ver]}`,
         icon: `PhArrowElbow${hor}${ver}`,
       });
     }

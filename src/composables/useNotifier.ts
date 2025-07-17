@@ -30,7 +30,6 @@ const messageMap: Record<
   "mode-mismatch": {
     message: "導入的資料與當前模式不符。無法載入資料。",
     level: "error",
-    mode: "notification",
   },
 };
 
@@ -39,7 +38,6 @@ export function useNotifier() {
     type: string,
     options: NotifierOptions & { mode: "confirm" }
   ): Promise<boolean>;
-  function notify(type: "export-confirm"): Promise<boolean>;
   function notify(
     type: string,
     options?: NotifierOptions

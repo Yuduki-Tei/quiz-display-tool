@@ -1,35 +1,33 @@
 <template>
   <div id="app">
-    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 2000">
-      <button @click="toggleManager" style="padding: 0.5em 1em">
-        {{ showPanel ? "切換 Zoomer" : "切換 Panel" }}
-      </button>
+    <div
+      v-if="!showHome"
+      style="position: fixed; bottom: 10px; right: 10px; z-index: 2000"
+    >
+      <Button @click="backToHome" icon="PhHouse" style="padding: 0.5em 1em" />
     </div>
-    <ZoomerManager v-if="!showPanel" />
-    <PanelManager v-else />
+    <HomePage v-if="showHome" @select-mode="selectMode" />
+    <ZoomerManager v-else-if="currentMode === 'zoomer'" />
+    <PanelManager v-else-if="currentMode === 'panel'" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import Button from "@/components/Button.vue";
 import ZoomerManager from "./features/Zoomer/ZoomerManager.vue";
 import PanelManager from "./features/Panel/PanelManager.vue";
+import HomePage from "./features/Home/HomePage.vue";
 
-const showPanel = ref(false);
-const toggleManager = () => {
-  showPanel.value = !showPanel.value;
+const showHome = ref(true);
+const currentMode = ref<"zoomer" | "panel">("zoomer");
+
+const selectMode = (mode: "zoomer" | "panel") => {
+  currentMode.value = mode;
+  showHome.value = false;
+};
+
+const backToHome = () => {
+  showHome.value = true;
 };
 </script>
-
-<style scoped>
-.theme-switch-bar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem 1rem;
-}
-</style>

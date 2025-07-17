@@ -52,7 +52,7 @@ const triggerImport = () => {
   importInput.value?.click();
 };
 
-const selectionCheck = async () => {
+const selectionCheck = async (): boolean => {
   const unselectedImageIds: string[] = [];
   imageStore.allData.forEach((imageData) => {
     if (!extraStore.hasSelection(imageData.id)) {
@@ -64,7 +64,7 @@ const selectionCheck = async () => {
     const confirmed = await notify("export-confirm");
     if (!confirmed) {
       notify("cancel");
-      return;
+      return false;
     }
     unselectedImageIds.forEach((id) => {
       const imageData = imageStore.allData.find((data) => data.id === id);
@@ -77,11 +77,13 @@ const selectionCheck = async () => {
       }
     });
   }
+  return true;
 };
 
 const handleExport = async () => {
   if (extraStore.$id === "zoomer") {
-    await selectionCheck();
+    const conti = await selectionCheck();
+    if (!!!conti) return;
   }
   try {
     const zip = new JSZip();

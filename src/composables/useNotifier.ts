@@ -27,6 +27,11 @@ const messageMap: Record<
     mode: "confirm",
     title: "確認",
   },
+  "mode-mismatch": {
+    message: "導入的資料與當前模式不符。無法載入資料。",
+    level: "error",
+    mode: "notification",
+  },
 };
 
 export function useNotifier() {

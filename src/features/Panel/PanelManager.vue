@@ -42,7 +42,7 @@
           <Button
             type="primary"
             @click="handleRevealControl"
-            :disabled="isManual"
+            :disabled="isManual || !canShowAll"
             :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
           />
           <el-button-group>
@@ -90,7 +90,7 @@
             </el-select>
           </div>
           <el-divider direction="vertical" />
-          <div class="duration-control">
+          <div class="duration-control" v-show="!isManual">
             <el-slider
               v-model="durationSec"
               :min="0.1"
@@ -112,14 +112,15 @@
         </div>
         <div class="top-bar-right">
           <el-select
-            v-model="autoRevealMode"
+            class="text-select"
+            v-model="mainMode"
             size="small"
             :disabled="isRevealing || isManual"
-            placeholder="めくりパターン"
-            style="width: 130px; margin-right: 10px"
+            v-show="!isManual"
+            placeholder="選擇自動翻面模式"
           >
             <el-option
-              v-for="mode in availableRevealModes"
+              v-for="mode in getMainRevealModes()"
               :key="mode.value"
               :label="mode.label"
               :value="mode.value"
@@ -127,6 +128,46 @@
               <div style="display: flex; align-items: center">
                 <Icon :name="mode.icon" style="margin-right: 5px" />
                 <span>{{ mode.label }}</span>
+              </div>
+            </el-option>
+          </el-select>
+          <el-select
+            class="text-select"
+            v-model="subMode"
+            v-show="mainMode === 'linear'"
+            size="small"
+            :disabled="isRevealing || isManual"
+            placeholder="方向優先度"
+          >
+            <el-option
+              v-for="subMode in getLinearSubModes()"
+              :key="subMode.value"
+              :label="subMode.label"
+              :value="subMode.value"
+            >
+              <div style="display: flex; align-items: center">
+                <Icon :name="subMode.icon" style="margin-right: 5px" />
+                <span>{{ subMode.label }}</span>
+              </div>
+            </el-option>
+          </el-select>
+          <el-select
+            class="text-select"
+            v-model="subMode"
+            v-show="mainMode === 'spiral'"
+            size="small"
+            :disabled="isRevealing || isManual"
+            placeholder="方向與起點"
+          >
+            <el-option
+              v-for="subMode in getSpiralSubModes()"
+              :key="subMode.value"
+              :label="subMode.label"
+              :value="subMode.value"
+            >
+              <div style="display: flex; align-items: center">
+                <Icon :name="subMode.icon" style="margin-right: 5px" />
+                <span>{{ subMode.label }}</span>
               </div>
             </el-option>
           </el-select>
@@ -166,7 +207,11 @@ import { storeToRefs } from "pinia";
 import { useImageStore } from "@/stores/imageStore";
 import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
-import { getRevealModes } from "./composables/revealPatterns";
+import {
+  getMainRevealModes,
+  getSpiralSubModes,
+  getLinearSubModes,
+} from "./composables/revealPatterns";
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
@@ -187,8 +232,11 @@ const gridX = ref<number>(5);
 const gridY = ref<number>(5);
 const duration = ref<number>(1000);
 const isManual = ref<boolean>(true);
-const autoRevealMode = ref<string>("random");
-const availableRevealModes = getRevealModes();
+const mainMode = ref<string>("");
+const subMode = ref<string>("");
+const autoRevealMode = computed(
+  () => mainMode.value + (subMode.value ? `-${subMode.value}` : "")
+);
 
 const triggerFileInput = () => {
   fileInput.value?.click();
@@ -204,8 +252,9 @@ const onFileChange = async (e: Event) => {
     if (status === "added" && currentId.value) {
       panelStore.setContext(currentId.value, {
         revealed: [],
-        isManual: true,
-        autoRevealMode: "random",
+        isManual: isManual.value,
+        autoRevealMode: autoRevealMode.value,
+        duration: duration.value,
         amount: { x: gridX.value, y: gridY.value },
       });
     }
@@ -260,77 +309,78 @@ const handleCoverAll = () => {
   panel.value?.coverAllPanels();
 };
 
+const modeGet = (mode: string): string[] => {
+  if (mode.startsWith("spiral")) {
+    return ["spiral", mode.replace("spiral-", "")];
+  } else if (mode.startsWith("linear")) {
+    return ["linear", mode.replace("linear-", "")];
+  } else {
+    return [mode, ""];
+  }
+};
+
 const durationSec = computed({
   get: () => duration.value / 1000,
   set: (v) => {
     duration.value = Math.round(v * 1000);
-    if (currentId.value) {
-      const ctx = panelStore.getContext(currentId.value);
-      if (ctx) {
-        panelStore.setContext(currentId.value, {
-          ...ctx,
-          duration: duration.value,
-        });
-      }
+    const ctx = panelStore.getContext(currentId.value);
+    if (ctx) {
+      panelStore.setContext(currentId.value, {
+        ...ctx,
+        duration: duration.value,
+      });
     }
   },
 });
 
 const revealTypeButtons = [
-  { value: true, icon: "PhHandPointing", tooltip: "手動めくりモード" },
-  { value: false, icon: "PhPlayCircle", tooltip: "自動めくりモード" },
+  { value: true, icon: "PhCursorClick", tooltip: "手動翻面" },
+  { value: false, icon: "PhClockClockwise", tooltip: "自動翻面" },
 ];
 
 const toggleManualMode = () => {
   isManual.value = !isManual.value;
-
-  if (currentId.value) {
-    const ctx = panelStore.getContext(currentId.value);
-    if (ctx) {
-      panelStore.setContext(currentId.value, {
-        ...ctx,
-        isManual: isManual.value,
-      });
-    }
+  const ctx = panelStore.getContext(currentId.value);
+  if (ctx) {
+    panelStore.setContext(currentId.value, {
+      ...ctx,
+      isManual: isManual.value,
+    });
   }
 };
 
-const canShowAll = computed(
-  (): boolean =>
-    panelStore.getContext(currentId.value)?.revealed.length <=
-    panelStore.getContext(currentId.value)?.amount.x *
-      panelStore.getContext(currentId.value)?.amount.x
-);
+const canShowAll = computed((): boolean => {
+  const ctx = panelStore.getContext(currentId.value);
+  return ctx && ctx.revealed.length < ctx.amount.x * ctx.amount.y;
+});
 const canHideAll = computed(
   (): boolean => panelStore.getContext(currentId.value)?.revealed.length > 0
 );
 
-watch([gridX, gridY, currentId], ([x, y, id]) => {
-  if (id) {
-    panelStore.setAmount(id, { x, y });
+watch([gridX, gridY], ([x, y]) => {
+  if (currentId.value) {
+    panelStore.setAmount(currentId.value, { x, y });
   }
 });
 
 watch(currentId, (id) => {
-  if (id) {
-    const ctx = panelStore.getContext(id);
-    if (ctx) {
-      duration.value = ctx.duration || 5000;
-      isManual.value = ctx.isManual;
-      autoRevealMode.value = ctx.autoRevealMode;
-    }
+  const ctx = panelStore.getContext(id);
+  if (ctx) {
+    duration.value = ctx.duration || 1000;
+    isManual.value = ctx.isManual;
+    gridX.value = ctx.amount.x;
+    gridY.value = ctx.amount.y;
+    [mainMode.value, subMode.value] = modeGet(ctx.autoRevealMode);
   }
 });
 
-watch(autoRevealMode, (newMode) => {
-  if (currentId.value) {
-    const ctx = panelStore.getContext(currentId.value);
-    if (ctx) {
-      panelStore.setContext(currentId.value, {
-        ...ctx,
-        autoRevealMode: newMode,
-      });
-    }
+watch(autoRevealMode, () => {
+  const ctx = panelStore.getContext(currentId.value);
+  if (ctx) {
+    panelStore.setContext(currentId.value, {
+      ...ctx,
+      autoRevealMode: autoRevealMode.value,
+    });
   }
 });
 

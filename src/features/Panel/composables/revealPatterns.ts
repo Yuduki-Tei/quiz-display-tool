@@ -1,61 +1,103 @@
 /**
  * @module revealPatterns
- * @description パネルの公開パターンを生成する機能を提供します
+ * @description Provides functionality to generate reveal patterns for panels
  */
 
 import type { PanelAmount } from "../types/PanelTypes";
+type Coord = [number, number];
+
+type StartPoint =
+  | "topLeft"
+  | "topRight"
+  | "bottomRight"
+  | "bottomLeft"
+  | "center";
+type Direction = "clockwise" | "counterClockwise";
+
+interface SpiralOptions {
+  startPoint?: StartPoint;
+  direction?: Direction;
+}
 
 /**
- * 選択したモードに基づいて公開順序の座標を生成します
- * @param mode 公開パターンモード
- * @param amount パネルグリッドサイズ（列×行）
- * @param revealed 既に公開されているパネル
- * @returns 公開される順序で[x, y]座標の配列
+ * Generates reveal order coordinates based on the selected mode
+ * @param mode Reveal pattern mode
+ * @param amount Panel grid size (columns × rows)
+ * @param revealed Panels that are already revealed
+ * @returns Array of [x, y] coordinates in reveal order
  */
 export function generateRevealOrder(
   mode: string,
-  amount: PanelAmount,
-  revealed: [number, number][]
+  amount: PanelAmount
 ): [number, number][] {
-  // まず、公開されていないすべての座標を取得
+  // First, get all coordinates that have not been revealed yet
   const { x: cols, y: rows } = amount;
-  const allCoords: [number, number][] = [];
 
-  for (let j = 0; j < rows; j++) {
-    for (let i = 0; i < cols; i++) {
-      // この座標が既に公開されているか確認
-      if (!revealed.some(([rx, ry]) => rx === i && ry === j)) {
-        allCoords.push([i, j]);
-      }
+  if (mode.startsWith("spiral")) {
+    const parts = mode.split("-"); // e.g., "spiral-topLeft-clockwise" -> ["spiral", "topLeft", "clockwise"]
+    const startPoint = parts[1] as StartPoint;
+    const direction = parts[2] as Direction;
+
+    return generateSpiralCoords(rows, cols, { startPoint, direction });
+  }
+
+  const allCoords = Array.from({ length: rows }).flatMap((_, j) =>
+    Array.from({ length: cols }, (_, i) => [i, j] as Coord)
+  );
+  if (mode.startsWith("linear")) {
+    const toMatch = mode.replace("linear-", "");
+    switch (toMatch) {
+      case "Right-Down":
+        return allCoords.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+      case "Right-Up":
+        return allCoords.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
+      case "Left-Down":
+        return allCoords.sort((a, b) => a[1] - b[1] || b[0] - a[0]);
+      case "Left-Up":
+        return allCoords.sort((a, b) => b[1] - a[1] || b[0] - a[0]);
+      case "Down-Right":
+        return allCoords.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      case "Down-Left":
+        return allCoords.sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+      case "Up-Right":
+        return allCoords.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+      case "Up-Left":
+        return allCoords.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
     }
   }
 
-  // 公開するパネルが残っていない
-  if (allCoords.length === 0) return [];
-
-  // 異なる公開パターンを適用
+  // Apply different reveal patterns
   switch (mode) {
     case "random":
       return shuffleArray(allCoords);
-    case "topToBottom":
-      return allCoords.sort((a, b) => a[1] - b[1]);
-    case "bottomToTop":
-      return allCoords.sort((a, b) => b[1] - a[1]);
-    case "leftToRight":
-      return allCoords.sort((a, b) => a[0] - b[0]);
-    case "rightToLeft":
-      return allCoords.sort((a, b) => b[0] - a[0]);
-    case "spiral":
-      return generateSpiralOrder(cols, rows, revealed);
-    case "diagonal":
-      return generateDiagonalOrder(cols, rows, revealed);
+
+    // case "topToBottom":
+    //   return allCoords.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
+    // case "topToBottomReverse":
+    //   return allCoords.sort((a, b) => a[1] - b[1] || b[0] - a[0]);
+
+    // case "bottomToTop":
+    //   return allCoords.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
+    // case "buttomToTopReverse":
+    //   return allCoords.sort((a, b) => b[1] - a[1] || b[0] - a[0]);
+
+    // case "leftToRight":
+    //   return allCoords.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    // case "leftToRightReverse":
+    //   return allCoords.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+
+    // case "rightToLeft":
+    //   return allCoords.sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+    // case "rightToLeftReverse":
+    //   return allCoords.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
+
     default:
-      return shuffleArray(allCoords); // デフォルトはランダム
+      return shuffleArray(allCoords); // Default is random
   }
 }
 
 /**
- * Fisher-Yatesアルゴリズムを使って配列をシャッフルします
+ * Shuffles an array using the Fisher-Yates algorithm
  */
 function shuffleArray<T>(array: T[]): T[] {
   const result = [...array];
@@ -65,107 +107,222 @@ function shuffleArray<T>(array: T[]): T[] {
   }
   return result;
 }
-
 /**
- * 外側から内側へのスパイラル表示パターンを生成します
+ * generates spiral coordinates for a grid
+ * @param rows
+ * @param cols
+ * @param options startpoint and direction
+ * @returns Array of coordinates in spiral order
  */
-function generateSpiralOrder(
-  cols: number,
+function generateSpiralCoords(
   rows: number,
-  revealed: [number, number][]
-): [number, number][] {
-  const result: [number, number][] = [];
-  const isRevealed = (x: number, y: number) =>
-    revealed.some(([rx, ry]) => rx === x && ry === y);
+  cols: number,
+  options: SpiralOptions = {}
+): Coord[] {
+  const { startPoint = "topLeft", direction = "clockwise" } = options;
+  if (rows === 0 || cols === 0) return [];
 
-  let top = 0;
-  let bottom = rows - 1;
-  let left = 0;
-  let right = cols - 1;
-  let direction = 0;
+  const result: Coord[] = [];
+  const total = rows * cols;
 
-  while (top <= bottom && left <= right) {
-    if (direction === 0) {
-      // 上の行、左から右へ
-      for (let i = left; i <= right; i++) {
-        if (!isRevealed(i, top)) result.push([i, top]);
+  if (startPoint === "center") {
+    let x = Math.floor((cols - 1) / 2);
+    let y = Math.floor((rows - 1) / 2);
+
+    result.push([x, y]);
+
+    const dirs =
+      direction === "clockwise"
+        ? [
+            [1, 0],
+            [0, 1],
+            [-1, 0],
+            [0, -1],
+          ] // R, D, L, U
+        : [
+            [1, 0],
+            [0, -1],
+            [-1, 0],
+            [0, 1],
+          ]; // R, U, L, D
+
+    let step = 1;
+    let dirIndex = 0;
+
+    while (result.length < total) {
+      for (let i = 0; i < 2; i++) {
+        for (let s = 0; s < step; s++) {
+          if (result.length >= total) break;
+          x += dirs[dirIndex][0];
+          y += dirs[dirIndex][1];
+          if (x >= 0 && x < cols && y >= 0 && y < rows) {
+            result.push([x, y]);
+          }
+        }
+        if (result.length >= total) break;
+        dirIndex = (dirIndex + 1) % 4;
       }
-      top++;
-    } else if (direction === 1) {
-      // 右の列、上から下へ
-      for (let i = top; i <= bottom; i++) {
-        if (!isRevealed(right, i)) result.push([right, i]);
-      }
-      right--;
-    } else if (direction === 2) {
-      // 下の行、右から左へ
-      for (let i = right; i >= left; i--) {
-        if (!isRevealed(i, bottom)) result.push([i, bottom]);
-      }
-      bottom--;
-    } else if (direction === 3) {
-      // 左の列、下から上へ
-      for (let i = bottom; i >= top; i--) {
-        if (!isRevealed(left, i)) result.push([left, i]);
-      }
-      left++;
+      step++;
     }
+    return result;
+  }
 
-    direction = (direction + 1) % 4;
+  let top = 0,
+    bottom = rows - 1,
+    left = 0,
+    right = cols - 1;
+
+  const traverseRight = () => {
+    for (let i = left; i <= right; i++) result.push([i, top]);
+    top++;
+  };
+  const traverseDown = () => {
+    for (let j = top; j <= bottom; j++) result.push([right, j]);
+    right--;
+  };
+  const traverseLeft = () => {
+    for (let i = right; i >= left; i--) result.push([i, bottom]);
+    bottom--;
+  };
+  const traverseUp = () => {
+    for (let j = bottom; j >= top; j--) result.push([left, j]);
+    left++;
+  };
+
+  let movePlan: (() => void)[] = [];
+
+  if (direction === "clockwise") {
+    switch (startPoint) {
+      case "topLeft":
+        movePlan = [traverseRight, traverseDown, traverseLeft, traverseUp];
+        break;
+      case "topRight":
+        movePlan = [traverseDown, traverseLeft, traverseUp, traverseRight];
+        break;
+      case "bottomRight":
+        movePlan = [traverseLeft, traverseUp, traverseRight, traverseDown];
+        break;
+      case "bottomLeft":
+        movePlan = [traverseUp, traverseRight, traverseDown, traverseLeft];
+        break;
+    }
+  } else {
+    switch (startPoint) {
+      case "topLeft":
+        movePlan = [traverseDown, traverseRight, traverseUp, traverseLeft];
+        break;
+      case "topRight":
+        movePlan = [traverseUp, traverseLeft, traverseDown, traverseRight];
+        break;
+      case "bottomRight":
+        movePlan = [traverseLeft, traverseDown, traverseRight, traverseUp];
+        break;
+      case "bottomLeft":
+        movePlan = [traverseRight, traverseUp, traverseLeft, traverseDown];
+        break;
+    }
+  }
+
+  let planIndex = 0;
+  while (result.length < total) {
+    movePlan[planIndex % 4]();
+    planIndex++;
   }
 
   return result;
 }
 
 /**
- * 対角線の表示パターンを生成します
+ * return usable patterns
  */
-function generateDiagonalOrder(
-  cols: number,
-  rows: number,
-  revealed: [number, number][]
-): [number, number][] {
-  const result: [number, number][] = [];
-  const isRevealed = (x: number, y: number) =>
-    revealed.some(([rx, ry]) => rx === x && ry === y);
-
-  // 対角線を生成（左上から右下への向き）
-  const diagonals: [number, number][][] = [];
-
-  // 対角線の合計数は行数 + 列数 - 1
-  for (let d = 0; d < rows + cols - 1; d++) {
-    const diagonal: [number, number][] = [];
-
-    // 各対角線について
-    for (let i = 0; i <= d; i++) {
-      const x = i;
-      const y = d - i;
-
-      if (x < cols && y < rows && !isRevealed(x, y)) {
-        diagonal.push([x, y]);
-      }
-    }
-
-    if (diagonal.length > 0) {
-      diagonals.push(diagonal);
-    }
-  }
-
-  // 対角線を平坦化
-  return diagonals.flat();
+export function getMainRevealModes() {
+  return [
+    { value: "random", label: "隨機", icon: "PhShuffleSimple" },
+    { value: "linear", label: "線性", icon: "PhArrowsLeftRight" },
+    // { value: "topToBottom", label: "線性(1)", icon: "PhArrowElbowRightDown" }, //LR-TB
+    // {
+    //   value: "topToBottomReverse", //RL-TB
+    //   label: "線性(1)反向",
+    //   icon: "PhArrowElbowLeftDown",
+    // },
+    // { value: "bottomToTop", label: "線性(2)", icon: "PhArrowElbowRightUp" }, //LR-BT
+    // {
+    //   value: "buttomToTopReverse", //RL-BT
+    //   label: "線性(2)反向",
+    //   icon: "PhArrowElbowLeftUp",
+    // },
+    // { value: "leftToRight", label: "線性(3)", icon: "PhArrowElbowDownRight" }, //TB-LR
+    // {
+    //   value: "leftToRightReverse", //BT-LR
+    //   label: "線性(3)反向",
+    //   icon: "PhArrowElbowUpRight",
+    // },
+    // { value: "rightToLeft", label: "線性(4)", icon: "PhArrowElbowDownLeft" }, //TB-RL
+    // {
+    //   value: "rightToLeftReverse", //BT-RL
+    //   label: "線性(4)反向",
+    //   icon: "PhArrowElbowUpLeft",
+    // },
+    { value: "spiral", label: "螺旋", icon: "PhSpiral" },
+  ];
 }
 
 /**
- * 利用可能な公開モードのリストを返します
+ * Returns sub modes for spiral patterns
  */
-export function getRevealModes() {
-  return [
-    { value: "random", label: "ランダム", icon: "Sort" },
-    { value: "topToBottom", label: "上から下", icon: "Bottom" },
-    { value: "bottomToTop", label: "下から上", icon: "Top" },
-    { value: "leftToRight", label: "左から右", icon: "Right" },
-    { value: "rightToLeft", label: "右から左", icon: "Back" },
-    { value: "spiral", label: "渦巻き", icon: "Loading" },
-    { value: "diagonal", label: "対角線", icon: "Share" },
-  ];
+export function getSpiralSubModes() {
+  const startPointLabels: Record<StartPoint, string> = {
+    topLeft: "左上",
+    topRight: "右上",
+    bottomRight: "右下",
+    bottomLeft: "左下",
+    center: "中心",
+  };
+  const directionLabels: Record<Direction, string> = {
+    clockwise: "順時針",
+    counterClockwise: "逆時針",
+  };
+
+  const subModes: { value: string; label: string; icon: string }[] = [];
+  for (const sp in startPointLabels) {
+    for (const dir in directionLabels) {
+      subModes.push({
+        value: `${sp}-${dir}`,
+        label: `${startPointLabels[sp as StartPoint]}起`,
+        icon:
+          dir === "clockwise" ? "PhArrowClockwise" : "PhArrowCounterClockwise",
+      });
+    }
+  }
+  return subModes;
+}
+
+/**
+ * Returns sub modes for linear patterns
+ */
+export function getLinearSubModes() {
+  const verticalLables: Record<string, string> = {
+    Right: "向右",
+    Left: "向左",
+  };
+  const horizontalLables: Record<string, string> = {
+    Down: "向下",
+    Up: "向上",
+  };
+  const subModes: { value: string; label: string; icon: string }[] = [];
+  for (const hor in horizontalLables) {
+    for (const ver in verticalLables) {
+      subModes.push({
+        value: `${ver}-${hor}`,
+        label: `先${verticalLables[ver]}後${horizontalLables[hor]}`,
+        icon: `PhArrowElbow${ver}${hor}`,
+      });
+      subModes.push({
+        value: `${hor}-${ver}`,
+        label: `先${horizontalLables[hor]}後${verticalLables[ver]}`,
+        icon: `PhArrowElbow${hor}${ver}`,
+      });
+    }
+  }
+  return subModes;
 }

@@ -54,7 +54,7 @@
       <el-empty v-else description=" " />
     </el-scrollbar>
     <div class="sidebar-footer">
-      <DataManager />
+      <DataManager :extraStore="props.extraStore" />
     </div>
   </div>
 </template>

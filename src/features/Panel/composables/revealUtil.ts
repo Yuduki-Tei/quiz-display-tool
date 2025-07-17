@@ -99,15 +99,8 @@ export function startReveal(params: RevealParams) {
   store.setRevealing(true);
   store.setPaused(false);
 
-  // Generate reveal order if needed
-  if (!context.order || context.order.length === 0) {
-    const order = generateRevealOrder(
-      context.autoRevealMode || "random",
-      context.amount,
-      context.revealed
-    );
-    store.setOrder(params.id, order);
-  }
+  const order = generateRevealOrder(context.autoRevealMode, context.amount);
+  store.setOrder(params.id, order);
 
   // Create new controller
   currentController = createRevealController();

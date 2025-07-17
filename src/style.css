@@ -64,6 +64,7 @@
 }
 
 .top-bar-right {
+  align-items: center;
   display: flex;
   justify-content: flex-end;
   flex: 1;
@@ -91,4 +92,8 @@
 .el-input-number {
   width: 80px;
   margin-left: 8px;
+}
+.text-select {
+  width: 140px;
+  margin-right: 10px;
 }

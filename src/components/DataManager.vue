@@ -25,7 +25,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { useImageStore } from "@/stores/imageStore";
-import { useZoomerStore } from "@/features/Zoomer/stores/zoomerStore";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
@@ -34,8 +33,15 @@ import { randomSelection } from "@/features/Zoomer/composables/useRectSelection"
 import { SelectionRect } from "@/features/Zoomer/types/ZoomerTypes";
 import { useNotifier } from "@/composables/useNotifier";
 
+interface Props {
+  extraStore: any;
+}
+
+const props = defineProps<Props>();
+
 const imageStore = useImageStore();
-const zoomerStore = useZoomerStore();
+const extraStore = props.extraStore;
+
 const importInput = ref<HTMLInputElement | null>(null);
 const { notify } = useNotifier();
 const isDataExists = computed(() => {
@@ -46,10 +52,10 @@ const triggerImport = () => {
   importInput.value?.click();
 };
 
-const handleExport = async () => {
+const selectionCheck = async () => {
   const unselectedImageIds: string[] = [];
   imageStore.allData.forEach((imageData) => {
-    if (!zoomerStore.hasSelection(imageData.id)) {
+    if (!extraStore.hasSelection(imageData.id)) {
       unselectedImageIds.push(imageData.id);
     }
   });
@@ -62,19 +68,35 @@ const handleExport = async () => {
     }
     unselectedImageIds.forEach((id) => {
       const imageData = imageStore.allData.find((data) => data.id === id);
-      if (imageData) {
+      if (imageData && extraStore.$id === "zoomer") {
         const rect: SelectionRect = randomSelection(
           imageData.displayWidth,
           imageData.displayHeight
         );
-        zoomerStore.setRect(id, rect);
+        extraStore.setRect(id, rect);
       }
     });
   }
+};
 
+const handleExport = async () => {
+  if (extraStore.$id === "zoomer") {
+    await selectionCheck();
+  }
   try {
     const zip = new JSZip();
+
+    const extraData = extraStore.contexts;
+
+    const header = {
+      version: "1.0.0",
+      createdAt: new Date().toISOString(),
+      mode: extraStore.$id,
+      appName: "quiz-display-tool",
+    };
+
     const sessionData = {
+      header,
       imageStore: {
         allData: imageStore.allData.map((d) => ({
           id: d.id,
@@ -86,9 +108,7 @@ const handleExport = async () => {
         })),
         currentIndex: imageStore.currentIndex,
       },
-      zoomerStore: {
-        contexts: zoomerStore.contexts,
-      },
+      extraStore: extraData,
     };
     zip.file("session.json", JSON.stringify(sessionData, null, 2));
     const imageFolder = zip.folder("images");
@@ -119,6 +139,15 @@ const handleImport = (event: Event) => {
       const sessionData = JSON.parse(await sessionFile.async("string"));
       const imageFiles = zip.folder("images");
 
+      const header = sessionData.header;
+      const importedMode = header.mode;
+      const currentMode = extraStore.$id;
+
+      if (importedMode !== currentMode) {
+        notify("mode-mismatch");
+        return;
+      }
+
       if (sessionData.imageStore && imageFiles) {
         // Revoke existing object URLs before importing new data
         imageStore.allData.forEach((data) => {
@@ -143,7 +172,7 @@ const handleImport = (event: Event) => {
           allData: validImageData,
           currentIndex: sessionData.imageStore.currentIndex,
         });
-        zoomerStore.importData(sessionData.zoomerStore);
+        extraStore.importData({ contexts: sessionData.extraStore });
         notify("imported");
       }
     } catch (error) {

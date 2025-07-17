@@ -64,7 +64,7 @@ const onPanelClick = (e: MouseEvent) => {
   if (
     !panelCanvas.value ||
     !context.value ||
-    panelStore.isRevealing ||
+    panelStore.isAutoRevealing ||
     !props.isManualMode
   )
     return;
@@ -154,7 +154,7 @@ watch(
 
 const drawImage = () => {
   if (!mainCanvas.value || !context.value) return;
-  
+
   const contextValue = context.value as PanelCombinedContext;
   const ctx = mainCanvas.value.getContext("2d");
   if (!ctx) return;

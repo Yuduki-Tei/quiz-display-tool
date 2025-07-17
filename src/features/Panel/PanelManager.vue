@@ -7,7 +7,7 @@
             type="primary"
             @click="isSidebarVisible = true"
             icon="PhSidebarSimple"
-            :disabled="isRevealing"
+            :disabled="isAutoRevealing"
           />
           <input
             ref="fileInput"
@@ -20,7 +20,7 @@
             type="primary"
             @click="triggerFileInput"
             icon="PhPlus"
-            :disabled="isRevealing"
+            :disabled="isAutoRevealing"
           />
           <el-divider direction="vertical" />
           <el-button-group>
@@ -43,7 +43,7 @@
             type="primary"
             @click="handleRevealControl"
             :disabled="isManual || !canShowAll"
-            :icon="isRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+            :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
           />
           <el-button-group>
             <Button
@@ -65,7 +65,7 @@
               v-model="gridX"
               size="small"
               style="width: 60px"
-              :disabled="isRevealing"
+              :disabled="isAutoRevealing"
             >
               <el-option
                 v-for="n in 100"
@@ -79,7 +79,7 @@
               v-model="gridY"
               size="small"
               style="width: 60px"
-              :disabled="isRevealing"
+              :disabled="isAutoRevealing"
             >
               <el-option
                 v-for="n in 100"
@@ -97,7 +97,7 @@
               :max="10"
               :step="0.1"
               style="width: 120px"
-              :disabled="isManual || isRevealing"
+              :disabled="isManual || isAutoRevealing"
               :show-tooltip="false"
             />
             <el-input-number
@@ -106,7 +106,7 @@
               :max="10"
               :step="0.1"
               size="small"
-              :disabled="isManual || isRevealing"
+              :disabled="isManual || isAutoRevealing"
             />
           </div>
         </div>
@@ -115,7 +115,7 @@
             class="text-select"
             v-model="mainMode"
             size="small"
-            :disabled="isRevealing || isManual"
+            :disabled="isAutoRevealing || isManual"
             v-show="!isManual"
             placeholder="選擇自動翻面模式"
           >
@@ -136,7 +136,7 @@
             v-model="subMode"
             v-show="mainMode === 'linear'"
             size="small"
-            :disabled="isRevealing || isManual"
+            :disabled="isAutoRevealing || isManual"
             placeholder="方向優先度"
           >
             <el-option
@@ -156,7 +156,7 @@
             v-model="subMode"
             v-show="mainMode === 'spiral'"
             size="small"
-            :disabled="isRevealing || isManual"
+            :disabled="isAutoRevealing || isManual"
             placeholder="方向與起點"
           >
             <el-option
@@ -178,7 +178,7 @@
               revealTypeButtons.find((b) => b.value === isManual)?.tooltip
             "
             @click="toggleManualMode"
-            :disabled="isRevealing"
+            :disabled="isAutoRevealing || isSomeRevealed"
           />
         </div>
       </div>
@@ -221,11 +221,18 @@ import Icon from "@/components/Icon.vue";
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
 const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
-const { isRevealing, isPaused } = storeToRefs(panelStore);
+const { isAutoRevealing, isPaused } = storeToRefs(panelStore);
 
 const panel = ref<InstanceType<typeof Panel> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const currentId = computed((): string | null => currentImage.value?.id || null);
+const isSomeRevealed = computed((): boolean => {
+  const ctx = panelStore.getContext(currentId.value);
+  return ctx
+    ? ctx.amount.x * ctx.amount.y > ctx.revealed.length &&
+        ctx.revealed.length > 0
+    : false;
+});
 const { notify } = useNotifier();
 const isSidebarVisible = ref(false);
 const gridX = ref<number>(5);
@@ -281,7 +288,7 @@ const goToNext = () => {
 };
 
 const handleRevealControl = () => {
-  if (!isRevealing.value) {
+  if (!isAutoRevealing.value) {
     if (currentId.value) {
       const ctx = panelStore.getContext(currentId.value);
       if (ctx) {

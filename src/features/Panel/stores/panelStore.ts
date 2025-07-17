@@ -3,7 +3,7 @@ import type { PanelAmount, PanelContext } from "../types/PanelTypes";
 
 interface PanelState {
   contexts: Record<string, PanelContext>;
-  isRevealing: boolean;
+  isAutoRevealing: boolean;
   isPaused: boolean;
 }
 
@@ -11,7 +11,7 @@ export const usePanelStore = defineStore("panel", {
   state: (): PanelState => ({
     contexts: {},
     isPaused: false,
-    isRevealing: false,
+    isAutoRevealing: false,
   }),
   actions: {
     /**
@@ -74,7 +74,7 @@ export const usePanelStore = defineStore("panel", {
      * Set reveal animation active state
      */
     setRevealing(revealing: boolean): void {
-      this.isRevealing = revealing;
+      this.isAutoRevealing = revealing;
     },
 
     /**

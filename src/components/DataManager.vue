@@ -182,6 +182,10 @@ const handleImport = (event: Event) => {
     }
   };
   reader.readAsArrayBuffer(file);
+
+  if (importInput.value) {
+    importInput.value.value = "";
+  }
 };
 </script>
 

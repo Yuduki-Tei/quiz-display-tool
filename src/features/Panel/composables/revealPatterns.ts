@@ -65,35 +65,7 @@ export function generateRevealOrder(
         return allCoords.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
     }
   }
-
-  // Apply different reveal patterns
-  switch (mode) {
-    case "random":
-      return shuffleArray(allCoords);
-
-    // case "topToBottom":
-    //   return allCoords.sort((a, b) => a[1] - b[1] || a[0] - b[0]);
-    // case "topToBottomReverse":
-    //   return allCoords.sort((a, b) => a[1] - b[1] || b[0] - a[0]);
-
-    // case "bottomToTop":
-    //   return allCoords.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-    // case "buttomToTopReverse":
-    //   return allCoords.sort((a, b) => b[1] - a[1] || b[0] - a[0]);
-
-    // case "leftToRight":
-    //   return allCoords.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-    // case "leftToRightReverse":
-    //   return allCoords.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
-
-    // case "rightToLeft":
-    //   return allCoords.sort((a, b) => b[0] - a[0] || a[1] - b[1]);
-    // case "rightToLeftReverse":
-    //   return allCoords.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
-
-    default:
-      return shuffleArray(allCoords); // Default is random
-  }
+  return shuffleArray(allCoords);
 }
 
 /**
@@ -239,30 +211,6 @@ export function getMainRevealModes() {
   return [
     { value: "random", label: "隨機", icon: "PhShuffleSimple" },
     { value: "linear", label: "線性", icon: "PhArrowsLeftRight" },
-    // { value: "topToBottom", label: "線性(1)", icon: "PhArrowElbowRightDown" }, //LR-TB
-    // {
-    //   value: "topToBottomReverse", //RL-TB
-    //   label: "線性(1)反向",
-    //   icon: "PhArrowElbowLeftDown",
-    // },
-    // { value: "bottomToTop", label: "線性(2)", icon: "PhArrowElbowRightUp" }, //LR-BT
-    // {
-    //   value: "buttomToTopReverse", //RL-BT
-    //   label: "線性(2)反向",
-    //   icon: "PhArrowElbowLeftUp",
-    // },
-    // { value: "leftToRight", label: "線性(3)", icon: "PhArrowElbowDownRight" }, //TB-LR
-    // {
-    //   value: "leftToRightReverse", //BT-LR
-    //   label: "線性(3)反向",
-    //   icon: "PhArrowElbowUpRight",
-    // },
-    // { value: "rightToLeft", label: "線性(4)", icon: "PhArrowElbowDownLeft" }, //TB-RL
-    // {
-    //   value: "rightToLeftReverse", //BT-RL
-    //   label: "線性(4)反向",
-    //   icon: "PhArrowElbowUpLeft",
-    // },
     { value: "spiral", label: "螺旋", icon: "PhSpiral" },
   ];
 }
@@ -301,25 +249,25 @@ export function getSpiralSubModes() {
  * Returns sub modes for linear patterns
  */
 export function getLinearSubModes() {
-  const verticalLables: Record<string, string> = {
+  const verticalLabels: Record<string, string> = {
     Right: "向右",
     Left: "向左",
   };
-  const horizontalLables: Record<string, string> = {
+  const horizontalLabels: Record<string, string> = {
     Down: "向下",
     Up: "向上",
   };
   const subModes: { value: string; label: string; icon: string }[] = [];
-  for (const hor in horizontalLables) {
-    for (const ver in verticalLables) {
+  for (const hor in horizontalLabels) {
+    for (const ver in verticalLabels) {
       subModes.push({
         value: `${ver}-${hor}`,
-        label: `先${verticalLables[ver]}後${horizontalLables[hor]}`,
+        label: `先${verticalLabels[ver]}後${horizontalLabels[hor]}`,
         icon: `PhArrowElbow${ver}${hor}`,
       });
       subModes.push({
         value: `${hor}-${ver}`,
-        label: `先${horizontalLables[hor]}後${verticalLables[ver]}`,
+        label: `先${horizontalLabels[hor]}後${verticalLabels[ver]}`,
         icon: `PhArrowElbow${hor}${ver}`,
       });
     }

@@ -2,6 +2,7 @@
   <el-button
     v-bind="buttonProps"
     :class="[icon && !slots.default ? 'icon-only-btn' : '', $attrs.class]"
+    plain
   >
     <Icon v-if="icon" :name="icon" :size="String(iconSize)" />
     <slot v-if="!icon" />

@@ -4,7 +4,6 @@
       <div class="manager-top-bar">
         <div class="manager-top-bar-left">
           <Button
-            type="primary"
             @click="isSidebarVisible = true"
             :disabled="isZooming"
             icon="PhSidebarSimple"
@@ -25,13 +24,11 @@
           <el-divider direction="vertical" />
           <el-button-group>
             <Button
-              type="info"
               @click="goToPrev"
               :disabled="!canGoPrev"
               icon="PhArrowLeft"
             />
             <Button
-              type="info"
               @click="goToNext"
               :disabled="!canGoNext"
               icon="PhArrowRight"
@@ -41,13 +38,11 @@
         <div class="top-bar-center">
           <el-button-group>
             <Button
-              type="primary"
               @click="handleZoomControl"
               :disabled="!hasSelection && !isZooming"
               :icon="isZooming && !isPaused ? 'PhPause' : 'PhPlay'"
             />
             <Button
-              type="warning"
               @click="handleShowFullImage"
               :disabled="!currentId || !isZooming"
               icon="PhCornersOut"
@@ -76,7 +71,6 @@
         </div>
         <div class="top-bar-right">
           <Button
-            type="primary"
             :icon="displayModes.find((m) => m.value === displayMode)?.icon"
             :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
             @click="cycleDisplayMode"

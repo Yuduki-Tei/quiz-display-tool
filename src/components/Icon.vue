@@ -1,6 +1,6 @@
 <template>
   <div class="phosphor-icon" :style="iconStyle">
-    <component :is="iconComponent" :weight="weight" />
+    <component :is="iconComponent" :weight="weight" :color="color" />
   </div>
 </template>
 
@@ -13,11 +13,13 @@ const props = withDefaults(
     size?: string | null;
     name: string;
     weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+    color?: string;
   }>(),
   {
     size: "20",
     name: "Plus",
     weight: "regular",
+    color: "currentColor",
   }
 );
 

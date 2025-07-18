@@ -51,11 +51,14 @@
           </div>
         </template>
       </vuedraggable>
-      <el-empty v-else description=" " />
+      <el-empty v-else description=" ">
+        <Button type="primary" icon="PhBoxArrowUp" @click="handleImport" />
+      </el-empty>
     </el-scrollbar>
-    <div class="sidebar-footer">
-      <DataManager :extraStore="props.extraStore" />
+    <div v-if="imageList.length > 0" class="sidebar-footer">
+      <Button icon="PhBoxArrowDown" @click="handleExport" />
     </div>
+    <DataManager ref="dataManagerRef" :extraStore="props.extraStore" />
   </div>
 </template>
 
@@ -83,6 +86,8 @@ const { allData } = storeToRefs(imageStore);
 const extraStore = props.extraStore;
 const showThumbnails = ref(true);
 
+const dataManagerRef = ref<InstanceType<typeof DataManager> | null>(null);
+
 const imageList = computed({
   get: () => allData.value,
   set: (newOrder) => {
@@ -97,6 +102,14 @@ const selectImage = (id: string) => {
 const handleDelete = (id: string) => {
   imageStore.removeData(id);
   extraStore.removeContext(id);
+};
+
+const handleImport = () => {
+  dataManagerRef.value?.triggerImport();
+};
+
+const handleExport = () => {
+  dataManagerRef.value?.handleExport();
 };
 </script>
 

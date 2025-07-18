@@ -6,7 +6,30 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import * as PhosphorIcons from "@phosphor-icons/vue";
+import {
+  PhHouse,
+  PhTrash,
+  PhBoxArrowDown,
+  PhBoxArrowUp,
+  PhTranslate,
+  PhSidebarSimple,
+  PhPlus,
+  PhArrowLeft,
+  PhArrowRight,
+  PhPause,
+  PhPlay,
+  PhEyeClosed,
+  PhFrameCorners,
+  PhCursorClick,
+  PhClockClockwise,
+  PhCornersOut,
+  PhImage,
+  PhCrop,
+  PhEyeSlash,
+  PhX,
+  PhPictureInPicture,
+  PhCheckerboard,
+} from "@phosphor-icons/vue";
 
 const props = withDefaults(
   defineProps<{
@@ -22,6 +45,31 @@ const props = withDefaults(
     color: "currentColor",
   }
 );
+
+const PhosphorIcons = {
+  PhHouse,
+  PhTrash,
+  PhBoxArrowDown,
+  PhBoxArrowUp,
+  PhTranslate,
+  PhSidebarSimple,
+  PhPlus,
+  PhArrowLeft,
+  PhArrowRight,
+  PhPause,
+  PhPlay,
+  PhEyeClosed,
+  PhFrameCorners,
+  PhCursorClick,
+  PhClockClockwise,
+  PhCornersOut,
+  PhImage,
+  PhCrop,
+  PhEyeSlash,
+  PhX,
+  PhPictureInPicture,
+  PhCheckerboard,
+};
 
 const iconStyle = computed(() => ({
   fontSize: props.size ? `${props.size}px` : "20px",

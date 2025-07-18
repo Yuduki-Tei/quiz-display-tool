@@ -107,9 +107,11 @@ import { useNotifier } from "@/composables/useNotifier";
 import Zoomer from "./views/Zoomer.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
 import Button from "@/components/Button.vue";
+import { useI18n } from "vue-i18n";
 
 const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
+const { t } = useI18n();
 
 const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
 const { isZooming, isPaused } = storeToRefs(zoomStore);
@@ -187,9 +189,9 @@ const durationSec = computed({
 });
 
 const displayModes = [
-  { value: "full", icon: "PhImage", tooltip: "顯示完整圖片" },
-  { value: "selection", icon: "PhCrop", tooltip: "只顯示框選區域" },
-  { value: "none", icon: "PhEyeSlash", tooltip: "隱藏圖片" },
+  { value: "full", icon: "PhImage", tooltip: t("zoomer.showFullImage") },
+  { value: "selection", icon: "PhCrop", tooltip: t("zoomer.showSelectedArea") },
+  { value: "none", icon: "PhEyeSlash", tooltip: t("zoomer.hideImage") },
 ];
 const displayMode = ref<string>("full");
 const cycleDisplayMode = () => {

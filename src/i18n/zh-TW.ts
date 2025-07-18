@@ -28,4 +28,36 @@ export default {
     imageUpload: "上傳圖片",
     selectMode: "選擇模式",
   },
+  mode: {
+    random: "隨機",
+    linear: "線性",
+    spiral: "螺旋",
+    direction: {
+      right: "向右",
+      left: "向左",
+      down: "向下",
+      up: "向上",
+      clockwise: "順時針",
+      counterClockwise: "逆時針",
+    },
+    position: {
+      topLeft: "左上開始",
+      topRight: "右上開始",
+      bottomRight: "右下開始",
+      bottomLeft: "左下開始",
+      center: "中心開始",
+    },
+  },
+  panel: {
+    selectMode: "選擇翻面模式",
+    directionPriority: "方向優先度",
+    directionAndStart: "方向與起點",
+    manual: "手動翻面",
+    auto: "自動翻面",
+  },
+  zoomer: {
+    showFullImage: "顯示完整圖片",
+    showSelectedArea: "只顯示框選區域",
+    hideImage: "隱藏圖片",
+  },
 };

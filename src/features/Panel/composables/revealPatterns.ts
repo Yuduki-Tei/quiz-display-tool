@@ -3,8 +3,10 @@
  * @description Provides functionality to generate reveal patterns for panels
  */
 
+import { vModelCheckbox } from "vue";
 import type { PanelAmount } from "../types/PanelTypes";
 type Coord = [number, number];
+import { useI18n } from "vue-i18n";
 
 type StartPoint =
   | "topLeft"
@@ -208,10 +210,11 @@ function generateSpiralCoords(
  * return usable patterns
  */
 export function getMainRevealModes() {
+  const { t } = useI18n();
   return [
-    { value: "random", label: "隨機", icon: "PhShuffleSimple" },
-    { value: "linear", label: "線性", icon: "PhArrowsLeftRight" },
-    { value: "spiral", label: "螺旋", icon: "PhSpiral" },
+    { value: "random", label: t("mode.random"), icon: "PhShuffleSimple" },
+    { value: "linear", label: t("mode.linear"), icon: "PhArrowsLeftRight" },
+    { value: "spiral", label: t("mode.spiral"), icon: "PhSpiral" },
   ];
 }
 
@@ -219,24 +222,22 @@ export function getMainRevealModes() {
  * Returns sub modes for spiral patterns
  */
 export function getSpiralSubModes() {
-  const startPointLabels: Record<StartPoint, string> = {
-    topLeft: "左上",
-    topRight: "右上",
-    bottomRight: "右下",
-    bottomLeft: "左下",
-    center: "中心",
-  };
-  const directionLabels: Record<Direction, string> = {
-    clockwise: "順時針",
-    counterClockwise: "逆時針",
-  };
+  const { t } = useI18n();
+  const startPoints: StartPoint[] = [
+    "topLeft",
+    "topRight",
+    "bottomRight",
+    "bottomLeft",
+    "center",
+  ];
+  const directions: Direction[] = ["clockwise", "counterClockwise"];
 
   const subModes: { value: string; label: string; icon: string }[] = [];
-  for (const sp in startPointLabels) {
-    for (const dir in directionLabels) {
+  for (const sp of startPoints) {
+    for (const dir of directions) {
       subModes.push({
         value: `${sp}-${dir}`,
-        label: `${startPointLabels[sp as StartPoint]}起`,
+        label: `${t(`mode.position.${sp}`)}`,
         icon:
           dir === "clockwise" ? "PhArrowClockwise" : "PhArrowCounterClockwise",
       });
@@ -249,25 +250,25 @@ export function getSpiralSubModes() {
  * Returns sub modes for linear patterns
  */
 export function getLinearSubModes() {
-  const verticalLabels: Record<string, string> = {
-    Right: "向右",
-    Left: "向左",
-  };
-  const horizontalLabels: Record<string, string> = {
-    Down: "向下",
-    Up: "向上",
-  };
+  const { t } = useI18n();
+  const verticals = ["Right", "Left"];
+  const horizontals = ["Down", "Up"];
+
   const subModes: { value: string; label: string; icon: string }[] = [];
-  for (const hor in horizontalLabels) {
-    for (const ver in verticalLabels) {
+  for (const hor of horizontals) {
+    for (const ver of verticals) {
       subModes.push({
         value: `${ver}-${hor}`,
-        label: `先${verticalLabels[ver]}後${horizontalLabels[hor]}`,
+        label: `${t(`mode.direction.${ver.toLowerCase()}`)} - ${t(
+          `mode.direction.${hor.toLowerCase()}`
+        )}`,
         icon: `PhArrowElbow${ver}${hor}`,
       });
       subModes.push({
         value: `${hor}-${ver}`,
-        label: `先${horizontalLabels[hor]}後${verticalLabels[ver]}`,
+        label: `${t(`mode.direction.${hor.toLowerCase()}`)} - ${t(
+          `mode.direction.${ver.toLowerCase()}`
+        )}`,
         icon: `PhArrowElbow${hor}${ver}`,
       });
     }

@@ -1,23 +1,11 @@
 <template>
-  <div class="data-manager-btns">
-    <Button
-      icon="PhBoxArrowUp"
-      @click="triggerImport"
-      :disabled="isDataExists"
-    />
-    <Button
-      icon="PhBoxArrowDown"
-      @click="handleExport"
-      :disabled="!isDataExists"
-    />
-    <input
-      ref="importInput"
-      type="file"
-      accept=".zip"
-      style="display: none"
-      @change="handleImport"
-    />
-  </div>
+  <input
+    ref="importInput"
+    type="file"
+    accept=".zip"
+    style="display: none"
+    @change="handleImport"
+  />
 </template>
 
 <script setup lang="ts">
@@ -26,7 +14,6 @@ import { useImageStore } from "@/stores/imageStore";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";
-import Button from "@/components/Button.vue";
 import { randomSelection } from "@/features/Zoomer/composables/useRectSelection";
 import { SelectionRect } from "@/features/Zoomer/types/ZoomerTypes";
 import { useNotifier } from "@/composables/useNotifier";
@@ -42,9 +29,7 @@ const extraStore = props.extraStore;
 
 const importInput = ref<HTMLInputElement | null>(null);
 const { notify } = useNotifier();
-const isDataExists = computed(() => {
-  return imageStore.allData.length > 0;
-});
+
 
 const triggerImport = () => {
   importInput.value?.click();
@@ -185,12 +170,9 @@ const handleImport = (event: Event) => {
     importInput.value.value = "";
   }
 };
-</script>
 
-<style scoped>
-.data-manager-btns {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-</style>
+defineExpose({
+  triggerImport,
+  handleExport,
+});
+</script>

@@ -111,7 +111,7 @@
             size="small"
             :disabled="isAutoRevealing || isManual"
             v-show="!isManual"
-            placeholder="選擇自動翻面模式"
+            :placeholder="t('panel.selectMode')"
           >
             <el-option
               v-for="mode in getMainRevealModes()"
@@ -131,7 +131,7 @@
             v-show="mainMode === 'linear'"
             size="small"
             :disabled="isAutoRevealing || isManual"
-            placeholder="方向優先度"
+            :placeholder="t('panel.directionPriority')"
           >
             <el-option
               v-for="subMode in getLinearSubModes()"
@@ -151,7 +151,7 @@
             v-show="mainMode === 'spiral'"
             size="small"
             :disabled="isAutoRevealing || isManual"
-            placeholder="方向與起點"
+            :placeholder="t('panel.directionAndStart')"
           >
             <el-option
               v-for="subMode in getSpiralSubModes()"
@@ -208,11 +208,13 @@ import {
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
 import ImageSidebar from "@/components/ImageSidebar.vue";
+import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
 
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
+const { t } = useI18n();
 const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
 const { isAutoRevealing, isPaused } = storeToRefs(panelStore);
 
@@ -334,8 +336,8 @@ const durationSec = computed({
 });
 
 const revealTypeButtons = [
-  { value: true, icon: "PhCursorClick", tooltip: "手動翻面" },
-  { value: false, icon: "PhClockClockwise", tooltip: "自動翻面" },
+  { value: true, icon: "PhCursorClick", tooltip: t("panel.manual") },
+  { value: false, icon: "PhClockClockwise", tooltip: t("panel.auto") },
 ];
 
 const toggleManualMode = () => {

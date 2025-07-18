@@ -1,39 +1,15 @@
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
 import type { NotifierOptions } from "@/@types/types";
+import { useI18n } from "vue-i18n";
 
 const capitalize = (s: string): string => {
   if (!s) return "";
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
-const messageMap: Record<
-  string,
-  {
-    message: string;
-    level: "success" | "warning" | "error" | "info";
-    mode?: "confirm" | "message" | "notification";
-    title?: string;
-  }
-> = {
-  added: { message: "圖片已載入", level: "success" },
-  updated: { message: "相同圖片已存在", level: "warning" },
-  error: { message: "載入圖片失敗", level: "error" },
-  exported: { message: "匯出成功", level: "success" },
-  imported: { message: "匯入成功", level: "success" },
-  cancel: { message: "已取消操作", level: "info" },
-  "export-confirm": {
-    message: "有部分圖片尚未框選區域。是否要為這些圖片隨機選取一塊區域後匯出？",
-    level: "warning",
-    mode: "confirm",
-    title: "確認",
-  },
-  "mode-mismatch": {
-    message: "導入的資料與當前模式不符。無法載入資料。",
-    level: "error",
-  },
-};
-
 export function useNotifier() {
+  const { t } = useI18n();
+
   function notify(
     type: string,
     options: NotifierOptions & { mode: "confirm" }
@@ -45,7 +21,7 @@ export function useNotifier() {
 
   /**
    * Display notification or confirmation dialog
-   * @param type Notification type (defined in messageMap)
+   * @param type Notification type (defined in i18n notification namespace)
    * @param options Optional configuration
    * @returns If it's a confirmation dialog, returns Promise<boolean> representing user's choice; otherwise returns undefined
    */
@@ -53,19 +29,37 @@ export function useNotifier() {
     type: string,
     options: NotifierOptions = {}
   ): Promise<boolean | void> {
-    const baseConfig = messageMap[type] || {
-      message: type,
-      level: "info",
-      mode: "message",
-    };
+    const message = t(`notification.${type}`);
+    const title = options.title || t("buttons.confirm");
 
-    const config = { ...baseConfig, ...options };
-    const mode = config.mode;
+    let level: "success" | "warning" | "error" | "info" = "info";
+    switch (type) {
+      case "added":
+      case "exported":
+      case "imported":
+        level = "success";
+        break;
+      case "updated":
+      case "export-confirm":
+        level = "warning";
+        break;
+      case "error":
+      case "mode-mismatch":
+        level = "error";
+        break;
+      default:
+        level = "info";
+    }
+
+    const mode =
+      type === "export-confirm" ? "confirm" : options.mode || "message";
 
     if (mode === "confirm") {
       try {
-        await ElMessageBox.confirm(config.message, config.title || "確認", {
-          type: config.level,
+        await ElMessageBox.confirm(message, title, {
+          type: level,
+          confirmButtonText: t("buttons.confirm"),
+          cancelButtonText: t("buttons.cancel"),
         });
         return true;
       } catch {
@@ -75,20 +69,20 @@ export function useNotifier() {
 
     if (mode === "notification") {
       ElNotification({
-        title: config.title || capitalize(config.level),
-        message: config.message,
-        type: config.level,
-        duration: config.duration || 4500,
-        ...config,
+        title: options.title || capitalize(level),
+        message,
+        type: level,
+        duration: options.duration || 4500,
+        ...options,
       });
       return;
     }
 
     ElMessage({
-      message: config.message,
-      type: config.level,
-      duration: config.duration || 2000,
-      ...config,
+      message,
+      type: level,
+      duration: options.duration || 2000,
+      ...options,
     });
   }
 

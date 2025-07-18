@@ -28,27 +28,31 @@ const props = withDefaults(
     type: "default",
     size: "default",
     circle: false,
-    plain: false,
   }
 );
 
 const $attrs = useAttrs();
 const slots = useSlots();
 
-const buttonProps = computed(() => ({
-  type: props.type,
-  size: props.size,
-  circle: props.circle,
-  plain: props.plain,
-  ...$attrs,
-}));
+const buttonProps = computed(() => {
+  const attrs = { ...$attrs };
+  if (!attrs.role) {
+    attrs.role = "button";
+  }
+
+  return {
+    type: props.type,
+    size: props.size,
+    circle: props.circle,
+    plain: props.plain,
+    ...attrs,
+  };
+});
 </script>
 
 <style scoped>
 .icon-only-btn {
   padding: 0 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
 }
 </style>

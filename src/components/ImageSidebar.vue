@@ -143,7 +143,7 @@ const handleDelete = (id: string) => {
 }
 
 .list-item-ep.is-active {
-  background-color: var(--el-color-primary-light-9);
+  background-color: var(--el-color-primary-light-5);
 }
 
 .list-item-ep.not-selected {
@@ -151,7 +151,7 @@ const handleDelete = (id: string) => {
 }
 
 .list-item-ep.not-selected.is-active {
-  background-color: var(--el-color-warning-light-9);
+  background-color: var(--el-color-warning-light-8);
 }
 
 .thumbnail-ep {

@@ -4,7 +4,7 @@
       v-if="!showHome"
       style="position: fixed; bottom: 10px; right: 10px; z-index: 2000"
     >
-      <Button @click="backToHome" icon="PhHouse" style="padding: 0.5em 1em" />
+      <Button @click="backToHome" icon="PhHouse" />
     </div>
     <HomePage v-if="showHome" @select-mode="selectMode" />
     <ZoomerManager v-else-if="currentMode === 'zoomer'" />

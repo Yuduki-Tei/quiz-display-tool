@@ -2,10 +2,10 @@
   <div class="home-page">
     <div class="mode-selection">
       <div class="mode-card" @click="selectMode('zoomer')">
-        <Icon name="PhPictureInPicture" size="128" />
+        <Icon name="PhPictureInPicture" size="128" color="#039390" />
       </div>
       <div class="mode-card" @click="selectMode('panel')">
-        <Icon name="PhCheckerboard" size="128" />
+        <Icon name="PhCheckerboard" size="128" color="#039390" />
       </div>
     </div>
   </div>
@@ -33,11 +33,6 @@ const selectMode = (mode: "zoomer" | "panel") => {
   height: 100vh;
 }
 
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-}
-
 .mode-selection {
   display: flex;
   gap: 2rem;
@@ -52,19 +47,11 @@ h1 {
   content: center;
   transition: transform 0.2s, box-shadow 0.2s;
   border: solid 1px;
+  border-color: var(--el-border-color);
 }
 
 .mode-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-p {
-  line-height: 1.5;
+  box-shadow: 0 2px 10px var(--el-color-primary-dark-2);
 }
 </style>

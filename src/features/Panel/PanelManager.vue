@@ -4,7 +4,6 @@
       <div class="manager-top-bar">
         <div class="manager-top-bar-left">
           <Button
-            type="primary"
             @click="isSidebarVisible = true"
             icon="PhSidebarSimple"
             :disabled="isAutoRevealing"
@@ -25,13 +24,11 @@
           <el-divider direction="vertical" />
           <el-button-group>
             <Button
-              type="info"
               @click="goToPrev"
               :disabled="!canGoPrev"
               icon="PhArrowLeft"
             />
             <Button
-              type="info"
               @click="goToNext"
               :disabled="!canGoNext"
               icon="PhArrowRight"
@@ -40,20 +37,17 @@
         </div>
         <div class="top-bar-center">
           <Button
-            type="primary"
             @click="handleRevealControl"
             :disabled="isManual || !canShowAll"
             :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
           />
           <el-button-group>
             <Button
-              type="warning"
               @click="handleCoverAll"
               icon="PhEyeClosed"
               :disabled="!canHideAll"
             />
             <Button
-              type="warning"
               @click="handleRevealAll"
               icon="PhFrameCorners"
               :disabled="!canShowAll"
@@ -172,7 +166,6 @@
             </el-option>
           </el-select>
           <Button
-            type="primary"
             :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
             :title="
               revealTypeButtons.find((b) => b.value === isManual)?.tooltip

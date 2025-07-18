@@ -1,13 +1,11 @@
 <template>
   <div class="data-manager-btns">
     <Button
-      type="primary"
       icon="PhBoxArrowUp"
       @click="triggerImport"
       :disabled="isDataExists"
     />
     <Button
-      type="primary"
       icon="PhBoxArrowDown"
       @click="handleExport"
       :disabled="!isDataExists"
@@ -52,7 +50,7 @@ const triggerImport = () => {
   importInput.value?.click();
 };
 
-const selectionCheck = async (): boolean => {
+const selectionCheck = async (): Promise<boolean> => {
   const unselectedImageIds: string[] = [];
   imageStore.allData.forEach((imageData) => {
     if (!extraStore.hasSelection(imageData.id)) {

@@ -89,10 +89,12 @@
     size="280px"
     :with-header="false"
   >
-    <ImageSidebar
+    <DataSidebar
       :current-id="currentId"
+      :data-store="imageStore"
       :extra-store="zoomStore"
-      @select-image="handleImageSelect"
+      data-type="image"
+      @select-data="handleImageSelect"
     />
   </el-drawer>
 </template>
@@ -105,7 +107,7 @@ import { useZoomerStore } from "./stores/zoomerStore";
 import { loadImageFile } from "@/composables/useImageLoader";
 import { useNotifier } from "@/composables/useNotifier";
 import Zoomer from "./views/Zoomer.vue";
-import ImageSidebar from "@/components/ImageSidebar.vue";
+import DataSidebar from "@/components/DataSidebar.vue";
 import Button from "@/components/Button.vue";
 import { useI18n } from "vue-i18n";
 

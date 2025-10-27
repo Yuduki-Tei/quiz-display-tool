@@ -186,10 +186,12 @@
     size="280px"
     :with-header="false"
   >
-    <ImageSidebar
+    <DataSidebar
       :current-id="currentId"
+      :data-store="imageStore"
       :extra-store="panelStore"
-      @select-image="handleImageSelect"
+      data-type="image"
+      @select-data="handleImageSelect"
     />
   </el-drawer>
 </template>
@@ -207,7 +209,7 @@ import {
 } from "./composables/revealPatterns";
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
-import ImageSidebar from "@/components/ImageSidebar.vue";
+import DataSidebar from "@/components/DataSidebar.vue";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";

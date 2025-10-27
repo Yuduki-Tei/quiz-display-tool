@@ -128,7 +128,13 @@
     size="280px"
     :with-header="false"
   >
-    <div class="sidebar-placeholder">Text file list will go here</div>
+    <DataSidebar
+      :current-id="currentId"
+      :data-store="textStore"
+      :extra-store="letterStore"
+      data-type="text"
+      @select-data="handleTextSelect"
+    />
   </el-drawer>
 </template>
 
@@ -136,11 +142,14 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useTextStore } from "@/stores/imageStore";
+import { useLetterStore } from "./stores/letterStore";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
+import DataSidebar from "@/components/DataSidebar.vue";
 
 const textStore = useTextStore();
+const letterStore = useLetterStore();
 const { t } = useI18n();
 const { canGoPrev, canGoNext, currentData } = storeToRefs(textStore);
 
@@ -179,15 +188,14 @@ const onFileChange = async (e: Event) => {
   const file = files[0];
 
   try {
-    const text = await file.text();
-    const textData = {
-      id: crypto.randomUUID(),
-      name: file.name,
-      content: text,
-      thumbnailSrc: null,
-    };
-    textStore.addData(textData);
-    // TODO: initialize letterStore context
+    const { loadTextFile } = await import("@/composables/useTextLoader");
+    const textDataArray = await loadTextFile(file);
+
+    // Add each line as a separate text data entry
+    textDataArray.forEach((textData) => {
+      textStore.addData(textData);
+      // TODO: initialize letterStore context for each text
+    });
   } catch (err) {
     console.error("Failed to load text file:", err);
   }
@@ -203,6 +211,11 @@ const goToPrev = () => {
 
 const goToNext = () => {
   textStore.goToNext();
+};
+
+const handleTextSelect = (id: string) => {
+  textStore.setCurrentById(id);
+  isSidebarVisible.value = false;
 };
 
 const handleRevealControl = () => {

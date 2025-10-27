@@ -4,16 +4,15 @@ export default {
     back: "戻る",
   },
   home: {
-    title: "クイズ表示ツール",
     imageQuiz: "画像クイズ表示ツール",
-    textQuiz: "テキストクイズ表示ツール",
+    textQuiz: "文字クイズ表示ツール",
     zoomerMode: "ズームアウトクイズ",
     panelMode: "パネルクイズ",
   },
   notification: {
-    added: "画像が読み込まれました",
-    updated: "同じ画像が既に存在します",
-    error: "画像の読み込みに失敗しました",
+    added: "データが読み込まれました",
+    updated: "同じデータが既に存在します",
+    error: "データの読み込みに失敗しました",
     exported: "エクスポートに成功しました",
     imported: "インポートに成功しました",
     cancel: "操作がキャンセルされました",
@@ -28,7 +27,7 @@ export default {
   },
   aria: {
     homeButton: "ホームに戻る",
-    imageUpload: "画像をアップロード",
+    imageUpload: "データをアップロード",
     selectMode: "モードを選択",
   },
   mode: {

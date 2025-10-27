@@ -4,16 +4,15 @@ export default {
     back: "返回",
   },
   home: {
-    title: "Quiz顯示工具",
     imageQuiz: "圖片Quiz顯示工具",
     textQuiz: "文字Quiz顯示工具",
     zoomerMode: "縮放模式",
     panelMode: "面板模式",
   },
   notification: {
-    added: "圖片已載入",
-    updated: "相同圖片已存在",
-    error: "載入圖片失敗",
+    added: "檔案已載入",
+    updated: "相同檔案已存在",
+    error: "載入檔案失敗",
     exported: "匯出成功",
     imported: "匯入成功",
     cancel: "已取消操作",
@@ -27,7 +26,7 @@ export default {
   },
   aria: {
     homeButton: "返回首頁",
-    imageUpload: "上傳圖片",
+    imageUpload: "上傳檔案",
     selectMode: "選擇模式",
   },
   mode: {

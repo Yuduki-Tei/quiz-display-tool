@@ -62,4 +62,13 @@ export default {
     showSelectedArea: "只顯示框選區域",
     hideImage: "隱藏圖片",
   },
+  letter: {
+    selectMode: "選擇揭露模式",
+    manual: "點擊揭露",
+    auto: "自動揭露",
+    charsPerRow: "每行字數",
+    random: "隨機",
+    sequential: "順序",
+    reverse: "倒序",
+  },
 };

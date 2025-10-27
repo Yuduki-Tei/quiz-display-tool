@@ -63,4 +63,13 @@ export default {
     showSelectedArea: "Show selected area only",
     hideImage: "Hide image",
   },
+  letter: {
+    selectMode: "Select reveal mode",
+    manual: "Manual reveal",
+    auto: "Auto reveal",
+    charsPerRow: "Characters per row",
+    random: "Random",
+    sequential: "Sequential",
+    reverse: "Reverse",
+  },
 };

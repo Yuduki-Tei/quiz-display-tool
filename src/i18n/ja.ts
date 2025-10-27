@@ -63,4 +63,13 @@ export default {
     showSelectedArea: "選択領域のみ表示",
     hideImage: "画像を非表示",
   },
+  letter: {
+    selectMode: "モード変更",
+    manual: "手動めくり",
+    auto: "自動めくり",
+    charsPerRow: "1行の文字数",
+    random: "ランダム",
+    sequential: "順番",
+    reverse: "逆順",
+  },
 };

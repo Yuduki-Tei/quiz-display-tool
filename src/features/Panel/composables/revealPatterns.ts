@@ -3,7 +3,6 @@
  * @description Provides functionality to generate reveal patterns for panels
  */
 
-import { vModelCheckbox } from "vue";
 import type { PanelAmount } from "../types/PanelTypes";
 type Coord = [number, number];
 import { useI18n } from "vue-i18n";

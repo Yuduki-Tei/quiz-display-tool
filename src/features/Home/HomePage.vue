@@ -38,15 +38,14 @@
 
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import Icon from "@/components/Icon.vue";
 
 const { t } = useI18n();
-const emit = defineEmits<{
-  (e: "select-mode", mode: "zoomer" | "panel"): void;
-}>();
+const router = useRouter();
 
 const selectMode = (mode: "zoomer" | "panel") => {
-  emit("select-mode", mode);
+  router.push(`/${mode}`);
 };
 </script>
 

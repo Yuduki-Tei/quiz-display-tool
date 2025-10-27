@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div
-      v-if="!showHome"
+      v-if="$route.name !== 'home'"
       style="position: fixed; bottom: 10px; right: 10px; z-index: 2000"
       class="home-button-container"
     >
@@ -14,37 +14,26 @@
     </div>
 
     <div class="language-controls">
-      <LanguageSelector v-if="showHome" />
+      <LanguageSelector v-if="$route.name === 'home'" />
     </div>
 
     <main>
-      <HomePage v-if="showHome" @select-mode="selectMode" />
-      <ZoomerManager v-else-if="currentMode === 'zoomer'" />
-      <PanelManager v-else-if="currentMode === 'panel'" />
+      <router-view />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import Button from "@/components/Button.vue";
 import LanguageSelector from "@/components/LanguageSelector.vue";
-import ZoomerManager from "./features/Zoomer/ZoomerManager.vue";
-import PanelManager from "./features/Panel/PanelManager.vue";
-import HomePage from "./features/Home/HomePage.vue";
 
 const { t } = useI18n();
-const showHome = ref(true);
-const currentMode = ref<"zoomer" | "panel">("zoomer");
-
-const selectMode = (mode: "zoomer" | "panel") => {
-  currentMode.value = mode;
-  showHome.value = false;
-};
+const router = useRouter();
 
 const backToHome = () => {
-  showHome.value = true;
+  router.push("/");
 };
 </script>
 

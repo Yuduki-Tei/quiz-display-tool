@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/features/Home/HomePage.vue";
 import ZoomerManager from "@/features/Zoomer/ZoomerManager.vue";
 import PanelManager from "@/features/Panel/PanelManager.vue";
+import LetterManager from "@/features/Letter/LetterManager.vue";
 
 const router = createRouter({
   history: createWebHistory("/quiz-display-tool/"),
@@ -20,6 +21,11 @@ const router = createRouter({
       path: "/panel",
       name: "panel",
       component: PanelManager,
+    },
+    {
+      path: "/text-panel",
+      name: "text-panel",
+      component: LetterManager,
     },
   ],
 });

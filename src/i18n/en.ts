@@ -5,6 +5,8 @@ export default {
   },
   home: {
     title: "Quiz Display Tool",
+    imageQuiz: "Image Quiz Display Tool",
+    textQuiz: "Text Quiz Display Tool",
     zoomerMode: "Zoom Out Mode",
     panelMode: "Panel Mode",
   },

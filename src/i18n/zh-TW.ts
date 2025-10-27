@@ -4,7 +4,9 @@ export default {
     back: "返回",
   },
   home: {
-    title: "圖片Quiz顯示工具",
+    title: "Quiz顯示工具",
+    imageQuiz: "圖片Quiz顯示工具",
+    textQuiz: "文字Quiz顯示工具",
     zoomerMode: "縮放模式",
     panelMode: "面板模式",
   },

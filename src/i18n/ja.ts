@@ -4,7 +4,9 @@ export default {
     back: "戻る",
   },
   home: {
-    title: "画像クイズ表示ツール",
+    title: "クイズ表示ツール",
+    imageQuiz: "画像クイズ表示ツール",
+    textQuiz: "テキストクイズ表示ツール",
     zoomerMode: "ズームアウトクイズ",
     panelMode: "パネルクイズ",
   },

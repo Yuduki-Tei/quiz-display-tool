@@ -1,21 +1,22 @@
 import { defineStore } from "pinia";
-import type { ImageData } from "../@types/types";
+import type { BaseData, ImageData, TextData } from "../@types/types";
 
-export const useImageStore = defineStore("imageStore", {
-  state: () => ({
-    allData: [] as Array<ImageData>,
-    currentIndex: -1,
-  }),
-  getters: {
-    currentImage(state): ImageData | null {
-      if (
-        state.currentIndex >= 0 &&
-        state.currentIndex < state.allData.length
-      ) {
-        return state.allData[state.currentIndex];
-      }
-      return null;
-    },
+function createDataStore<T extends BaseData>(storeName: string) {
+  return defineStore(storeName, {
+    state: () => ({
+      allData: [] as Array<T>,
+      currentIndex: -1,
+    }),
+    getters: {
+      currentData(state) {
+        if (
+          state.currentIndex >= 0 &&
+          state.currentIndex < state.allData.length
+        ) {
+          return state.allData[state.currentIndex] as T;
+        }
+        return null as T | null;
+      },
     canGoPrev(state): boolean {
       return state.currentIndex > 0;
     },
@@ -33,19 +34,19 @@ export const useImageStore = defineStore("imageStore", {
     goToNext(): string | null {
       if (this.canGoNext) {
         this.currentIndex++;
-        return this.currentImage?.id || null;
+        return this.currentData?.id || null;
       }
       return null;
     },
     goToPrev(): string | null {
       if (this.canGoPrev) {
         this.currentIndex--;
-        return this.currentImage?.id || null;
+        return this.currentData?.id || null;
       }
       return null;
     },
-    updateOrder(newOrder: ImageData[]) {
-      const currentId = this.currentImage?.id;
+    updateOrder(newOrder: T[]) {
+      const currentId = this.currentData?.id;
       this.allData = newOrder;
       if (currentId) {
         this.setCurrentById(currentId);
@@ -53,10 +54,10 @@ export const useImageStore = defineStore("imageStore", {
     },
 
     getIndexById(id: string): number {
-      return this.allData.findIndex((c: ImageData) => c.id === id);
+      return this.allData.findIndex((c: T) => c.id === id);
     },
 
-    addData(data: ImageData): "added" | "updated" {
+    addData(data: T): "added" | "updated" {
       const existingIndex = this.getIndexById(data.id);
       if (existingIndex === -1) {
         this.allData.push(data);
@@ -72,17 +73,17 @@ export const useImageStore = defineStore("imageStore", {
       const indexToRemove = this.allData.findIndex((data) => data.id === id);
       if (indexToRemove === -1) return;
 
-      const wasCurrentImage = this.currentImage?.id === id;
-      const removedImage = this.allData[indexToRemove];
+      const wasCurrentData = this.currentData?.id === id;
+      const removedData = this.allData[indexToRemove];
 
       this.allData.splice(indexToRemove, 1);
 
       if (
-        removedImage &&
-        removedImage.thumbnailSrc &&
-        removedImage.thumbnailSrc.startsWith("blob:")
+        removedData &&
+        removedData.thumbnailSrc &&
+        removedData.thumbnailSrc.startsWith("blob:")
       ) {
-        URL.revokeObjectURL(removedImage.thumbnailSrc);
+        URL.revokeObjectURL(removedData.thumbnailSrc);
       }
 
       if (this.allData.length === 0) {
@@ -90,14 +91,14 @@ export const useImageStore = defineStore("imageStore", {
         return;
       }
 
-      if (wasCurrentImage) {
+      if (wasCurrentData) {
         this.currentIndex = Math.min(indexToRemove, this.allData.length - 1);
       } else if (this.currentIndex > indexToRemove) {
         this.currentIndex--;
       }
     },
 
-    getData(id: string | number | null): ImageData | null {
+    getData(id: string | number | null): T | null {
       if (id === null) {
         return this.allData[this.currentIndex] || null;
       }
@@ -108,7 +109,7 @@ export const useImageStore = defineStore("imageStore", {
       return idx !== -1 ? this.allData[idx] : null;
     },
 
-    setData(id: string | number, data: ImageData): boolean {
+    setData(id: string | number, data: T): boolean {
       if (typeof id === "number" && id >= 0 && id < this.allData.length) {
         this.allData[id] = data;
         return true;
@@ -121,13 +122,17 @@ export const useImageStore = defineStore("imageStore", {
       return false;
     },
 
-    importData(data: { allData: ImageData[]; currentIndex: number }) {
+    importData(data: { allData: T[]; currentIndex: number }) {
       this.allData = data.allData;
       this.currentIndex = data.currentIndex;
     },
 
-    getAllImages(): ImageData[] {
+    getAllData(): T[] {
       return this.allData;
     },
   },
-});
+  });
+}
+
+export const useImageStore = createDataStore<ImageData>("imageStore");
+export const useTextStore = createDataStore<TextData>("textStore");

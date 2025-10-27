@@ -215,12 +215,12 @@ import Icon from "@/components/Icon.vue";
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
 const { t } = useI18n();
-const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
+const { canGoPrev, canGoNext, currentData } = storeToRefs(imageStore);
 const { isAutoRevealing, isPaused } = storeToRefs(panelStore);
 
 const panel = ref<InstanceType<typeof Panel> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-const currentId = computed((): string | null => currentImage.value?.id || null);
+const currentId = computed((): string | null => currentData.value?.id || null);
 const isSomeRevealed = computed((): boolean => {
   const ctx = panelStore.getContext(currentId.value);
   return ctx
@@ -387,7 +387,7 @@ watch(autoRevealMode, () => {
 });
 
 onMounted(() => {
-  const images = imageStore.getAllImages();
+  const images = imageStore.getAllData();
   if (images.length > 0) {
     images.forEach((image) => {
       if (!panelStore.hasContext(image.id)) {

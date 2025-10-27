@@ -113,13 +113,13 @@ const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
 const { t } = useI18n();
 
-const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
+const { canGoPrev, canGoNext, currentData } = storeToRefs(imageStore);
 const { isZooming, isPaused } = storeToRefs(zoomStore);
 
 const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const currentId = computed(() => currentImage.value?.id || null);
+const currentId = computed(() => currentData.value?.id || null);
 const hasSelection = computed(() => zoomStore.hasSelection(currentId.value));
 
 const { notify } = useNotifier();
@@ -209,7 +209,7 @@ watch(currentId, (id) => {
 });
 
 onMounted(() => {
-  const images = imageStore.getAllImages();
+  const images = imageStore.getAllData();
   if (images.length > 0) {
     images.forEach((image) => {
       if (!zoomStore.hasContext(image.id)) {

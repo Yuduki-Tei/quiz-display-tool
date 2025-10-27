@@ -118,7 +118,7 @@
         </div>
       </div>
       <div class="display-area">
-        <div class="placeholder">Letter display component will go here</div>
+        <Letter ref="letter" :id="currentId" :isManualMode="isManual" />
       </div>
     </el-main>
   </el-container>
@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useTextStore } from "@/stores/imageStore";
 import { useLetterStore } from "./stores/letterStore";
@@ -147,12 +147,15 @@ import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
 import DataSidebar from "@/components/DataSidebar.vue";
+import Letter from "./views/Letter.vue";
 
 const textStore = useTextStore();
 const letterStore = useLetterStore();
 const { t } = useI18n();
 const { canGoPrev, canGoNext, currentData } = storeToRefs(textStore);
+const { isAutoRevealing, isPaused } = storeToRefs(letterStore);
 
+const letter = ref<InstanceType<typeof Letter> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const currentId = computed((): string | null => currentData.value?.id || null);
 const isSidebarVisible = ref(false);
@@ -160,22 +163,20 @@ const charsPerRow = ref<number>(10);
 const duration = ref<number>(1000);
 const isManual = ref<boolean>(true);
 const autoRevealMode = ref<string>("random");
-const isAutoRevealing = ref<boolean>(false);
-const isPaused = ref<boolean>(false);
 
 const isSomeRevealed = computed((): boolean => {
-  // TODO: implement with letterStore
-  return false;
+  const ctx = letterStore.getContext(currentId.value);
+  return ctx ? ctx.totalChars > ctx.revealed.length && ctx.revealed.length > 0 : false;
 });
 
 const canShowAll = computed((): boolean => {
-  // TODO: implement with letterStore
-  return true;
+  const ctx = letterStore.getContext(currentId.value);
+  return ctx && ctx.revealed.length < ctx.totalChars;
 });
 
 const canHideAll = computed((): boolean => {
-  // TODO: implement with letterStore
-  return false;
+  const ctx = letterStore.getContext(currentId.value);
+  return ctx ? ctx.revealed.length > 0 : false;
 });
 
 const triggerFileInput = () => {
@@ -193,8 +194,18 @@ const onFileChange = async (e: Event) => {
 
     // Add each line as a separate text data entry
     textDataArray.forEach((textData) => {
-      textStore.addData(textData);
-      // TODO: initialize letterStore context for each text
+      const status = textStore.addData(textData);
+      if (status === "added" && textData.id) {
+        // Initialize letterStore context for each text
+        letterStore.setContext(textData.id, {
+          totalChars: textData.content.length,
+          charsPerRow: charsPerRow.value,
+          revealed: [],
+          isManual: isManual.value,
+          autoRevealMode: autoRevealMode.value,
+          duration: duration.value,
+        });
+      }
     });
   } catch (err) {
     console.error("Failed to load text file:", err);
@@ -219,30 +230,56 @@ const handleTextSelect = (id: string) => {
 };
 
 const handleRevealControl = () => {
-  // TODO: implement auto reveal logic
-  console.log("handleRevealControl");
+  if (!isAutoRevealing.value) {
+    if (currentId.value) {
+      const ctx = letterStore.getContext(currentId.value);
+      if (ctx) {
+        letterStore.setContext(currentId.value, {
+          ...ctx,
+          autoRevealMode: autoRevealMode.value,
+        });
+      }
+    }
+    letter.value?.startAutoReveal();
+  } else {
+    if (isPaused.value) {
+      letter.value?.resumeAutoReveal();
+    } else {
+      letter.value?.pauseAutoReveal();
+    }
+  }
 };
 
 const handleRevealAll = () => {
-  // TODO: implement reveal all logic
-  console.log("handleRevealAll");
+  letter.value?.revealAllLetters();
 };
 
 const handleCoverAll = () => {
-  // TODO: implement cover all logic
-  console.log("handleCoverAll");
+  letter.value?.coverAllLetters();
 };
 
 const toggleManualMode = () => {
   isManual.value = !isManual.value;
-  // TODO: update letterStore context
+  const ctx = letterStore.getContext(currentId.value);
+  if (ctx) {
+    letterStore.setContext(currentId.value, {
+      ...ctx,
+      isManual: isManual.value,
+    });
+  }
 };
 
 const durationSec = computed({
   get: () => duration.value / 1000,
   set: (v) => {
     duration.value = Math.round(v * 1000);
-    // TODO: update letterStore context
+    const ctx = letterStore.getContext(currentId.value);
+    if (ctx) {
+      letterStore.setContext(currentId.value, {
+        ...ctx,
+        duration: duration.value,
+      });
+    }
   },
 });
 
@@ -256,6 +293,35 @@ const revealTypeButtons = [
   { value: true, icon: "PhCursorClick", tooltip: t("letter.manual") },
   { value: false, icon: "PhClockClockwise", tooltip: t("letter.auto") },
 ];
+
+// Watch for changes to charsPerRow and update letter store
+watch(charsPerRow, (newValue) => {
+  if (currentId.value) {
+    letterStore.setCharsPerRow(currentId.value, newValue);
+  }
+});
+
+// Watch for currentId changes and sync local state with store
+watch(currentId, (id) => {
+  const ctx = letterStore.getContext(id);
+  if (ctx) {
+    duration.value = ctx.duration || 1000;
+    isManual.value = ctx.isManual;
+    charsPerRow.value = ctx.charsPerRow;
+    autoRevealMode.value = ctx.autoRevealMode;
+  }
+});
+
+// Watch for autoRevealMode changes and update store
+watch(autoRevealMode, () => {
+  const ctx = letterStore.getContext(currentId.value);
+  if (ctx) {
+    letterStore.setContext(currentId.value, {
+      ...ctx,
+      autoRevealMode: autoRevealMode.value,
+    });
+  }
+});
 </script>
 
 <style scoped>

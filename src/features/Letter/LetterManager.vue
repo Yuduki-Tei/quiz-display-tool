@@ -55,7 +55,7 @@
           </el-button-group>
           <el-divider direction="vertical" />
           <div class="chars-per-row-control">
-            <span style="white-space: nowrap; margin-right: 0.5rem">{{ t("letter.charsPerRow") }}:</span>
+            <span>{{ t("letter.charsPerRow") }}:</span>
             <el-input-number
               v-model="charsPerRow"
               :min="1"
@@ -247,7 +247,7 @@ const durationSec = computed({
 });
 
 const revealModes = [
-  { value: "random", icon: "PhShuffle", label: t("letter.random") },
+  { value: "random", icon: "PhShuffleSimple", label: t("letter.random") },
   { value: "sequential", icon: "PhArrowRight", label: t("letter.sequential") },
   { value: "reverse", icon: "PhArrowLeft", label: t("letter.reverse") },
 ];
@@ -274,5 +274,9 @@ const revealTypeButtons = [
 .sidebar-placeholder {
   padding: 20px;
   text-align: center;
+}
+.chars-per-row-control {
+  white-space: nowrap;
+  margin-right: 0.5rem;
 }
 </style>

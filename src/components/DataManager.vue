@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useImageStore } from "@/stores/imageStore";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -29,7 +29,6 @@ const extraStore = props.extraStore;
 
 const importInput = ref<HTMLInputElement | null>(null);
 const { notify } = useNotifier();
-
 
 const triggerImport = () => {
   importInput.value?.click();

@@ -69,20 +69,21 @@
           <div class="duration-control" v-show="!isManual">
             <el-slider
               v-model="durationSec"
-              :min="0.1"
-              :max="10"
-              :step="0.1"
+              :min="0.01"
+              :max="3"
+              :step="0.01"
               style="width: 120px"
               :disabled="isManual || isAutoRevealing"
               :show-tooltip="false"
             />
             <el-input-number
               v-model="durationSec"
-              :min="0.1"
-              :max="10"
-              :step="0.1"
+              :min="0.01"
+              :max="3"
+              :step="0.01"
               size="small"
               :disabled="isManual || isAutoRevealing"
+              style="width: 100px"
             />
           </div>
         </div>
@@ -160,13 +161,15 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const currentId = computed((): string | null => currentData.value?.id || null);
 const isSidebarVisible = ref(false);
 const charsPerRow = ref<number>(10);
-const duration = ref<number>(1000);
+const duration = ref<number>(200);
 const isManual = ref<boolean>(true);
 const autoRevealMode = ref<string>("random");
 
 const isSomeRevealed = computed((): boolean => {
   const ctx = letterStore.getContext(currentId.value);
-  return ctx ? ctx.totalChars > ctx.revealed.length && ctx.revealed.length > 0 : false;
+  return ctx
+    ? ctx.totalChars > ctx.revealed.length && ctx.revealed.length > 0
+    : false;
 });
 
 const canShowAll = computed((): boolean => {
@@ -305,7 +308,7 @@ watch(charsPerRow, (newValue) => {
 watch(currentId, (id) => {
   const ctx = letterStore.getContext(id);
   if (ctx) {
-    duration.value = ctx.duration || 1000;
+    duration.value = ctx.duration || 200;
     isManual.value = ctx.isManual;
     charsPerRow.value = ctx.charsPerRow;
     autoRevealMode.value = ctx.autoRevealMode;
@@ -326,6 +329,12 @@ watch(autoRevealMode, () => {
 
 <style scoped>
 .chars-per-row-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.duration-control {
   display: flex;
   align-items: center;
   gap: 0.5rem;

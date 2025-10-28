@@ -19,6 +19,14 @@ import { useTextStore } from "@/stores/imageStore";
 import { useLetterStore } from "../stores/letterStore";
 import { LetterCombinedContext } from "../types/LetterTypes";
 import { drawText, handleLetterClick } from "../composables/clickUtil";
+import {
+  startReveal,
+  stopReveal,
+  pauseReveal,
+  resumeReveal,
+  revealAll,
+  coverAll,
+} from "../composables/revealUtil";
 
 const props = withDefaults(
   defineProps<{
@@ -83,43 +91,51 @@ const startAutoReveal = () => {
   const letterContext = letterStore.getContext(props.id);
   if (!letterContext) return false;
 
-  // TODO: Implement auto reveal logic
-  console.log("startAutoReveal");
+  // Check if there are any letters left to reveal
+  if (letterContext.revealed.length >= letterContext.totalChars) {
+    return false;
+  }
+
+  startReveal({
+    id: props.id,
+    duration: letterContext.duration || 200,
+    onReveal: () => {
+      // Redraw text when a letter is revealed
+      draw();
+    },
+  });
   return true;
 };
 
 const pauseAutoReveal = () => {
-  // TODO: Implement pause logic
-  console.log("pauseAutoReveal");
+  pauseReveal();
   return true;
 };
 
 const resumeAutoReveal = () => {
-  // TODO: Implement resume logic
-  console.log("resumeAutoReveal");
+  resumeReveal();
   return true;
 };
 
 const stopAutoReveal = () => {
-  // TODO: Implement stop logic
-  console.log("stopAutoReveal");
+  stopReveal();
   return true;
 };
 
 const revealAllLetters = () => {
   if (!props.id) return false;
 
-  letterStore.revealAll(props.id);
-  draw();
-  return true;
+  return revealAll(props.id, () => {
+    draw();
+  });
 };
 
 const coverAllLetters = () => {
   if (!props.id) return false;
 
-  letterStore.coverAll(props.id);
-  draw();
-  return true;
+  return coverAll(props.id, () => {
+    draw();
+  });
 };
 
 defineExpose({

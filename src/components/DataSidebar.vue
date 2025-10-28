@@ -5,7 +5,11 @@
       <el-switch v-model="showThumbnails" />
     </div>
     <el-scrollbar>
-      <div v-if="dataList.length === 0" class="list-item-ep add-file-item" @click="emit('add-file')">
+      <div
+        v-if="dataList.length === 0"
+        class="list-item-ep add-file-item"
+        @click="emit('add-file')"
+      >
         <div class="thumbnail-ep add-file-thumbnail">
           <Icon name="PhPlus" size="24" />
         </div>
@@ -24,7 +28,7 @@
             class="list-item-ep"
             :class="{
               'is-active': element.id === currentId,
-              'not-selected': !extraStore?.hasSelection?.(element.id),
+              'not-selected': !(extraStore?.hasSelection?.(element.id) ?? true),
             }"
             @click="selectData(element.id)"
           >
@@ -61,7 +65,11 @@
           </div>
         </template>
       </vuedraggable>
-      <div v-if="dataList.length > 0" class="list-item-ep add-file-item" @click="emit('add-file')">
+      <div
+        v-if="dataList.length > 0"
+        class="list-item-ep add-file-item"
+        @click="emit('add-file')"
+      >
         <div class="thumbnail-ep add-file-thumbnail">
           <Icon name="PhPlus" size="24" />
         </div>
@@ -183,6 +191,10 @@ const handleExport = () => {
 }
 
 .list-item-ep.is-active {
+  background-color: var(--el-color-primary-light-8);
+}
+
+.list-item-ep.is-active:hover {
   background-color: var(--el-color-primary-light-5);
 }
 

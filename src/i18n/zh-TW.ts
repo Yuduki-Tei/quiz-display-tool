@@ -60,9 +60,9 @@ export default {
     auto: "自動揭露",
   },
   zoomer: {
-    showFullImage: "顯示完整圖片",
-    showSelectedArea: "只顯示框選區域",
-    hideImage: "隱藏圖片",
+    showFullImage: "完整顯示中",
+    showSelectedArea: "框選區域顯示中",
+    hideImage: "圖片隱藏中",
   },
   letter: {
     selectMode: "選擇揭露模式",

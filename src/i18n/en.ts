@@ -61,9 +61,9 @@ export default {
     auto: "Auto reveal",
   },
   zoomer: {
-    showFullImage: "Show full image",
-    showSelectedArea: "Show selected area only",
-    hideImage: "Hide image",
+    showFullImage: "Showing full image",
+    showSelectedArea: "Showing selected area only",
+    hideImage: "Hiding image",
   },
   letter: {
     selectMode: "Select reveal mode",

@@ -61,9 +61,9 @@ export default {
     auto: "自動めくり",
   },
   zoomer: {
-    showFullImage: "画像全体を表示",
-    showSelectedArea: "選択領域のみ表示",
-    hideImage: "画像を非表示",
+    showFullImage: "画像全体表示中",
+    showSelectedArea: "選択領域表示中",
+    hideImage: "画像非表示中",
   },
   letter: {
     selectMode: "モード変更",

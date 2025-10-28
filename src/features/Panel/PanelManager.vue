@@ -6,6 +6,7 @@
           <Button
             @click="isSidebarVisible = true"
             icon="PhSidebarSimple"
+            :title="t('sidebar.openSidebar')"
             :disabled="isAutoRevealing"
           />
           <input
@@ -20,11 +21,13 @@
               @click="goToPrev"
               :disabled="!canGoPrev"
               icon="PhArrowLeft"
+              :title="t('topbar.previous')"
             />
             <Button
               @click="goToNext"
               :disabled="!canGoNext"
               icon="PhArrowRight"
+              :title="t('topbar.next')"
             />
           </el-button-group>
         </div>
@@ -34,11 +37,13 @@
             <Button
               @click="handleCoverAll"
               icon="PhEyeClosed"
+              :title="t('topbar.hideAll')"
               :disabled="!canHideAll"
             />
             <Button
               @click="handleRevealAll"
               icon="PhFrameCorners"
+              :title="t('topbar.showAll')"
               :disabled="!canShowAll"
             />
           </el-button-group>
@@ -161,6 +166,7 @@
             :title="
               revealTypeButtons.find((b) => b.value === isManual)?.tooltip
             "
+            tooltipPlacement="left"
             @click="toggleManualMode"
             :disabled="isAutoRevealing || isSomeRevealed"
           />
@@ -175,6 +181,7 @@
     <Button
       @click="handleRevealControl"
       :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+      :title="isAutoRevealing && !isPaused ? t('topbar.pause') : t('topbar.play')"
       :icon-size="28"
       :disabled="!canShowAll"
       size="large"

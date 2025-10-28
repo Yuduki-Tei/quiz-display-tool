@@ -32,6 +32,18 @@ export default {
   },
   sidebar: {
     addItem: "Add Item",
+    openSidebar: "Open sidebar",
+    delete: "Delete",
+    import: "Import file",
+    export: "Export file",
+  },
+  topbar: {
+    previous: "Previous",
+    next: "Next",
+    hideAll: "Hide all",
+    showAll: "Show all",
+    play: "Start",
+    pause: "Pause",
   },
   mode: {
     random: "Random",
@@ -57,8 +69,8 @@ export default {
     selectMode: "Select reveal mode",
     directionPriority: "Direction priority",
     directionAndStart: "Direction and start point",
-    manual: "Manual reveal",
-    auto: "Auto reveal",
+    manual: "Manual reveal mode",
+    auto: "Auto reveal mode",
   },
   zoomer: {
     showFullImage: "Showing full image",
@@ -67,8 +79,8 @@ export default {
   },
   letter: {
     selectMode: "Select reveal mode",
-    manual: "Manual reveal",
-    auto: "Auto reveal",
+    manual: "Manual reveal mode",
+    auto: "Auto reveal mode",
     charsPerRow: "Characters per row",
     random: "Random",
     sequential: "Sequential",

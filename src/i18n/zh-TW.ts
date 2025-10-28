@@ -31,6 +31,18 @@ export default {
   },
   sidebar: {
     addItem: "新增項目",
+    openSidebar: "開啟側邊欄",
+    delete: "刪除",
+    import: "匯入檔案",
+    export: "匯出檔案",
+  },
+  topbar: {
+    previous: "上一項",
+    next: "下一項",
+    hideAll: "隱藏全部",
+    showAll: "顯示全部",
+    play: "開始",
+    pause: "暫停",
   },
   mode: {
     random: "隨機",
@@ -56,8 +68,8 @@ export default {
     selectMode: "選擇揭露模式",
     directionPriority: "方向優先度",
     directionAndStart: "方向與起點",
-    manual: "手動揭露",
-    auto: "自動揭露",
+    manual: "手動揭露模式中",
+    auto: "自動揭露模式中",
   },
   zoomer: {
     showFullImage: "完整顯示中",
@@ -66,8 +78,8 @@ export default {
   },
   letter: {
     selectMode: "選擇揭露模式",
-    manual: "點擊揭露",
-    auto: "自動揭露",
+    manual: "點擊揭露模式中",
+    auto: "自動揭露模式中",
     charsPerRow: "每行字數",
     random: "隨機",
     sequential: "順序",

@@ -60,6 +60,7 @@
               class="delete-btn"
               icon="PhTrash"
               icon-size="16"
+              :title="t('sidebar.delete')"
               @click.stop="handleDelete(element.id)"
             />
           </div>
@@ -76,11 +77,11 @@
         <span class="filename">{{ t("sidebar.addItem") }}</span>
       </div>
       <div v-if="dataList.length === 0" class="empty-state">
-        <Button type="primary" icon="PhBoxArrowUp" @click="handleImport" />
+        <Button type="primary" icon="PhBoxArrowUp" :title="t('sidebar.import')" @click="handleImport" />
       </div>
     </el-scrollbar>
     <div v-if="dataList.length > 0" class="sidebar-footer">
-      <Button icon="PhBoxArrowDown" @click="handleExport" />
+      <Button icon="PhBoxArrowDown" :title="t('sidebar.export')" @click="handleExport" />
     </div>
     <DataManager
       ref="dataManagerRef"

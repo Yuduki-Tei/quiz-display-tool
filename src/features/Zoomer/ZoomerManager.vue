@@ -7,6 +7,7 @@
             @click="isSidebarVisible = true"
             :disabled="isZooming"
             icon="PhSidebarSimple"
+            :title="t('sidebar.openSidebar')"
           />
           <input
             ref="fileInput"
@@ -20,28 +21,24 @@
               @click="goToPrev"
               :disabled="!canGoPrev"
               icon="PhArrowLeft"
+              :title="t('topbar.previous')"
             />
             <Button
               @click="goToNext"
               :disabled="!canGoNext"
               icon="PhArrowRight"
+              :title="t('topbar.next')"
             />
           </el-button-group>
         </div>
         <el-divider direction="vertical" />
         <div class="top-bar-section common-utils">
-          <el-button-group>
-            <Button
-              @click="handleZoomControl"
-              :disabled="!hasSelection && !isZooming"
-              :icon="isZooming && !isPaused ? 'PhPause' : 'PhPlay'"
-            />
-            <Button
-              @click="handleShowFullImage"
-              :disabled="!currentId || !isZooming"
-              icon="PhCornersOut"
-            />
-          </el-button-group>
+          <Button
+            @click="handleShowFullImage"
+            :disabled="!currentId || !isZooming"
+            icon="PhCornersOut"
+            :title="t('topbar.showAll')"
+          />
         </div>
         <el-divider direction="vertical" />
         <div class="top-bar-section auto-play">
@@ -71,6 +68,7 @@
           <Button
             :icon="displayModes.find((m) => m.value === displayMode)?.icon"
             :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
+            tooltipPlacement="left"
             @click="cycleDisplayMode"
             :disabled="isZooming"
           />
@@ -85,6 +83,7 @@
     <Button
       @click="handleZoomControl"
       :icon="isZooming && !isPaused ? 'PhPause' : 'PhPlay'"
+      :title="isZooming && !isPaused ? t('topbar.pause') : t('topbar.play')"
       :icon-size="28"
       :disabled="!hasSelection"
       size="large"

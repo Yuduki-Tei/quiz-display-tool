@@ -1,5 +1,21 @@
 <template>
+  <el-tooltip
+    v-if="title"
+    :content="title"
+    :show-after="tooltipDelay"
+    :placement="tooltipPlacement"
+  >
+    <el-button
+      v-bind="buttonProps"
+      :class="[icon && !slots.default ? 'icon-only-btn' : '', $attrs.class]"
+      plain
+    >
+      <Icon v-if="icon" :name="icon" :size="String(iconSize)" />
+      <slot v-if="!icon" />
+    </el-button>
+  </el-tooltip>
   <el-button
+    v-else
     v-bind="buttonProps"
     :class="[icon && !slots.default ? 'icon-only-btn' : '', $attrs.class]"
     plain
@@ -21,6 +37,21 @@ const props = withDefaults(
     size?: string;
     circle?: boolean;
     plain?: boolean;
+    title?: string;
+    tooltipDelay?: number;
+    tooltipPlacement?:
+      | "top"
+      | "top-start"
+      | "top-end"
+      | "bottom"
+      | "bottom-start"
+      | "bottom-end"
+      | "left"
+      | "left-start"
+      | "left-end"
+      | "right"
+      | "right-start"
+      | "right-end";
   }>(),
   {
     icon: null,
@@ -28,6 +59,9 @@ const props = withDefaults(
     type: "default",
     size: "default",
     circle: false,
+    title: undefined,
+    tooltipDelay: 300,
+    tooltipPlacement: "bottom",
   }
 );
 
@@ -36,6 +70,9 @@ const slots = useSlots();
 
 const buttonProps = computed(() => {
   const attrs = { ...$attrs };
+  // Remove title from attrs to prevent native tooltip
+  delete attrs.title;
+
   if (!attrs.role) {
     attrs.role = "button";
   }

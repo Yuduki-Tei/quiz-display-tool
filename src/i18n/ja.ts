@@ -32,6 +32,18 @@ export default {
   },
   sidebar: {
     addItem: "項目を追加",
+    openSidebar: "サイドバーを開く",
+    delete: "削除",
+    import: "ファイルをインポート",
+    export: "ファイルをエクスポート",
+  },
+  topbar: {
+    previous: "前へ",
+    next: "次へ",
+    hideAll: "すべて隠す",
+    showAll: "すべて表示",
+    play: "開始",
+    pause: "一時停止",
   },
   mode: {
     random: "ランダム",
@@ -57,8 +69,8 @@ export default {
     selectMode: "モード変更",
     directionPriority: "順番変更",
     directionAndStart: "方向と開始位置",
-    manual: "手動めくり",
-    auto: "自動めくり",
+    manual: "手動めくりモード中",
+    auto: "自動めくりモード中",
   },
   zoomer: {
     showFullImage: "画像全体表示中",
@@ -67,8 +79,8 @@ export default {
   },
   letter: {
     selectMode: "モード変更",
-    manual: "手動めくり",
-    auto: "自動めくり",
+    manual: "手動めくりモード中",
+    auto: "自動めくりモード中",
     charsPerRow: "一行あたりの文字数",
     random: "ランダム",
     sequential: "順番",

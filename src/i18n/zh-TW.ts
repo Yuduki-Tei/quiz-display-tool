@@ -50,11 +50,11 @@ export default {
     },
   },
   panel: {
-    selectMode: "選擇翻面模式",
+    selectMode: "選擇揭露模式",
     directionPriority: "方向優先度",
     directionAndStart: "方向與起點",
-    manual: "手動翻面",
-    auto: "自動翻面",
+    manual: "手動揭露",
+    auto: "自動揭露",
   },
   zoomer: {
     showFullImage: "顯示完整圖片",

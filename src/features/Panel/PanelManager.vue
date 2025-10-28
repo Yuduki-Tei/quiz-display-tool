@@ -2,7 +2,7 @@
   <el-container class="manager-layout">
     <el-main class="manager-main">
       <div class="manager-top-bar">
-        <div class="manager-top-bar-left">
+        <div class="top-bar-section file-utils">
           <Button
             @click="isSidebarVisible = true"
             icon="PhSidebarSimple"
@@ -15,7 +15,6 @@
             @change="onFileChange"
             style="display: none"
           />
-          <el-divider direction="vertical" />
           <el-button-group>
             <Button
               @click="goToPrev"
@@ -29,12 +28,8 @@
             />
           </el-button-group>
         </div>
-        <div class="top-bar-center">
-          <Button
-            @click="handleRevealControl"
-            :disabled="isManual || !canShowAll"
-            :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
-          />
+        <el-divider direction="vertical" />
+        <div class="top-bar-section common-utils">
           <el-button-group>
             <Button
               @click="handleCoverAll"
@@ -47,7 +42,6 @@
               :disabled="!canShowAll"
             />
           </el-button-group>
-          <el-divider direction="vertical" />
           <div class="grid-selector">
             <el-select
               v-model="gridX"
@@ -77,7 +71,9 @@
               />
             </el-select>
           </div>
-          <el-divider direction="vertical" />
+        </div>
+        <el-divider direction="vertical" />
+        <div class="top-bar-section auto-play">
           <div class="duration-control" v-show="!isManual">
             <el-slider
               v-model="durationSec"
@@ -97,15 +93,12 @@
               :disabled="isManual || isAutoRevealing"
             />
           </div>
-        </div>
-        <div class="top-bar-right">
           <el-select
             class="text-select"
             v-model="mainMode"
+            v-show="!isManual"
             size="small"
             :disabled="isAutoRevealing || isManual"
-            v-show="!isManual"
-            :placeholder="t('panel.selectMode')"
           >
             <el-option
               v-for="mode in getMainRevealModes()"
@@ -122,7 +115,7 @@
           <el-select
             class="text-select"
             v-model="subMode"
-            v-show="mainMode === 'linear'"
+            v-show="!isManual && mainMode === 'linear'"
             size="small"
             :disabled="isAutoRevealing || isManual"
             :placeholder="t('panel.directionPriority')"
@@ -142,7 +135,7 @@
           <el-select
             class="text-select"
             v-model="subMode"
-            v-show="mainMode === 'spiral'"
+            v-show="!isManual && mainMode === 'spiral'"
             size="small"
             :disabled="isAutoRevealing || isManual"
             :placeholder="t('panel.directionAndStart')"
@@ -159,6 +152,10 @@
               </div>
             </el-option>
           </el-select>
+        </div>
+
+        <el-divider direction="vertical" />
+        <div class="top-bar-section mode-toggle">
           <Button
             :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
             :title="
@@ -174,6 +171,17 @@
       </div>
     </el-main>
   </el-container>
+  <div v-if="!isManual" class="floating-play-button">
+    <Button
+      @click="handleRevealControl"
+      :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+      :icon-size="28"
+      :disabled="!canShowAll"
+      size="large"
+      circle
+    />
+  </div>
+
   <el-drawer
     v-model="isSidebarVisible"
     direction="ltr"
@@ -231,7 +239,7 @@ const gridX = ref<number>(5);
 const gridY = ref<number>(5);
 const duration = ref<number>(1000);
 const isManual = ref<boolean>(true);
-const mainMode = ref<string>("");
+const mainMode = ref<string>("random");
 const subMode = ref<string>("");
 const autoRevealMode = computed(
   () => mainMode.value + (subMode.value ? `-${subMode.value}` : "")

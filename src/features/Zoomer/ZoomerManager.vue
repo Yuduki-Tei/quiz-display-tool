@@ -2,7 +2,7 @@
   <el-container class="manager-layout">
     <el-main class="manager-main">
       <div class="manager-top-bar">
-        <div class="manager-top-bar-left">
+        <div class="top-bar-section file-utils">
           <Button
             @click="isSidebarVisible = true"
             :disabled="isZooming"
@@ -15,7 +15,6 @@
             @change="onFileChange"
             style="display: none"
           />
-          <el-divider direction="vertical" />
           <el-button-group>
             <Button
               @click="goToPrev"
@@ -29,7 +28,8 @@
             />
           </el-button-group>
         </div>
-        <div class="top-bar-center">
+        <el-divider direction="vertical" />
+        <div class="top-bar-section common-utils">
           <el-button-group>
             <Button
               @click="handleZoomControl"
@@ -42,7 +42,9 @@
               icon="PhCornersOut"
             />
           </el-button-group>
-          <el-divider direction="vertical" />
+        </div>
+        <el-divider direction="vertical" />
+        <div class="top-bar-section auto-play">
           <div class="duration-control">
             <el-slider
               v-model="durationSec"
@@ -63,7 +65,9 @@
             />
           </div>
         </div>
-        <div class="top-bar-right">
+
+        <el-divider direction="vertical" />
+        <div class="top-bar-section mode-toggle">
           <Button
             :icon="displayModes.find((m) => m.value === displayMode)?.icon"
             :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
@@ -77,6 +81,17 @@
       </div>
     </el-main>
   </el-container>
+  <div class="floating-play-button">
+    <Button
+      @click="handleZoomControl"
+      :icon="isZooming && !isPaused ? 'PhPause' : 'PhPlay'"
+      :icon-size="28"
+      :disabled="!hasSelection"
+      size="large"
+      circle
+    />
+  </div>
+
   <el-drawer
     v-model="isSidebarVisible"
     direction="ltr"

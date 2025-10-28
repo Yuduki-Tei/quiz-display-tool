@@ -2,7 +2,7 @@
   <el-container class="manager-layout">
     <el-main class="manager-main">
       <div class="manager-top-bar">
-        <div class="manager-top-bar-left">
+        <div class="top-bar-section file-utils">
           <Button
             @click="isSidebarVisible = true"
             icon="PhSidebarSimple"
@@ -15,7 +15,6 @@
             @change="onFileChange"
             style="display: none"
           />
-          <el-divider direction="vertical" />
           <el-button-group>
             <Button
               @click="goToPrev"
@@ -29,12 +28,8 @@
             />
           </el-button-group>
         </div>
-        <div class="top-bar-center">
-          <Button
-            @click="handleRevealControl"
-            :disabled="isManual || !canShowAll"
-            :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
-          />
+        <el-divider direction="vertical" />
+        <div class="top-bar-section common-utils">
           <el-button-group>
             <Button
               @click="handleCoverAll"
@@ -47,7 +42,6 @@
               :disabled="!canShowAll"
             />
           </el-button-group>
-          <el-divider direction="vertical" />
           <div class="chars-per-row-control">
             <span>{{ t("letter.charsPerRow") }}:</span>
             <el-input-number
@@ -59,7 +53,9 @@
               :disabled="isAutoRevealing"
             />
           </div>
-          <el-divider direction="vertical" v-show="!isManual" />
+        </div>
+        <el-divider direction="vertical" />
+        <div class="top-bar-section auto-play">
           <div class="duration-control" v-show="!isManual">
             <el-slider
               v-model="durationSec"
@@ -80,15 +76,12 @@
               style="width: 100px"
             />
           </div>
-        </div>
-        <div class="top-bar-right">
           <el-select
             class="text-select"
             v-model="autoRevealMode"
+            v-show="!isManual"
             size="small"
             :disabled="isAutoRevealing || isManual"
-            v-show="!isManual"
-            :placeholder="t('letter.selectMode')"
           >
             <el-option
               v-for="mode in revealModes"
@@ -102,6 +95,9 @@
               </div>
             </el-option>
           </el-select>
+        </div>
+        <el-divider direction="vertical" />
+        <div class="top-bar-section mode-toggle">
           <Button
             :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
             :title="
@@ -117,6 +113,17 @@
       </div>
     </el-main>
   </el-container>
+  <div v-if="!isManual" class="floating-play-button">
+    <Button
+      @click="handleRevealControl"
+      :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
+      :icon-size="28"
+      :disabled="!canShowAll"
+      size="large"
+      circle
+    />
+  </div>
+
   <el-drawer
     v-model="isSidebarVisible"
     direction="ltr"

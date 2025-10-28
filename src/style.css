@@ -18,14 +18,30 @@
   padding: 1rem;
   display: flex;
   align-items: center;
+  gap: 1rem;
   border-bottom: 1px solid var(--el-color-primary-light-5);
 }
-.manager-top-bar-left {
+.top-bar-section {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex: 1;
+  gap: 0.75rem;
+}
+.top-bar-section.file-utils {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+.top-bar-section.common-utils {
+  flex: 0 0 auto;
+  min-width: 270px;
+}
+.top-bar-section.auto-play {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-start;
+}
+.top-bar-section.mode-toggle {
+  flex: 0 0 auto;
+  min-width: 48px;
 }
 .display-area {
   flex-grow: 1;
@@ -47,27 +63,21 @@
   align-items: center;
   height: 100%;
 }
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  flex: 1;
+.floating-play-button {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 2000;
 }
-
-.top-bar-center {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  justify-content: center;
-  flex: 2;
+.floating-play-button .el-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  transition: all 0.1s ease;
 }
-
-.top-bar-right {
-  align-items: center;
-  display: flex;
-  justify-content: flex-end;
-  flex: 1;
+.floating-play-button .el-button:hover:not([disabled]) {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--el-color-primary-dark-2);
 }
 
 .el-button-group {

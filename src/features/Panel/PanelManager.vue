@@ -186,10 +186,12 @@
     size="280px"
     :with-header="false"
   >
-    <ImageSidebar
+    <DataSidebar
       :current-id="currentId"
+      :data-store="imageStore"
       :extra-store="panelStore"
-      @select-image="handleImageSelect"
+      data-type="image"
+      @select-data="handleImageSelect"
     />
   </el-drawer>
 </template>
@@ -207,7 +209,7 @@ import {
 } from "./composables/revealPatterns";
 import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
-import ImageSidebar from "@/components/ImageSidebar.vue";
+import DataSidebar from "@/components/DataSidebar.vue";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
@@ -215,12 +217,12 @@ import Icon from "@/components/Icon.vue";
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
 const { t } = useI18n();
-const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
+const { canGoPrev, canGoNext, currentData } = storeToRefs(imageStore);
 const { isAutoRevealing, isPaused } = storeToRefs(panelStore);
 
 const panel = ref<InstanceType<typeof Panel> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
-const currentId = computed((): string | null => currentImage.value?.id || null);
+const currentId = computed((): string | null => currentData.value?.id || null);
 const isSomeRevealed = computed((): boolean => {
   const ctx = panelStore.getContext(currentId.value);
   return ctx
@@ -387,7 +389,7 @@ watch(autoRevealMode, () => {
 });
 
 onMounted(() => {
-  const images = imageStore.getAllImages();
+  const images = imageStore.getAllData();
   if (images.length > 0) {
     images.forEach((image) => {
       if (!panelStore.hasContext(image.id)) {

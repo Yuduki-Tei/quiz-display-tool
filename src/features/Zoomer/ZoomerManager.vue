@@ -89,10 +89,12 @@
     size="280px"
     :with-header="false"
   >
-    <ImageSidebar
+    <DataSidebar
       :current-id="currentId"
+      :data-store="imageStore"
       :extra-store="zoomStore"
-      @select-image="handleImageSelect"
+      data-type="image"
+      @select-data="handleImageSelect"
     />
   </el-drawer>
 </template>
@@ -105,7 +107,7 @@ import { useZoomerStore } from "./stores/zoomerStore";
 import { loadImageFile } from "@/composables/useImageLoader";
 import { useNotifier } from "@/composables/useNotifier";
 import Zoomer from "./views/Zoomer.vue";
-import ImageSidebar from "@/components/ImageSidebar.vue";
+import DataSidebar from "@/components/DataSidebar.vue";
 import Button from "@/components/Button.vue";
 import { useI18n } from "vue-i18n";
 
@@ -113,13 +115,13 @@ const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
 const { t } = useI18n();
 
-const { canGoPrev, canGoNext, currentImage } = storeToRefs(imageStore);
+const { canGoPrev, canGoNext, currentData } = storeToRefs(imageStore);
 const { isZooming, isPaused } = storeToRefs(zoomStore);
 
 const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-const currentId = computed(() => currentImage.value?.id || null);
+const currentId = computed(() => currentData.value?.id || null);
 const hasSelection = computed(() => zoomStore.hasSelection(currentId.value));
 
 const { notify } = useNotifier();
@@ -209,7 +211,7 @@ watch(currentId, (id) => {
 });
 
 onMounted(() => {
-  const images = imageStore.getAllImages();
+  const images = imageStore.getAllData();
   if (images.length > 0) {
     images.forEach((image) => {
       if (!zoomStore.hasContext(image.id)) {

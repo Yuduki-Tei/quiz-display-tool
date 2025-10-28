@@ -4,16 +4,15 @@ export default {
     back: "Back",
   },
   home: {
-    title: "Quiz Display Tool",
     imageQuiz: "Image Quiz Display Tool",
     textQuiz: "Text Quiz Display Tool",
     zoomerMode: "Zoom Out Mode",
     panelMode: "Panel Mode",
   },
   notification: {
-    added: "Image loaded",
-    updated: "Same image already exists",
-    error: "Failed to load image",
+    added: "File loaded",
+    updated: "Same file already exists",
+    error: "Failed to load file",
     exported: "Export successful",
     imported: "Import successful",
     cancel: "Operation cancelled",
@@ -28,7 +27,7 @@ export default {
   },
   aria: {
     homeButton: "Return to home",
-    imageUpload: "Upload image",
+    fileUpload: "Upload image",
     selectMode: "Select mode",
   },
   mode: {
@@ -62,5 +61,14 @@ export default {
     showFullImage: "Show full image",
     showSelectedArea: "Show selected area only",
     hideImage: "Hide image",
+  },
+  letter: {
+    selectMode: "Select reveal mode",
+    manual: "Manual reveal",
+    auto: "Auto reveal",
+    charsPerRow: "Characters per row",
+    random: "Random",
+    sequential: "Sequential",
+    reverse: "Reverse",
   },
 };

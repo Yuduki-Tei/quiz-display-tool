@@ -1,14 +1,21 @@
-export interface ImageData {
+export interface BaseData {
   id: string;
   name: string;
+  thumbnailSrc: string | null;
+}
+
+export interface ImageData extends BaseData {
   image: Blob | File | null;
   canvas: HTMLCanvasElement | null;
-  thumbnailSrc: string | null;
   renderable: ImageBitmap | null;
   naturalWidth: number;
   naturalHeight: number;
   displayWidth: number;
   displayHeight: number;
+}
+
+export interface TextData extends BaseData {
+  content: string;
 }
 
 export interface NotifierOptions {

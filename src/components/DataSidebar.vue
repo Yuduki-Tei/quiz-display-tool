@@ -1,13 +1,13 @@
 <template>
-  <div class="image-sidebar-ep">
+  <div class="data-sidebar-ep">
     <div class="sidebar-header">
       <h4 class="sidebar-title"></h4>
       <el-switch v-model="showThumbnails" />
     </div>
     <el-scrollbar>
       <vuedraggable
-        v-if="imageList.length > 0"
-        v-model="imageList"
+        v-if="dataList.length > 0"
+        v-model="dataList"
         item-key="id"
         class="draggable-list"
         ghost-class="ghost"
@@ -20,23 +20,29 @@
               'is-active': element.id === currentId,
               'not-selected': !extraStore?.hasSelection?.(element.id),
             }"
-            @click="selectImage(element.id)"
+            @click="selectData(element.id)"
           >
+            <!-- Image thumbnail -->
             <el-image
+              v-if="dataType === 'image'"
               :src="showThumbnails ? element.thumbnailSrc : ''"
               fit="cover"
               class="thumbnail-ep"
             >
               <template #error>
-                <div class="image-slot-error">
+                <div class="thumbnail-slot-error">
                   <Icon name="PhImage" />
                 </div>
               </template>
             </el-image>
+            <!-- Text thumbnail -->
+            <div v-else class="thumbnail-ep text-thumbnail">
+              {{ showThumbnails ? element.thumbnailSrc : "" }}
+            </div>
             <span class="filename">{{
               showThumbnails
                 ? element.name
-                : imageStore.getIndexById(element.id) + 1
+                : dataStore.getIndexById(element.id) + 1
             }}</span>
             <Button
               type="danger"
@@ -55,17 +61,20 @@
         <Button type="primary" icon="PhBoxArrowUp" @click="handleImport" />
       </el-empty>
     </el-scrollbar>
-    <div v-if="imageList.length > 0" class="sidebar-footer">
+    <div v-if="dataList.length > 0" class="sidebar-footer">
       <Button icon="PhBoxArrowDown" @click="handleExport" />
     </div>
-    <DataManager ref="dataManagerRef" :extraStore="props.extraStore" />
+    <DataManager
+      ref="dataManagerRef"
+      :dataStore="dataStore"
+      :extraStore="props.extraStore"
+      :dataType="props.dataType"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useImageStore } from "@/stores/imageStore";
-import { storeToRefs } from "pinia";
 import vuedraggable from "vuedraggable";
 import Icon from "@/components/Icon.vue";
 import Button from "@/components/Button.vue";
@@ -73,34 +82,36 @@ import DataManager from "./DataManager.vue";
 
 const props = defineProps<{
   currentId: string | null;
+  dataStore: any;
   extraStore: any;
+  dataType: "image" | "text";
 }>();
 
 const emit = defineEmits<{
-  (e: "select-image", id: string): void;
+  (e: "select-data", id: string): void;
 }>();
 
-const imageStore = useImageStore();
-const { allData } = storeToRefs(imageStore);
+const dataStore = props.dataStore;
+const allData = computed(() => dataStore.allData);
 
 const extraStore = props.extraStore;
 const showThumbnails = ref(true);
 
 const dataManagerRef = ref<InstanceType<typeof DataManager> | null>(null);
 
-const imageList = computed({
+const dataList = computed({
   get: () => allData.value,
   set: (newOrder) => {
-    imageStore.updateOrder(newOrder);
+    dataStore.updateOrder(newOrder);
   },
 });
 
-const selectImage = (id: string) => {
-  emit("select-image", id);
+const selectData = (id: string) => {
+  emit("select-data", id);
 };
 
 const handleDelete = (id: string) => {
-  imageStore.removeData(id);
+  dataStore.removeData(id);
   extraStore.removeContext(id);
 };
 
@@ -114,7 +125,7 @@ const handleExport = () => {
 </script>
 
 <style scoped>
-.image-sidebar-ep {
+.data-sidebar-ep {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -125,6 +136,8 @@ const handleExport = () => {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1rem 0.5rem;
+  padding-right: 0;
+  padding-bottom: 1rem;
 }
 
 .list-item-ep {
@@ -175,7 +188,21 @@ const handleExport = () => {
   flex-shrink: 0;
 }
 
-.image-slot-error {
+.text-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--el-fill-color-light);
+  color: var(--el-text-color-regular);
+  font-size: 12px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px;
+}
+
+.thumbnail-slot-error {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -195,10 +222,6 @@ const handleExport = () => {
 
 .ghost {
   opacity: 0.5;
-}
-.sidebar-header {
-  padding-right: 0;
-  padding-bottom: 1rem;
 }
 
 .sidebar-footer {

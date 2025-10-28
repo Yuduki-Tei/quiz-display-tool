@@ -1,5 +1,3 @@
-// src/composables/useImageLoader.ts
-
 import type { ImageData } from "@/@types/types";
 
 export async function loadImageFile(

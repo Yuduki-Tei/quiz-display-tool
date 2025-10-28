@@ -87,6 +87,11 @@ export function drawGrid(
   ctx.lineWidth = 1;
   ctx.fillStyle = "rgb(66,66,66)";
 
+  // Calculate font size for panel numbers
+  const avgCellWidth = displayWidth / numCols;
+  const avgCellHeight = displayHeight / numRows;
+  const fontSize = Math.min(avgCellWidth, avgCellHeight) * 0.4;
+
   let currentY = 0;
   for (let j = 0; j < numRows; j++) {
     const rectHeight = heights[j];
@@ -96,10 +101,24 @@ export function drawGrid(
       const rectWidth = widths[i];
 
       if (!isPanelRevealed(contextValue, i, j)) {
+        // Draw gray background
         ctx.fillRect(currentX, currentY, rectWidth, rectHeight);
         if (toStroke) {
           ctx.strokeRect(currentX, currentY, rectWidth, rectHeight);
         }
+
+        // Draw panel number
+        const panelNumber = j * numCols + i + 1;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.font = `${fontSize}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+          panelNumber.toString(),
+          currentX + rectWidth / 2,
+          currentY + rectHeight / 2
+        );
+        ctx.fillStyle = "rgb(66,66,66)";
       }
       currentX += rectWidth;
     }

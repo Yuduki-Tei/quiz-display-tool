@@ -5,7 +5,7 @@
       <el-switch v-model="showThumbnails" />
     </div>
     <el-scrollbar>
-      <div class="list-item-ep add-file-item" @click="emit('add-file')">
+      <div v-if="dataList.length === 0" class="list-item-ep add-file-item" @click="emit('add-file')">
         <div class="thumbnail-ep add-file-thumbnail">
           <Icon name="PhPlus" size="24" />
         </div>
@@ -28,7 +28,6 @@
             }"
             @click="selectData(element.id)"
           >
-            <!-- Image thumbnail -->
             <el-image
               v-if="dataType === 'image'"
               :src="showThumbnails ? element.thumbnailSrc : ''"
@@ -41,7 +40,6 @@
                 </div>
               </template>
             </el-image>
-            <!-- Text thumbnail -->
             <div v-else class="thumbnail-ep text-thumbnail">
               {{ showThumbnails ? element.thumbnailSrc : "" }}
             </div>
@@ -63,11 +61,15 @@
           </div>
         </template>
       </vuedraggable>
-
-      <!-- Empty State (only shown when no data) -->
-      <el-empty v-if="dataList.length === 0" description=" ">
+      <div v-if="dataList.length > 0" class="list-item-ep add-file-item" @click="emit('add-file')">
+        <div class="thumbnail-ep add-file-thumbnail">
+          <Icon name="PhPlus" size="24" />
+        </div>
+        <span class="filename">{{ t("sidebar.addItem") }}</span>
+      </div>
+      <div v-if="dataList.length === 0" class="empty-state">
         <Button type="primary" icon="PhBoxArrowUp" @click="handleImport" />
-      </el-empty>
+      </div>
     </el-scrollbar>
     <div v-if="dataList.length > 0" class="sidebar-footer">
       <Button icon="PhBoxArrowDown" @click="handleExport" />
@@ -263,5 +265,12 @@ const handleExport = () => {
   justify-content: center;
   background-color: var(--el-color-primary-light-7);
   color: var(--el-color-primary);
+}
+
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 </style>

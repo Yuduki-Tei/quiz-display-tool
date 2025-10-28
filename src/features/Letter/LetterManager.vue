@@ -15,12 +15,6 @@
             @change="onFileChange"
             style="display: none"
           />
-          <Button
-            type="primary"
-            @click="triggerFileInput"
-            icon="PhPlus"
-            :disabled="isAutoRevealing"
-          />
           <el-divider direction="vertical" />
           <el-button-group>
             <Button
@@ -135,6 +129,7 @@
       :extra-store="letterStore"
       data-type="text"
       @select-data="handleTextSelect"
+      @add-file="triggerFileInput"
     />
   </el-drawer>
 </template>

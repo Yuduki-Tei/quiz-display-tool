@@ -15,12 +15,6 @@
             @change="onFileChange"
             style="display: none"
           />
-          <Button
-            type="primary"
-            @click="triggerFileInput"
-            :disabled="isZooming"
-            icon="PhPlus"
-          />
           <el-divider direction="vertical" />
           <el-button-group>
             <Button
@@ -95,6 +89,7 @@
       :extra-store="zoomStore"
       data-type="image"
       @select-data="handleImageSelect"
+      @add-file="triggerFileInput"
     />
   </el-drawer>
 </template>

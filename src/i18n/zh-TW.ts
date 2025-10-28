@@ -29,6 +29,9 @@ export default {
     imageUpload: "上傳檔案",
     selectMode: "選擇模式",
   },
+  sidebar: {
+    addItem: "新增項目",
+  },
   mode: {
     random: "隨機",
     linear: "線性",

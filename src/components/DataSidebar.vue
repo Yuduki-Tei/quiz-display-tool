@@ -5,6 +5,12 @@
       <el-switch v-model="showThumbnails" />
     </div>
     <el-scrollbar>
+      <div class="list-item-ep add-file-item" @click="emit('add-file')">
+        <div class="thumbnail-ep add-file-thumbnail">
+          <Icon name="PhPlus" size="24" />
+        </div>
+        <span class="filename">{{ t("sidebar.addItem") }}</span>
+      </div>
       <vuedraggable
         v-if="dataList.length > 0"
         v-model="dataList"
@@ -57,7 +63,9 @@
           </div>
         </template>
       </vuedraggable>
-      <el-empty v-else description=" ">
+
+      <!-- Empty State (only shown when no data) -->
+      <el-empty v-if="dataList.length === 0" description=" ">
         <Button type="primary" icon="PhBoxArrowUp" @click="handleImport" />
       </el-empty>
     </el-scrollbar>
@@ -79,6 +87,9 @@ import vuedraggable from "vuedraggable";
 import Icon from "@/components/Icon.vue";
 import Button from "@/components/Button.vue";
 import DataManager from "./DataManager.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps<{
   currentId: string | null;
@@ -89,6 +100,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "select-data", id: string): void;
+  (e: "add-file"): void;
 }>();
 
 const dataStore = props.dataStore;
@@ -229,5 +241,27 @@ const handleExport = () => {
   border-top: 1px solid var(--el-color-primary-light-5);
   display: flex;
   justify-content: flex-end;
+}
+
+.add-file-item {
+  background-color: var(--el-color-primary-light-9);
+  border: 2px dashed var(--el-color-primary);
+  margin: 0 8px 4px 8px;
+}
+
+.add-file-item:hover {
+  background-color: var(--el-color-primary-light-8);
+}
+
+.draggable-list {
+  padding: 0 8px;
+}
+
+.add-file-thumbnail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--el-color-primary-light-7);
+  color: var(--el-color-primary);
 }
 </style>

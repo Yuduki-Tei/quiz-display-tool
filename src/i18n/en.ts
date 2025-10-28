@@ -30,6 +30,9 @@ export default {
     fileUpload: "Upload image",
     selectMode: "Select mode",
   },
+  sidebar: {
+    addItem: "Add Item",
+  },
   mode: {
     random: "Random",
     linear: "Linear",

@@ -30,6 +30,9 @@ export default {
     imageUpload: "データをアップロード",
     selectMode: "モードを選択",
   },
+  sidebar: {
+    addItem: "項目を追加",
+  },
   mode: {
     random: "ランダム",
     linear: "各行・各列",
@@ -66,7 +69,7 @@ export default {
     selectMode: "モード変更",
     manual: "手動めくり",
     auto: "自動めくり",
-    charsPerRow: "1行の文字数",
+    charsPerRow: "一行あたりの文字数",
     random: "ランダム",
     sequential: "順番",
     reverse: "逆順",

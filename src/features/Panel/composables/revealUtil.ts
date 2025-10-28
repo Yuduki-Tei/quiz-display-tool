@@ -21,8 +21,6 @@ let currentController: ReturnType<typeof createRevealController> | null = null;
 export type RevealParams = {
   id: string;
   duration: number;
-  onStart?: () => void;
-  onFinish?: () => void;
   onReveal?: (coord: [number, number]) => void;
 };
 
@@ -106,10 +104,7 @@ export function startReveal(params: RevealParams) {
   currentController = createRevealController();
   const controller = currentController;
 
-  let { id, duration, onStart, onFinish, onReveal } = params;
-
-  // Call start callback if provided
-  if (onStart) onStart();
+  let { id, duration, onReveal } = params;
 
   const panelId = id;
   let currentIndex = 0; // Define reveal function
@@ -118,7 +113,6 @@ export function startReveal(params: RevealParams) {
 
     const context = store.getContext(panelId);
     if (!context || !context.order || currentIndex >= context.order.length) {
-      if (onFinish) onFinish();
       controller.stop();
       return;
     }
@@ -135,7 +129,6 @@ export function startReveal(params: RevealParams) {
     if (currentIndex < context.order.length) {
       const timeoutId = window.setTimeout(reveal, duration);
     } else {
-      if (onFinish) onFinish();
       controller.stop();
     }
   };

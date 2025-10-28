@@ -13,12 +13,7 @@ import type { ZoomerContext } from "../types/ZoomerTypes";
 import { useZoomerStore } from "../stores/zoomerStore";
 
 // Utility for zoom-out animation on canvas
-export type ZoomOutParams = ZoomerContext &
-  ImageData & {
-    onStart?: () => void;
-    onFinish?: () => void;
-  };
-
+export type ZoomOutParams = ZoomerContext & ImageData;
 let currentController: ReturnType<typeof startZoomOut> | null = null;
 
 export function startZoomOut(params: ZoomOutParams) {
@@ -32,7 +27,6 @@ export function startZoomOut(params: ZoomOutParams) {
   let pauseTime = 0;
 
   const {
-    onStart,
     canvas,
     renderable,
     naturalWidth,
@@ -41,12 +35,10 @@ export function startZoomOut(params: ZoomOutParams) {
     displayHeight,
     selection,
     duration,
-    onFinish,
   } = params;
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  if (onStart) onStart();
   // Normalize selection rectangle (always left-top origin)
   const sx = selection.w >= 0 ? selection.x : selection.x + selection.w;
   const sy = selection.h >= 0 ? selection.y : selection.y + selection.h;
@@ -118,7 +110,6 @@ export function startZoomOut(params: ZoomOutParams) {
         displayHeight
       );
       imageStore.setZooming(false);
-      if (onFinish) onFinish();
     }
   }
 

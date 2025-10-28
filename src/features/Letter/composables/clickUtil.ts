@@ -69,7 +69,7 @@ export function drawText(
       ctx.fillStyle = "#ffffff";
       ctx.fillText(char, x, y);
     } else {
-      // Draw covered character (placeholder)
+      // Draw gray background
       ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
       ctx.fillRect(
         col * cellWidth + 5,
@@ -77,6 +77,15 @@ export function drawText(
         cellWidth - 10,
         cellHeight - 10
       );
+
+      // Draw index number
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      const originalFont = ctx.font;
+      ctx.font = `${
+        fontSize * 0.5
+      }px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      ctx.fillText((index + 1).toString(), x, y);
+      ctx.font = originalFont;
     }
   });
 

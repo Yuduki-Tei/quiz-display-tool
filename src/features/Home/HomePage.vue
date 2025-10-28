@@ -1,6 +1,5 @@
 <template>
   <div class="home-page">
-    <!-- 圖片Quiz顯示工具 -->
     <div class="quiz-section">
       <h2 class="section-title">{{ t("home.imageQuiz") }}</h2>
       <div class="mode-selection" role="group" :aria-label="t('aria.selectMode')">
@@ -36,8 +35,6 @@
         </button>
       </div>
     </div>
-
-    <!-- 文字Quiz顯示工具 -->
     <div class="quiz-section">
       <h2 class="section-title">{{ t("home.textQuiz") }}</h2>
       <div class="mode-selection" role="group" :aria-label="t('aria.selectMode')">

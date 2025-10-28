@@ -34,8 +34,8 @@ export default {
     addItem: "Add Item",
     openSidebar: "Open sidebar",
     delete: "Delete",
-    import: "Import file",
-    export: "Export file",
+    import: "Import zip file",
+    export: "Export zip file",
   },
   topbar: {
     previous: "Previous",

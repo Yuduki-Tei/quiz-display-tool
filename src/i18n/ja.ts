@@ -34,8 +34,8 @@ export default {
     addItem: "項目を追加",
     openSidebar: "サイドバーを開く",
     delete: "削除",
-    import: "ファイルをインポート",
-    export: "ファイルをエクスポート",
+    import: "zipファイルをインポート",
+    export: "zipファイルをエクスポート",
   },
   topbar: {
     previous: "前へ",

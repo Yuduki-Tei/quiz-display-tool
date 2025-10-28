@@ -33,8 +33,8 @@ export default {
     addItem: "新增項目",
     openSidebar: "開啟側邊欄",
     delete: "刪除",
-    import: "匯入檔案",
-    export: "匯出檔案",
+    import: "匯入壓縮檔",
+    export: "匯出壓縮檔",
   },
   topbar: {
     previous: "上一項",

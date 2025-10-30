@@ -31,6 +31,8 @@ import {
   PhArrowElbowRightUp,
   PhArrowElbowUpRight,
   PhArrowElbowUpLeft,
+  PhArrowsLeftRight,
+  PhArrowsClockwise,
   PhShuffleSimple,
 } from "@phosphor-icons/vue";
 export const icons = {
@@ -66,5 +68,7 @@ export const icons = {
   PhArrowElbowRightUp,
   PhArrowElbowUpRight,
   PhArrowElbowUpLeft,
+  PhArrowsLeftRight,
+  PhArrowsClockwise,
   PhShuffleSimple,
 };

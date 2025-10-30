@@ -66,8 +66,8 @@
         <el-divider direction="vertical" />
         <div class="top-bar-section mode-toggle">
           <Button
-            :icon="displayModes.find((m) => m.value === displayMode)?.icon"
-            :title="displayModes.find((m) => m.value === displayMode)?.tooltip"
+            :icon="currentDisplayMode.icon"
+            :title="currentDisplayMode.tooltip"
             tooltipPlacement="left"
             @click="cycleDisplayMode"
             :disabled="isZooming"
@@ -200,11 +200,35 @@ const durationSec = computed({
 });
 
 const displayModes = [
-  { value: "full", icon: "PhImage", tooltip: t("zoomer.showFullImage") },
-  { value: "selection", icon: "PhCrop", tooltip: t("zoomer.showSelectedArea") },
-  { value: "none", icon: "PhEyeSlash", tooltip: t("zoomer.hideImage") },
+  {
+    value: "full",
+    icon: "PhImage",
+    currentLabel: t("zoomer.showFullImage"),
+    nextLabel: t("zoomer.switchToShowSelectedArea")
+  },
+  {
+    value: "selection",
+    icon: "PhCrop",
+    currentLabel: t("zoomer.showSelectedArea"),
+    nextLabel: t("zoomer.switchToHideImage")
+  },
+  {
+    value: "none",
+    icon: "PhEyeSlash",
+    currentLabel: t("zoomer.hideImage"),
+    nextLabel: t("zoomer.switchToShowFullImage")
+  },
 ];
 const displayMode = ref<string>("full");
+
+const currentDisplayMode = computed(() => {
+  const current = displayModes.find((m) => m.value === displayMode.value);
+  return {
+    icon: current?.icon || "PhImage",
+    tooltip: current?.nextLabel || t("zoomer.switchToShowSelectedArea"),
+  };
+});
+
 const cycleDisplayMode = () => {
   const idx = displayModes.findIndex((m) => m.value === displayMode.value);
   displayMode.value = displayModes[(idx + 1) % displayModes.length].value;

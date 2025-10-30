@@ -162,10 +162,8 @@
         <el-divider direction="vertical" />
         <div class="top-bar-section mode-toggle">
           <Button
-            :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
-            :title="
-              revealTypeButtons.find((b) => b.value === isManual)?.tooltip
-            "
+            :icon="revealTypeButton.icon"
+            :title="revealTypeButton.tooltip"
             tooltipPlacement="left"
             @click="toggleManualMode"
             :disabled="isAutoRevealing || isSomeRevealed"
@@ -347,10 +345,10 @@ const durationSec = computed({
   },
 });
 
-const revealTypeButtons = [
-  { value: true, icon: "PhCursorClick", tooltip: t("panel.manual") },
-  { value: false, icon: "PhClockClockwise", tooltip: t("panel.auto") },
-];
+const revealTypeButton = computed(() => ({
+  icon: isManual.value ? "PhCursorClick" : "PhClockClockwise",
+  tooltip: isManual.value ? t("panel.switchToAuto") : t("panel.switchToManual"),
+}));
 
 const toggleManualMode = () => {
   isManual.value = !isManual.value;

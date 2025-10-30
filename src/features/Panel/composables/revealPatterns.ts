@@ -213,7 +213,7 @@ export function getMainRevealModes() {
   return [
     { value: "random", label: t("mode.random"), icon: "PhShuffleSimple" },
     { value: "linear", label: t("mode.linear"), icon: "PhArrowsLeftRight" },
-    { value: "spiral", label: t("mode.spiral"), icon: "PhSpiral" },
+    { value: "spiral", label: t("mode.spiral"), icon: "PhArrowsClockwise" },
   ];
 }
 

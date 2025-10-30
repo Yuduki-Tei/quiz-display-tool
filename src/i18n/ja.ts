@@ -1,8 +1,4 @@
 export default {
-  common: {
-    home: "ホーム",
-    back: "戻る",
-  },
   home: {
     imageQuiz: "画像クイズ表示ツール",
     textQuiz: "文字クイズ表示ツール",
@@ -26,8 +22,6 @@ export default {
     cancel: "キャンセル",
   },
   aria: {
-    homeButton: "ホームに戻る",
-    imageUpload: "データをアップロード",
     selectMode: "モードを選択",
   },
   sidebar: {
@@ -57,8 +51,6 @@ export default {
       left: "左",
       down: "下",
       up: "上",
-      clockwise: "時計回り",
-      counterClockwise: "反時計回り",
     },
     position: {
       topLeft: "左上から",
@@ -69,24 +61,25 @@ export default {
     },
   },
   panel: {
-    selectMode: "モード変更",
     directionPriority: "順番変更",
     directionAndStart: "方向と開始位置",
-    manual: "手動めくりモード中",
-    auto: "自動めくりモード中",
+    switchToManual: "手動モードに切り替え",
+    switchToAuto: "自動モードに切り替え",
   },
   zoomer: {
     showFullImage: "画像全体表示中",
     showSelectedArea: "選択領域表示中",
     hideImage: "画像非表示中",
+    switchToShowFullImage: "画像全体を表示",
+    switchToShowSelectedArea: "選択領域を表示",
+    switchToHideImage: "画像を非表示",
   },
   letter: {
-    selectMode: "モード変更",
-    manual: "手動めくりモード中",
-    auto: "自動めくりモード中",
     charsPerRow: "一行あたりの文字数",
     random: "ランダム",
     sequential: "順番",
     reverse: "逆順",
+    switchToManual: "手動モードに切り替え",
+    switchToAuto: "自動モードに切り替え",
   },
 };

@@ -1,8 +1,4 @@
 export default {
-  common: {
-    home: "首頁",
-    back: "返回",
-  },
   home: {
     imageQuiz: "圖片Quiz顯示工具",
     textQuiz: "文字Quiz顯示工具",
@@ -25,8 +21,6 @@ export default {
     cancel: "取消",
   },
   aria: {
-    homeButton: "返回首頁",
-    imageUpload: "上傳檔案",
     selectMode: "選擇模式",
   },
   sidebar: {
@@ -56,8 +50,6 @@ export default {
       left: "向左",
       down: "向下",
       up: "向上",
-      clockwise: "順時針",
-      counterClockwise: "逆時針",
     },
     position: {
       topLeft: "左上開始",
@@ -68,24 +60,25 @@ export default {
     },
   },
   panel: {
-    selectMode: "選擇揭露模式",
     directionPriority: "方向優先度",
     directionAndStart: "方向與起點",
-    manual: "手動揭露模式中",
-    auto: "自動揭露模式中",
+    switchToManual: "切換為手動模式",
+    switchToAuto: "切換為自動模式",
   },
   zoomer: {
     showFullImage: "完整顯示中",
     showSelectedArea: "框選區域顯示中",
     hideImage: "圖片隱藏中",
+    switchToShowFullImage: "顯示完整圖片",
+    switchToShowSelectedArea: "顯示框選區域",
+    switchToHideImage: "隱藏圖片",
   },
   letter: {
-    selectMode: "選擇揭露模式",
-    manual: "點擊揭露模式中",
-    auto: "自動揭露模式中",
     charsPerRow: "每行字數",
     random: "隨機",
     sequential: "順序",
     reverse: "倒序",
+    switchToManual: "切換為手動模式",
+    switchToAuto: "切換為自動模式",
   },
 };

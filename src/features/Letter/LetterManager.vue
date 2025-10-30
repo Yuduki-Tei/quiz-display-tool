@@ -104,10 +104,8 @@
         <el-divider direction="vertical" />
         <div class="top-bar-section mode-toggle">
           <Button
-            :icon="revealTypeButtons.find((b) => b.value === isManual)?.icon"
-            :title="
-              revealTypeButtons.find((b) => b.value === isManual)?.tooltip
-            "
+            :icon="revealTypeButton.icon"
+            :title="revealTypeButton.tooltip"
             tooltipPlacement="left"
             @click="toggleManualMode"
             :disabled="isAutoRevealing || isSomeRevealed"
@@ -301,10 +299,10 @@ const revealModes = [
   { value: "reverse", icon: "PhArrowLeft", label: t("letter.reverse") },
 ];
 
-const revealTypeButtons = [
-  { value: true, icon: "PhCursorClick", tooltip: t("letter.manual") },
-  { value: false, icon: "PhClockClockwise", tooltip: t("letter.auto") },
-];
+const revealTypeButton = computed(() => ({
+  icon: isManual.value ? "PhCursorClick" : "PhClockClockwise",
+  tooltip: isManual.value ? t("letter.switchToAuto") : t("letter.switchToManual"),
+}));
 
 // Watch for changes to charsPerRow and update letter store
 watch(charsPerRow, (newValue) => {

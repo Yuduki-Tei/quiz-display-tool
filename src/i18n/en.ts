@@ -1,8 +1,4 @@
 export default {
-  common: {
-    home: "Home",
-    back: "Back",
-  },
   home: {
     imageQuiz: "Image Quiz Display Tool",
     textQuiz: "Text Quiz Display Tool",
@@ -26,8 +22,6 @@ export default {
     cancel: "Cancel",
   },
   aria: {
-    homeButton: "Return to home",
-    fileUpload: "Upload image",
     selectMode: "Select mode",
   },
   sidebar: {
@@ -57,8 +51,6 @@ export default {
       left: "Left",
       down: "Down",
       up: "Up",
-      clockwise: "Clockwise",
-      counterClockwise: "Counter-clockwise",
     },
     position: {
       topLeft: "from Top-left",
@@ -69,24 +61,25 @@ export default {
     },
   },
   panel: {
-    selectMode: "Select reveal mode",
     directionPriority: "Direction priority",
     directionAndStart: "Direction and start point",
-    manual: "Manual reveal mode",
-    auto: "Auto reveal mode",
+    switchToManual: "Switch to manual mode",
+    switchToAuto: "Switch to auto mode",
   },
   zoomer: {
     showFullImage: "Showing full image",
     showSelectedArea: "Showing selected area only",
     hideImage: "Hiding image",
+    switchToShowFullImage: "Show full image",
+    switchToShowSelectedArea: "Show selected area",
+    switchToHideImage: "Hide image",
   },
   letter: {
-    selectMode: "Select reveal mode",
-    manual: "Manual reveal mode",
-    auto: "Auto reveal mode",
     charsPerRow: "Characters per row",
     random: "Random",
     sequential: "Sequential",
     reverse: "Reverse",
+    switchToManual: "Switch to manual mode",
+    switchToAuto: "Switch to auto mode",
   },
 };

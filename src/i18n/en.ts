@@ -36,6 +36,9 @@ export default {
     delete: "Delete",
     import: "Import zip file",
     export: "Export zip file",
+    home: "Back to Home",
+    showThumbnails: "Show thumbnails and overview",
+    hideThumbnails: "Hide thumbnails and overview",
   },
   topbar: {
     previous: "Previous",

@@ -36,6 +36,9 @@ export default {
     delete: "削除",
     import: "zipファイルをインポート",
     export: "zipファイルをエクスポート",
+    home: "ホームに戻る",
+    showThumbnails: "サムネイルと概要を表示",
+    hideThumbnails: "サムネイルと概要を非表示",
   },
   topbar: {
     previous: "前へ",

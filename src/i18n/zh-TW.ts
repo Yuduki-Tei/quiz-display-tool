@@ -35,6 +35,9 @@ export default {
     delete: "刪除",
     import: "匯入壓縮檔",
     export: "匯出壓縮檔",
+    home: "回到首頁",
+    showThumbnails: "顯示縮圖與概要",
+    hideThumbnails: "隱藏縮圖與概要",
   },
   topbar: {
     previous: "上一項",

@@ -2,7 +2,12 @@
   <div class="data-sidebar-ep">
     <div class="sidebar-header">
       <h4 class="sidebar-title"></h4>
-      <el-switch v-model="showThumbnails" />
+      <el-tooltip
+        :content="showThumbnails ? t('sidebar.hideThumbnails') : t('sidebar.showThumbnails')"
+        placement="bottom"
+      >
+        <el-switch v-model="showThumbnails" />
+      </el-tooltip>
     </div>
     <el-scrollbar>
       <div
@@ -77,11 +82,22 @@
         <span class="filename">{{ t("sidebar.addItem") }}</span>
       </div>
       <div v-if="dataList.length === 0" class="empty-state">
-        <Button type="primary" icon="PhBoxArrowUp" :title="t('sidebar.import')" @click="handleImport" />
+        <Button
+          type="primary"
+          icon="PhBoxArrowUp"
+          :title="t('sidebar.import')"
+          @click="handleImport"
+        />
       </div>
     </el-scrollbar>
-    <div v-if="dataList.length > 0" class="sidebar-footer">
-      <Button icon="PhBoxArrowDown" :title="t('sidebar.export')" @click="handleExport" />
+    <div class="sidebar-footer">
+      <Button icon="PhHouse" :title="t('sidebar.home')" @click="handleGoHome" />
+      <Button
+        v-if="dataList.length > 0"
+        icon="PhBoxArrowDown"
+        :title="t('sidebar.export')"
+        @click="handleExport"
+      />
     </div>
     <DataManager
       ref="dataManagerRef"
@@ -94,6 +110,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import vuedraggable from "vuedraggable";
 import Icon from "@/components/Icon.vue";
 import Button from "@/components/Button.vue";
@@ -101,6 +118,7 @@ import DataManager from "./DataManager.vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+const router = useRouter();
 
 const props = defineProps<{
   currentId: string | null;
@@ -144,6 +162,10 @@ const handleImport = () => {
 
 const handleExport = () => {
   dataManagerRef.value?.handleExport();
+};
+
+const handleGoHome = () => {
+  router.push("/");
 };
 </script>
 
@@ -255,7 +277,8 @@ const handleExport = () => {
   padding: 1rem;
   border-top: 1px solid var(--el-color-primary-light-5);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .add-file-item {

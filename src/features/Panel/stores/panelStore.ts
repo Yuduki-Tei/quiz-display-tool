@@ -18,7 +18,7 @@ export const usePanelStore = defineStore("panel", {
      * Get panel context by id
      */
     getContext(id: string | null): PanelContext | null {
-      return id ? this.contexts[id] : null;
+      return id ? this.contexts[id] || null : null;
     },
 
     /**

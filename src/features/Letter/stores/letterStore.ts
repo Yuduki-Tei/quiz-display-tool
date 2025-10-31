@@ -18,7 +18,7 @@ export const useLetterStore = defineStore("letter", {
      * Get letter context by id
      */
     getContext(id: string | null): LetterContext | null {
-      return id ? this.contexts[id] : null;
+      return id ? this.contexts[id] || null : null;
     },
 
     /**

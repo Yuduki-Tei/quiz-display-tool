@@ -149,7 +149,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useTextStore } from "@/stores/imageStore";
+import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "./stores/letterStore";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";

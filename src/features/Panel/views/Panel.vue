@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from "vue";
-import { useImageStore } from "@/stores/imageStore";
+import { useImageStore } from "@/stores/dataStore";
 import { drawGrid, handlePanelClick } from "../composables/clickUtil";
 import { usePanelStore } from "../stores/panelStore";
 import { PanelCombinedContext } from "../types/PanelTypes";

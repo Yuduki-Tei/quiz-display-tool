@@ -207,7 +207,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { useImageStore } from "@/stores/imageStore";
+import { useImageStore } from "@/stores/dataStore";
 import { usePanelStore } from "./stores/panelStore";
 import { loadImageFile } from "@/composables/useImageLoader";
 import {

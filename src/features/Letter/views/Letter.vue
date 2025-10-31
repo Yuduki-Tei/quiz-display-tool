@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, onMounted } from "vue";
-import { useTextStore } from "@/stores/imageStore";
+import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "../stores/letterStore";
 import { LetterCombinedContext } from "../types/LetterTypes";
 import { drawText, handleLetterClick } from "../composables/clickUtil";

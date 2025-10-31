@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from "vue";
 import { useZoomerStore } from "../stores/zoomerStore";
-import { useImageStore } from "@/stores/imageStore";
+import { useImageStore } from "@/stores/dataStore";
 import { useRectSelection } from "../composables/useRectSelection";
 import {
   startZoomOut as zoomOutUtil,

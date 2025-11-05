@@ -36,8 +36,7 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
 
     // 步驟 4: 驗證圖片已載入到 store
     // 檢查導航按鈕是否啟用（表示有資料）
-    const prevButton = page.locator('button').filter({ hasText: /previous|prev|上一張/i }).first();
-    const nextButton = page.locator('button').filter({ hasText: /next|下一張/i }).first();
+    const prevButton = page.locator('button[title="Previous"]');
 
     // 第一張圖片時，prev 應該 disabled
     await expect(prevButton).toBeDisabled();
@@ -71,11 +70,8 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 找到自動播放按鈕
-    // 可能的文字: "自動播放", "Auto Play", "Play" 或圖示按鈕
-    const playButton = page.locator('button').filter({
-      hasText: /play|播放|auto/i
-    }).first();
+    // 步驟 2: 找到自動播放按鈕（使用 title 屬性）
+    const playButton = page.locator('button[title="Start"]');
 
     // 開始自動播放
     await playButton.click();
@@ -83,10 +79,8 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
     // 步驟 3: 等待一段時間，確保有字元被揭露
     await page.waitForTimeout(1000);
 
-    // 步驟 4: 暫停
-    const pauseButton = page.locator('button').filter({
-      hasText: /pause|暫停|stop/i
-    }).first();
+    // 步驟 4: 暫停（播放後按鈕會變成暫停）
+    const pauseButton = page.locator('button[title="Pause"]');
 
     await pauseButton.click();
 
@@ -103,10 +97,8 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 點擊「全部顯示」
-    const showAllButton = page.locator('button').filter({
-      hasText: /show all|reveal all|全部顯示|全部揭露/i
-    }).first();
+    // 步驟 2: 點擊「全部顯示」（使用 title 屬性）
+    const showAllButton = page.locator('button[title="Show all"]');
 
     await showAllButton.click();
 
@@ -114,10 +106,8 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
     const canvas = page.locator('canvas').first();
     await expect(canvas).toBeVisible();
 
-    // 步驟 3: 點擊「全部隱藏」
-    const hideAllButton = page.locator('button').filter({
-      hasText: /hide all|cover all|全部隱藏|全部遮蓋/i
-    }).first();
+    // 步驟 3: 點擊「全部隱藏」（使用 title 屬性）
+    const hideAllButton = page.locator('button[title="Hide all"]');
 
     await hideAllButton.click();
 
@@ -141,10 +131,8 @@ test.describe('Letter 功能 - 完整使用者流程', () => {
     await fileInput.setInputFiles(testImagePath);
     await page.waitForTimeout(500);
 
-    // 步驟 4: 切換到上一張圖片
-    const prevButton = page.locator('button').filter({
-      hasText: /previous|prev|上一張/i
-    }).first();
+    // 步驟 4: 切換到上一張圖片（使用 title 屬性）
+    const prevButton = page.locator('button[title="Previous"]');
 
     await prevButton.click();
 

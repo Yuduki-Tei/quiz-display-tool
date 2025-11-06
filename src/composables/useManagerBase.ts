@@ -5,6 +5,7 @@
  */
 
 import { ref, computed, toRef } from "vue";
+import { useNotifier } from "@/composables/useNotifier";
 
 /**
  * Base data item interface
@@ -69,10 +70,15 @@ export interface ManagerBaseConfig<
   loadFile: (file: File) => Promise<T | T[]>;
 
   /**
-   * Optional callback when a new file is successfully added
-   * Receives the data ID and status
+   * Optional callback when a new file is added
+   * Receives the data ID and status ("added", "duplicate", or "error")
    */
   onFileAdded?: (id: string, status: string) => void;
+
+  /**
+   * Whether to show notifications when files are added
+   */
+  showNotifications?: boolean;
 }
 
 /**
@@ -81,12 +87,22 @@ export interface ManagerBaseConfig<
 export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
   config: ManagerBaseConfig<T>
 ) {
-  const { dataStore, extraStore, dataType, fileAccept, loadFile, onFileAdded } =
-    config;
+  const {
+    dataStore,
+    extraStore,
+    dataType,
+    fileAccept,
+    loadFile,
+    onFileAdded,
+    showNotifications = true,
+  } = config;
 
   // Reactive state
   const isSidebarVisible = ref(false);
   const fileInput = ref<HTMLInputElement | null>(null);
+
+  // Notification system
+  const { notify } = useNotifier();
 
   // Store refs - using toRef to make them reactive
   const canGoPrev = toRef(dataStore, "canGoPrev");
@@ -122,8 +138,13 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
       // Handle single data item
       if (!Array.isArray(data)) {
         const status = dataStore.addData(data);
-        if (status === "added" && data.id && onFileAdded) {
-          onFileAdded(data.id, status);
+        if (data.id) {
+          if (onFileAdded) {
+            onFileAdded(data.id, status);
+          }
+          if (showNotifications) {
+            notify(status);
+          }
         }
         return status;
       }
@@ -132,15 +153,23 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
       let lastStatus = "error";
       data.forEach((item) => {
         const status = dataStore.addData(item);
-        if (status === "added" && item.id && onFileAdded) {
-          onFileAdded(item.id, status);
+        if (item.id) {
+          if (onFileAdded) {
+            onFileAdded(item.id, status);
+          }
+          if (showNotifications) {
+            notify(status);
+          }
         }
         lastStatus = status;
       });
       return lastStatus;
     } catch (err) {
       console.error("Failed to load file:", err);
-      throw err;
+      if (showNotifications) {
+        notify("error");
+      }
+      return "error";
     } finally {
       // Reset file input
       if (fileInput.value) {

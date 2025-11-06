@@ -15,7 +15,7 @@
         ref="fileInput"
         type="file"
         accept=".txt"
-        @change="onFileChange"
+        @change="baseOnFileChange"
         style="display: none"
       />
     </template>
@@ -182,18 +182,20 @@ const {
     const { loadTextFile } = await import("@/composables/useTextLoader");
     return await loadTextFile(file);
   },
-  onFileAdded: (id: string) => {
-    // Initialize letterStore context for each text
-    const textData = textStore.getData(id);
-    if (textData) {
-      letterStore.setContext(id, {
-        totalChars: textData.content.length,
-        charsPerRow: charsPerRow.value,
-        revealed: [],
-        isManual: isManual.value,
-        autoRevealMode: autoRevealMode.value,
-        duration: duration.value,
-      });
+  onFileAdded: (id: string, status: string) => {
+    if (status === "added") {
+      // Initialize letterStore context for each text
+      const textData = textStore.getData(id);
+      if (textData) {
+        letterStore.setContext(id, {
+          totalChars: textData.content.length,
+          charsPerRow: charsPerRow.value,
+          revealed: [],
+          isManual: isManual.value,
+          autoRevealMode: autoRevealMode.value,
+          duration: duration.value,
+        });
+      }
     }
   },
 });
@@ -249,14 +251,6 @@ const revealTypeButton = computed(() => ({
 }));
 
 // Letter-specific methods
-const onFileChange = async (e: Event) => {
-  try {
-    await baseOnFileChange(e);
-  } catch (err) {
-    console.error("Failed to load text file:", err);
-  }
-};
-
 const handleRevealControl = () => {
   if (!isAutoRevealing.value) {
     if (currentId.value) {

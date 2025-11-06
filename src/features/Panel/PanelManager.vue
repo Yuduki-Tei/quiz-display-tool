@@ -15,7 +15,7 @@
         ref="fileInput"
         type="file"
         accept="image/*"
-        @change="onFileChange"
+        @change="baseOnFileChange"
         style="display: none"
       />
     </template>
@@ -211,7 +211,6 @@ import {
   getSpiralSubModes,
   getLinearSubModes,
 } from "./composables/revealPatterns";
-import { useNotifier } from "@/composables/useNotifier";
 import Panel from "../Panel/views/Panel.vue";
 import DataSidebar from "@/components/DataSidebar.vue";
 import { useI18n } from "vue-i18n";
@@ -222,7 +221,6 @@ import ManagerLayout from "@/components/ManagerLayout.vue";
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
 const { t } = useI18n();
-const { notify } = useNotifier();
 
 // Use shared manager base functionality
 const {
@@ -254,7 +252,6 @@ const {
         amount: { x: gridX.value, y: gridY.value },
       });
     }
-    notify(status);
   },
 });
 
@@ -309,14 +306,6 @@ const revealTypeButton = computed(() => ({
 }));
 
 // Panel-specific methods
-const onFileChange = async (e: Event) => {
-  try {
-    await baseOnFileChange(e);
-  } catch (err) {
-    notify("error");
-  }
-};
-
 const modeGet = (mode: string): string[] => {
   if (mode.startsWith("spiral")) {
     return ["spiral", mode.replace("spiral-", "")];

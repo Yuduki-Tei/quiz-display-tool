@@ -15,7 +15,8 @@
         ref="fileInput"
         type="file"
         accept="image/*"
-        @change="onFileChange"
+        ˊ
+        @change="baseOnFileChange"
         style="display: none"
       />
     </template>
@@ -110,7 +111,6 @@ import { useImageStore } from "@/stores/dataStore";
 import { useZoomerStore } from "./stores/zoomerStore";
 import { useManagerBase } from "@/composables/useManagerBase";
 import { loadImageFile } from "@/composables/useImageLoader";
-import { useNotifier } from "@/composables/useNotifier";
 import Zoomer from "./views/Zoomer.vue";
 import DataSidebar from "@/components/DataSidebar.vue";
 import Button from "@/components/Button.vue";
@@ -120,7 +120,6 @@ import ManagerLayout from "@/components/ManagerLayout.vue";
 const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
 const { t } = useI18n();
-const { notify } = useNotifier();
 
 // Use shared manager base functionality
 const {
@@ -149,7 +148,6 @@ const {
         selection: { x: 0, y: 0, w: 0, h: 0 },
       });
     }
-    notify(status);
   },
 });
 
@@ -204,14 +202,6 @@ const currentDisplayMode = computed(() => {
 });
 
 // Zoomer-specific methods
-const onFileChange = async (e: Event) => {
-  try {
-    await baseOnFileChange(e);
-  } catch (err) {
-    notify("error");
-  }
-};
-
 const handleZoomControl = () => {
   if (!isZooming.value) {
     zoomer.value?.startZoomOut();

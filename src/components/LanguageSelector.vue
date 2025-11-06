@@ -4,6 +4,7 @@
       icon="PhTranslate"
       @click="cycleLanguage"
       :title="getCurrentLanguageName()"
+      tooltipPlacement="left"
     />
   </div>
 </template>

@@ -15,7 +15,6 @@
         ref="fileInput"
         type="file"
         accept="image/*"
-        ˊ
         @change="baseOnFileChange"
         style="display: none"
       />

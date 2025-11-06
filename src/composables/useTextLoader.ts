@@ -60,12 +60,28 @@ export function getTextPreview(content: string): string {
  * @returns Promise<TextData[]> - Array of text data, one for each non-empty line
  */
 export async function loadTextFile(file: File): Promise<TextData[]> {
+  // Quick validation before any heavy operations
+  const maxSize = 1 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error("File too large");
+  }
+
+  if (file.size === 0) {
+    throw new Error("Empty file");
+  }
+
   const baseId = await getSha256(file);
   const content = await file.text();
 
   const lines = content.split("\n").filter((line) => line.trim() !== "");
   if (lines.length === 0) {
-    return [];
+    throw new Error("No content");
+  }
+
+  // Limit number of lines to prevent UI freeze
+  const maxLines = 100;
+  if (lines.length > maxLines) {
+    throw new Error("Too many lines");
   }
 
   return lines.map((line, index) => {

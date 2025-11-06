@@ -11,35 +11,52 @@
  */
 
 /**
+ * Base context interface for reveal stores
+ */
+export interface BaseRevealContext<T = any> {
+  order?: T[];
+  duration?: number;
+  autoRevealMode?: string;
+  [key: string]: any; // Allow additional properties
+}
+
+/**
+ * Base reveal store interface
+ * Methods marked as optional because they may be provided via custom implementations
+ */
+export interface RevealStoreInterface<T = any> {
+  setRevealing?: (val: boolean) => void;
+  setAutoRevealing?: (val: boolean) => void;
+  setPaused?: (val: boolean) => void;
+  getContext?: (id: string | null) => BaseRevealContext<T> | null;
+  setOrder?: (id: string, order: T[]) => void;
+  generateOrder?: (id: string, mode: string) => void;
+  revealAll?: (id: string) => void;
+  coverAll?: (id: string) => void;
+  [key: string]: any; // Allow additional methods
+}
+
+/**
  * Configuration for creating reveal utilities
  */
 export interface RevealUtilConfig<T> {
   /**
    * Factory function that returns the store instance
-   * Store must implement these methods:
-   * - setRevealing/setAutoRevealing: (val: boolean) => void
-   * - setPaused: (val: boolean) => void
-   * - getContext: (id: string | null) => any
-   * - setOrder?: (id: string, order: T[]) => void (for Panel)
-   * - generateOrder?: (id: string, mode: string) => void (for Letter)
-   * - addRevealed: (id: string, item: T) => void
-   * - revealAll: (id: string) => void
-   * - coverAll: (id: string) => void
    */
-  useStore: () => any;
+  useStore: () => RevealStoreInterface<T>;
 
   /**
    * Optional function to generate reveal order
    * Required for Panel-style reveals, not needed if store has generateOrder method
    */
-  generateOrder?: (mode: string, context: any) => T[];
+  generateOrder?: (mode: string, amount: number) => T[];
 
   /**
    * Name of the method to call for setting reveal state
    * Default: 'setAutoRevealing' (for Letter)
    * Can be: 'setRevealing' (for Panel)
    */
-  setRevealingMethod?: 'setRevealing' | 'setAutoRevealing';
+  setRevealingMethod?: "setRevealing" | "setAutoRevealing";
 
   /**
    * Name of the method to call for revealing an item
@@ -52,13 +69,13 @@ export interface RevealUtilConfig<T> {
    * Custom revealAll implementation
    * If not provided, will call store.revealAll()
    */
-  customRevealAll?: (id: string, store: any) => boolean;
+  customRevealAll?: (id: string, store: RevealStoreInterface<T>) => boolean;
 
   /**
    * Custom coverAll implementation
    * If not provided, will call store.coverAll()
    */
-  customCoverAll?: (id: string, store: any) => boolean;
+  customCoverAll?: (id: string, store: RevealStoreInterface<T>) => boolean;
 }
 
 /**
@@ -77,14 +94,15 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
   const {
     useStore,
     generateOrder: externalGenerateOrder,
-    setRevealingMethod = 'setAutoRevealing',
-    addRevealedMethod = 'addRevealed',
+    setRevealingMethod = "setAutoRevealing",
+    addRevealedMethod = "addRevealed",
     customRevealAll,
     customCoverAll,
   } = config;
 
   // Animation controller reference (singleton)
-  let currentController: ReturnType<typeof createRevealController> | null = null;
+  let currentController: ReturnType<typeof createRevealController> | null =
+    null;
 
   /**
    * Creates a controller for reveal animation
@@ -105,20 +123,20 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
 
       finished = true;
       const store = useStore();
-      store[setRevealingMethod](false);
-      store.setPaused(false);
+      store[setRevealingMethod]?.(false);
+      store.setPaused?.(false);
     };
 
     const pause = () => {
       paused = true;
       const store = useStore();
-      store.setPaused(true);
+      store.setPaused?.(true);
     };
 
     const resume = () => {
       paused = false;
       const store = useStore();
-      store.setPaused(false);
+      store.setPaused?.(false);
       revealFn();
     };
 
@@ -152,21 +170,24 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
     }
 
     const store = useStore();
-    const context = store.getContext(params.id);
+    const context = store.getContext?.(params.id);
 
     if (!context) return null;
 
-    store[setRevealingMethod](true);
-    store.setPaused(false);
+    store[setRevealingMethod]?.(true);
+    store.setPaused?.(false);
 
     // Generate or retrieve order
     if (externalGenerateOrder && store.setOrder) {
       // Panel-style: generate externally and set to store
-      const order = externalGenerateOrder(context.autoRevealMode, context.amount);
+      const order = externalGenerateOrder(
+        context.autoRevealMode,
+        context.amount
+      );
       store.setOrder(params.id, order);
     } else if (store.generateOrder) {
       // Letter-style: store generates order internally
-      store.generateOrder(params.id, context.autoRevealMode || 'sequential');
+      store.generateOrder(params.id, context.autoRevealMode || "sequential");
     }
 
     // Create new controller
@@ -180,7 +201,7 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
     const reveal = () => {
       if (controller.isPaused || controller.isFinished) return;
 
-      const context = store.getContext(id);
+      const context = store.getContext?.(id);
       if (!context || !context.order || currentIndex >= context.order.length) {
         controller.stop();
         return;
@@ -192,7 +213,7 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
       // Call the appropriate method to add revealed item
       if (store[addRevealedMethod]) {
         store[addRevealedMethod](id, nextItem);
-      } else {
+      } else if (store.addRevealed) {
         // Fallback for generic addRevealed
         store.addRevealed(id, nextItem);
       }
@@ -264,9 +285,9 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
     const result = customRevealAll
       ? customRevealAll(id, store)
       : (() => {
-          const context = store.getContext(id);
+          const context = store.getContext?.(id);
           if (!context) return false;
-          store.revealAll(id);
+          store.revealAll?.(id);
           return true;
         })();
 
@@ -295,9 +316,9 @@ export function createRevealUtil<T>(config: RevealUtilConfig<T>) {
     const result = customCoverAll
       ? customCoverAll(id, store)
       : (() => {
-          const context = store.getContext(id);
+          const context = store.getContext?.(id);
           if (!context) return false;
-          store.coverAll(id);
+          store.coverAll?.(id);
           return true;
         })();
 

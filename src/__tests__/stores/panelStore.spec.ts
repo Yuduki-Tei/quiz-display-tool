@@ -8,25 +8,25 @@ describe('usePanelStore', () => {
     setActivePinia(createPinia());
   });
 
-  describe('初始狀態', () => {
-    it('應該有空的 contexts', () => {
+  describe('Initial state', () => {
+    it('should have empty contexts', () => {
       const store = usePanelStore();
       expect(store.contexts).toEqual({});
     });
 
-    it('應該初始化 isPaused 為 false', () => {
+    it('should initialize isPaused to false', () => {
       const store = usePanelStore();
       expect(store.isPaused).toBe(false);
     });
 
-    it('應該初始化 isAutoRevealing 為 false', () => {
+    it('should initialize isAutoRevealing to false', () => {
       const store = usePanelStore();
       expect(store.isAutoRevealing).toBe(false);
     });
   });
 
   describe('getContext', () => {
-    it('應該在 id 存在時回傳 context', () => {
+    it('should return context when id exists', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -41,13 +41,13 @@ describe('usePanelStore', () => {
       expect(result).toEqual(mockContext);
     });
 
-    it('應該在 id 不存在時回傳 null', () => {
+    it('should return null when id does not exist', () => {
       const store = usePanelStore();
       const result = store.getContext('non-existent');
       expect(result).toBeNull();
     });
 
-    it('應該在 id 為 null 時回傳 null', () => {
+    it('should return null when id is null', () => {
       const store = usePanelStore();
       const result = store.getContext(null);
       expect(result).toBeNull();
@@ -55,7 +55,7 @@ describe('usePanelStore', () => {
   });
 
   describe('setContext', () => {
-    it('應該設定新的 context', () => {
+    it('should set a new context', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -69,7 +69,7 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id']).toEqual(mockContext);
     });
 
-    it('應該覆蓋已存在的 context', () => {
+    it('should overwrite an existing context', () => {
       const store = usePanelStore();
       const oldContext: PanelContext = {
         amount: { x: 3, y: 3 },
@@ -92,7 +92,7 @@ describe('usePanelStore', () => {
   });
 
   describe('setAmount', () => {
-    it('應該更新現有 context 的 amount', () => {
+    it('should update the amount of an existing context', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -108,7 +108,7 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id'].amount).toEqual(newAmount);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = usePanelStore();
       const newAmount: PanelAmount = { x: 10, y: 10 };
       store.setAmount('non-existent', newAmount);
@@ -117,7 +117,7 @@ describe('usePanelStore', () => {
   });
 
   describe('hasSelection', () => {
-    it('應該在有有效的 grid dimensions 時回傳 true', () => {
+    it('should return true when there are valid grid dimensions', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -130,7 +130,7 @@ describe('usePanelStore', () => {
       expect(store.hasSelection('test-id')).toBe(true);
     });
 
-    it('應該在 x 為 0 時回傳 false', () => {
+    it('should return false when x is 0', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 0, y: 5 },
@@ -143,7 +143,7 @@ describe('usePanelStore', () => {
       expect(store.hasSelection('test-id')).toBe(false);
     });
 
-    it('應該在 y 為 0 時回傳 false', () => {
+    it('should return false when y is 0', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 0 },
@@ -156,14 +156,14 @@ describe('usePanelStore', () => {
       expect(store.hasSelection('test-id')).toBe(false);
     });
 
-    it('應該在 context 不存在時回傳 false', () => {
+    it('should return false when context does not exist', () => {
       const store = usePanelStore();
       expect(store.hasSelection('non-existent')).toBe(false);
     });
   });
 
   describe('hasContext', () => {
-    it('應該在 context 存在時回傳 true', () => {
+    it('should return true when context exists', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -176,14 +176,14 @@ describe('usePanelStore', () => {
       expect(store.hasContext('test-id')).toBe(true);
     });
 
-    it('應該在 context 不存在時回傳 false', () => {
+    it('should return false when context does not exist', () => {
       const store = usePanelStore();
       expect(store.hasContext('non-existent')).toBe(false);
     });
   });
 
   describe('removeContext', () => {
-    it('應該成功刪除存在的 context', () => {
+    it('should successfully delete an existing context', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 5, y: 5 },
@@ -199,7 +199,7 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id']).toBeUndefined();
     });
 
-    it('應該在 context 不存在時回傳 false', () => {
+    it('should return false when context does not exist', () => {
       const store = usePanelStore();
       const result = store.removeContext('non-existent');
       expect(result).toBe(false);
@@ -207,13 +207,13 @@ describe('usePanelStore', () => {
   });
 
   describe('setPaused', () => {
-    it('應該設定 isPaused 為 true', () => {
+    it('should set isPaused to true', () => {
       const store = usePanelStore();
       store.setPaused(true);
       expect(store.isPaused).toBe(true);
     });
 
-    it('應該設定 isPaused 為 false', () => {
+    it('should set isPaused to false', () => {
       const store = usePanelStore();
       store.setPaused(true);
       store.setPaused(false);
@@ -222,13 +222,13 @@ describe('usePanelStore', () => {
   });
 
   describe('setRevealing', () => {
-    it('應該設定 isAutoRevealing 為 true', () => {
+    it('should set isAutoRevealing to true', () => {
       const store = usePanelStore();
       store.setRevealing(true);
       expect(store.isAutoRevealing).toBe(true);
     });
 
-    it('應該設定 isAutoRevealing 為 false', () => {
+    it('should set isAutoRevealing to false', () => {
       const store = usePanelStore();
       store.setRevealing(true);
       store.setRevealing(false);
@@ -237,7 +237,7 @@ describe('usePanelStore', () => {
   });
 
   describe('canReveal', () => {
-    it('應該在還有未顯示的 panels 時回傳 true', () => {
+    it('should return true when there are unrevealed panels', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 3, y: 3 },
@@ -250,7 +250,7 @@ describe('usePanelStore', () => {
       expect(result).toBe(true);
     });
 
-    it('應該在所有 panels 都已顯示時回傳 false', () => {
+    it('should return false when all panels are revealed', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 2, y: 2 },
@@ -263,7 +263,7 @@ describe('usePanelStore', () => {
       expect(result).toBe(false);
     });
 
-    it('應該在 context 為 null 時回傳 false', () => {
+    it('should return false when context is null', () => {
       const store = usePanelStore();
       const result = store.canReveal(null as any);
       expect(result).toBe(false);
@@ -271,7 +271,7 @@ describe('usePanelStore', () => {
   });
 
   describe('setOrder', () => {
-    it('應該設定 reveal order', () => {
+    it('should set reveal order', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 2, y: 2 },
@@ -287,7 +287,7 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id'].order).toEqual(order);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = usePanelStore();
       const order: [number, number][] = [[0, 0]];
       store.setOrder('non-existent', order);
@@ -296,7 +296,7 @@ describe('usePanelStore', () => {
   });
 
   describe('addRevealedPanel', () => {
-    it('應該將 panel 座標加入 revealed 陣列', () => {
+    it('should add panel coordinates to revealed array', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 3, y: 3 },
@@ -311,7 +311,7 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id'].revealed).toContainEqual([1, 2]);
     });
 
-    it('應該能連續加入多個 panels', () => {
+    it('should add multiple panels consecutively', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 3, y: 3 },
@@ -331,14 +331,14 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id'].revealed).toContainEqual([2, 2]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = usePanelStore();
       expect(() => store.addRevealedPanel('non-existent', [0, 0])).not.toThrow();
     });
   });
 
   describe('clearRevealedPanels', () => {
-    it('應該清空所有已顯示的 panels', () => {
+    it('should clear all revealed panels', () => {
       const store = usePanelStore();
       const mockContext: PanelContext = {
         amount: { x: 3, y: 3 },
@@ -353,14 +353,14 @@ describe('usePanelStore', () => {
       expect(store.contexts['test-id'].revealed).toEqual([]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = usePanelStore();
       expect(() => store.clearRevealedPanels('non-existent')).not.toThrow();
     });
   });
 
   describe('importData', () => {
-    it('應該匯入 contexts 資料', () => {
+    it('should import contexts data', () => {
       const store = usePanelStore();
       const mockContexts: Record<string, PanelContext> = {
         'id-1': {

@@ -1,43 +1,43 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright E2E 測試配置
- * 用於測試完整的使用者體驗，包括檔案上傳、Canvas 渲染等
+ * Playwright E2E test configuration
+ * Used to test complete user experience, including file upload, Canvas rendering, etc.
  */
 export default defineConfig({
   testDir: './e2e',
 
-  /* 最大測試執行時間 */
+  /* Maximum test execution time */
   timeout: 30 * 1000,
 
-  /* 每個測試重試次數 */
+  /* Number of retries per test */
   retries: process.env.CI ? 2 : 0,
 
-  /* 並行執行的 worker 數量 */
+  /* Number of parallel workers */
   workers: process.env.CI ? 1 : undefined,
 
-  /* 測試報告 */
+  /* Test reporter */
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['list']
   ],
 
-  /* 所有測試的共用配置 */
+  /* Shared configuration for all tests */
   use: {
-    /* 基礎 URL */
+    /* Base URL */
     baseURL: 'http://localhost:5173',
 
-    /* 收集 trace 以便除錯 */
+    /* Collect trace for debugging */
     trace: 'on-first-retry',
 
-    /* 截圖設定 */
+    /* Screenshot settings */
     screenshot: 'only-on-failure',
 
-    /* 影片錄製 */
+    /* Video recording */
     video: 'retain-on-failure',
   },
 
-  /* 測試專案配置 - 只用 Chromium */
+  /* Test project configuration - Chromium only */
   projects: [
     {
       name: 'chromium',
@@ -45,7 +45,7 @@ export default defineConfig({
     },
   ],
 
-  /* 開發伺服器配置 */
+  /* Development server configuration */
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',

@@ -1,46 +1,46 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * 基礎導航處理測試
+ * Basic navigation handling tests
  */
 
-test.describe("各頁面正確載入測試", () => {
-  test("應該能夠導航到首頁", async ({ page }) => {
-    // 步驟 1: 導航到首頁
+test.describe("Verify correct page loading for all pages", () => {
+  test("Should be able to navigate to home page", async ({ page }) => {
+    // Step 1: Navigate to home page
     await page.goto("/quiz-display-tool/");
 
-    // 步驟 2: 等待頁面載入
+    // Step 2: Wait for page to load
     await page.waitForLoadState("networkidle");
 
-    // 步驟 3: 驗證頁面標題或內容
-    // 檢查頁面是否載入成功
+    // Step 3: Verify page title or content
+    // Check if page loaded successfully
     await expect(page).toHaveURL(/quiz-display-tool/);
 
-    // 步驟 4: 截圖記錄首頁
+    // Step 4: Take screenshot of home page
     await page.screenshot({ path: "playwright-report/homepage.png" });
   });
 
-  test("應該能夠導航到 Letter 頁面", async ({ page }) => {
-    // 導航到 Letter 頁面
+  test("Should be able to navigate to Letter page", async ({ page }) => {
+    // Navigate to Letter page
     await page.goto("/quiz-display-tool/text-panel");
 
-    // 等待載入
+    // Wait for page to load
     await page.waitForLoadState("networkidle");
 
-    // 驗證 URL 正確
+    // Verify URL is correct
     await expect(page).toHaveURL(/text-panel/);
 
-    // 檢查是否有檔案上傳輸入
+    // Check if file upload inputs exist
     const fileInputs = page.locator('input[type="file"]');
     const count = await fileInputs.count();
 
-    console.log(`找到 ${count} 個檔案上傳按鈕`);
+    console.log(`Found ${count} file upload buttons`);
 
-    // 截圖記錄頁面
+    // Take screenshot of page
     await page.screenshot({ path: "playwright-report/letter-page.png" });
   });
 
-  test("應該能夠導航到 Panel 頁面", async ({ page }) => {
+  test("Should be able to navigate to Panel page", async ({ page }) => {
     await page.goto("/quiz-display-tool/panel");
     await page.waitForLoadState("networkidle");
     await expect(page).toHaveURL(/panel/);
@@ -48,7 +48,7 @@ test.describe("各頁面正確載入測試", () => {
     await page.screenshot({ path: "playwright-report/panel-page.png" });
   });
 
-  test("應該能夠導航到 Zoomer 頁面", async ({ page }) => {
+  test("Should be able to navigate to Zoomer page", async ({ page }) => {
     await page.goto("/quiz-display-tool/zoomer");
     await page.waitForLoadState("networkidle");
     await expect(page).toHaveURL(/zoomer/);

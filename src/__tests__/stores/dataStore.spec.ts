@@ -8,35 +8,35 @@ describe('useImageStore', () => {
     setActivePinia(createPinia());
   });
 
-  describe('初始狀態', () => {
-    it('應該有空的 allData', () => {
+  describe('Initial state', () => {
+    it('should have empty allData', () => {
       const store = useImageStore();
       expect(store.allData).toEqual([]);
     });
 
-    it('應該初始化 currentIndex 為 -1', () => {
+    it('should initialize currentIndex to -1', () => {
       const store = useImageStore();
       expect(store.currentIndex).toBe(-1);
     });
 
-    it('currentData 應該在沒有資料時回傳 null', () => {
+    it('currentData should return null when there is no data', () => {
       const store = useImageStore();
       expect(store.currentData).toBeNull();
     });
 
-    it('canGoPrev 應該在初始時為 false', () => {
+    it('canGoPrev should be false initially', () => {
       const store = useImageStore();
       expect(store.canGoPrev).toBe(false);
     });
 
-    it('canGoNext 應該在初始時為 false', () => {
+    it('canGoNext should be false initially', () => {
       const store = useImageStore();
       expect(store.canGoNext).toBe(false);
     });
   });
 
   describe('addData', () => {
-    it('應該成功新增資料並回傳 "added"', () => {
+    it('should successfully add data and return "added"', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -58,7 +58,7 @@ describe('useImageStore', () => {
       expect(store.allData[0]).toEqual(mockData);
     });
 
-    it('應該在新增資料後自動設定 currentIndex 為最後一筆', () => {
+    it('should automatically set currentIndex to the last item after adding data', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -79,7 +79,7 @@ describe('useImageStore', () => {
       expect(store.currentData).toEqual(mockData);
     });
 
-    it('應該更新已存在的資料並回傳 "updated"', () => {
+    it('should update existing data and return "updated"', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -108,7 +108,7 @@ describe('useImageStore', () => {
       expect(store.allData[0].name).toBe('New Name');
     });
 
-    it('應該能夠新增多筆資料', () => {
+    it('should be able to add multiple data items', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -144,7 +144,7 @@ describe('useImageStore', () => {
   });
 
   describe('removeData', () => {
-    it('應該成功刪除資料', () => {
+    it('should successfully remove data', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -166,7 +166,7 @@ describe('useImageStore', () => {
       expect(store.currentIndex).toBe(-1);
     });
 
-    it('應該在刪除不存在的 id 時不做任何事', () => {
+    it('should do nothing when removing a non-existent id', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -187,7 +187,7 @@ describe('useImageStore', () => {
       expect(store.allData).toHaveLength(1);
     });
 
-    it('應該在刪除當前資料後正確調整 currentIndex', () => {
+    it('should correctly adjust currentIndex after removing current data', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -225,7 +225,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-1');
     });
 
-    it('應該在刪除非當前資料時正確調整 currentIndex', () => {
+    it('should correctly adjust currentIndex when removing non-current data', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -276,7 +276,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-3');
     });
 
-    it('應該在刪除最後一筆資料時設定 currentIndex 為 -1', () => {
+    it('should set currentIndex to -1 when removing the last data item', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -298,7 +298,7 @@ describe('useImageStore', () => {
       expect(store.currentData).toBeNull();
     });
 
-    it('應該在刪除資料時釋放 blob URL', () => {
+    it('should release blob URL when removing data', () => {
       const store = useImageStore();
 
       // Create a real blob URL
@@ -326,7 +326,7 @@ describe('useImageStore', () => {
       expect(store.allData).toHaveLength(0);
     });
 
-    it('應該在刪除非 blob URL 的資料時不會出錯', () => {
+    it('should not error when removing data with non-blob URL', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -350,7 +350,7 @@ describe('useImageStore', () => {
   });
 
   describe('getData', () => {
-    it('應該在傳入 null 時回傳 currentData', () => {
+    it('should return currentData when passed null', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -371,7 +371,7 @@ describe('useImageStore', () => {
       expect(result).toEqual(mockData);
     });
 
-    it('應該在傳入 index 時回傳對應的資料', () => {
+    it('should return corresponding data when passed an index', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -405,7 +405,7 @@ describe('useImageStore', () => {
       expect(store.getData(1)).toEqual(mockData2);
     });
 
-    it('應該在傳入 id 時回傳對應的資料', () => {
+    it('should return corresponding data when passed an id', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -426,14 +426,14 @@ describe('useImageStore', () => {
       expect(result).toEqual(mockData);
     });
 
-    it('應該在 id 不存在時回傳 null', () => {
+    it('should return null when id does not exist', () => {
       const store = useImageStore();
       const result = store.getData('non-existent');
 
       expect(result).toBeNull();
     });
 
-    it('應該在 index 超出範圍時回傳 null', () => {
+    it('should return null when index is out of range', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -456,7 +456,7 @@ describe('useImageStore', () => {
   });
 
   describe('setData', () => {
-    it('應該在使用 index 時更新資料並回傳 true', () => {
+    it('should update data and return true when using index', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -484,7 +484,7 @@ describe('useImageStore', () => {
       expect(store.allData[0].name).toBe('New Name');
     });
 
-    it('應該在使用 id 時更新資料並回傳 true', () => {
+    it('should update data and return true when using id', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -512,7 +512,7 @@ describe('useImageStore', () => {
       expect(store.allData[0].name).toBe('New Name');
     });
 
-    it('應該在 id 不存在時回傳 false', () => {
+    it('should return false when id does not exist', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -532,7 +532,7 @@ describe('useImageStore', () => {
       expect(result).toBe(false);
     });
 
-    it('應該在 index 超出範圍時回傳 false', () => {
+    it('should return false when index is out of range', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -556,7 +556,7 @@ describe('useImageStore', () => {
   });
 
   describe('goToNext', () => {
-    it('應該在可以前進時移動到下一筆並回傳 id', () => {
+    it('should move to next item and return id when able to go forward', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -594,7 +594,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-2');
     });
 
-    it('應該在已經是最後一筆時回傳 null', () => {
+    it('should return null when already at the last item', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -616,7 +616,7 @@ describe('useImageStore', () => {
       expect(store.currentIndex).toBe(0);
     });
 
-    it('應該在沒有資料時回傳 null', () => {
+    it('should return null when there is no data', () => {
       const store = useImageStore();
       const result = store.goToNext();
 
@@ -625,7 +625,7 @@ describe('useImageStore', () => {
   });
 
   describe('goToPrev', () => {
-    it('應該在可以後退時移動到上一筆並回傳 id', () => {
+    it('should move to previous item and return id when able to go backward', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -663,7 +663,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-1');
     });
 
-    it('應該在已經是第一筆時回傳 null', () => {
+    it('should return null when already at the first item', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -685,7 +685,7 @@ describe('useImageStore', () => {
       expect(store.currentIndex).toBe(0);
     });
 
-    it('應該在沒有資料時回傳 null', () => {
+    it('should return null when there is no data', () => {
       const store = useImageStore();
       const result = store.goToPrev();
 
@@ -694,7 +694,7 @@ describe('useImageStore', () => {
   });
 
   describe('setCurrentById', () => {
-    it('應該成功設定當前 index', () => {
+    it('should successfully set current index', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -730,7 +730,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-1');
     });
 
-    it('應該在 id 不存在時不改變 currentIndex', () => {
+    it('should not change currentIndex when id does not exist', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -755,7 +755,7 @@ describe('useImageStore', () => {
   });
 
   describe('updateOrder', () => {
-    it('應該更新資料順序並保持當前選取', () => {
+    it('should update data order and maintain current selection', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -795,7 +795,7 @@ describe('useImageStore', () => {
       expect(store.currentIndex).toBe(1);
     });
 
-    it('應該在沒有 currentData 時也能更新順序', () => {
+    it('should be able to update order even without currentData', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -831,7 +831,7 @@ describe('useImageStore', () => {
   });
 
   describe('getIndexById', () => {
-    it('應該回傳正確的 index', () => {
+    it('should return correct index', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -865,14 +865,14 @@ describe('useImageStore', () => {
       expect(store.getIndexById('img-2')).toBe(1);
     });
 
-    it('應該在 id 不存在時回傳 -1', () => {
+    it('should return -1 when id does not exist', () => {
       const store = useImageStore();
       expect(store.getIndexById('non-existent')).toBe(-1);
     });
   });
 
   describe('importData', () => {
-    it('應該匯入資料和 currentIndex', () => {
+    it('should import data and currentIndex', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -909,7 +909,7 @@ describe('useImageStore', () => {
       expect(store.currentData?.id).toBe('img-2');
     });
 
-    it('應該覆蓋現有資料', () => {
+    it('should overwrite existing data', () => {
       const store = useImageStore();
       const oldData: ImageData = {
         id: 'old-1',
@@ -948,7 +948,7 @@ describe('useImageStore', () => {
   });
 
   describe('getAllData', () => {
-    it('應該回傳所有資料', () => {
+    it('should return all data', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -984,7 +984,7 @@ describe('useImageStore', () => {
       expect(result).toEqual([mockData1, mockData2]);
     });
 
-    it('應該在沒有資料時回傳空陣列', () => {
+    it('should return empty array when there is no data', () => {
       const store = useImageStore();
       const result = store.getAllData();
 
@@ -993,7 +993,7 @@ describe('useImageStore', () => {
   });
 
   describe('canGoPrev and canGoNext getters', () => {
-    it('應該在只有一筆資料時兩者都為 false', () => {
+    it('should both be false when there is only one data item', () => {
       const store = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -1014,7 +1014,7 @@ describe('useImageStore', () => {
       expect(store.canGoNext).toBe(false);
     });
 
-    it('應該在第一筆時只能前進', () => {
+    it('should only be able to go forward when at first item', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -1049,7 +1049,7 @@ describe('useImageStore', () => {
       expect(store.canGoNext).toBe(true);
     });
 
-    it('應該在最後一筆時只能後退', () => {
+    it('should only be able to go backward when at last item', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -1084,7 +1084,7 @@ describe('useImageStore', () => {
       expect(store.canGoNext).toBe(false);
     });
 
-    it('應該在中間時可以前後移動', () => {
+    it('should be able to move forward and backward when in the middle', () => {
       const store = useImageStore();
       const mockData1: ImageData = {
         id: 'img-1',
@@ -1139,20 +1139,20 @@ describe('useTextStore', () => {
     setActivePinia(createPinia());
   });
 
-  describe('初始狀態', () => {
-    it('應該有空的 allData', () => {
+  describe('Initial state', () => {
+    it('should have empty allData', () => {
       const store = useTextStore();
       expect(store.allData).toEqual([]);
     });
 
-    it('應該初始化 currentIndex 為 -1', () => {
+    it('should initialize currentIndex to -1', () => {
       const store = useTextStore();
       expect(store.currentIndex).toBe(-1);
     });
   });
 
   describe('addData', () => {
-    it('應該成功新增文字資料', () => {
+    it('should successfully add text data', () => {
       const store = useTextStore();
       const mockData: TextData = {
         id: 'text-1',
@@ -1168,7 +1168,7 @@ describe('useTextStore', () => {
       expect(store.allData[0]).toEqual(mockData);
     });
 
-    it('應該在新增後自動設定 currentIndex', () => {
+    it('should automatically set currentIndex after adding', () => {
       const store = useTextStore();
       const mockData: TextData = {
         id: 'text-1',
@@ -1185,7 +1185,7 @@ describe('useTextStore', () => {
   });
 
   describe('removeData', () => {
-    it('應該成功刪除文字資料', () => {
+    it('should successfully remove text data', () => {
       const store = useTextStore();
       const mockData: TextData = {
         id: 'text-1',
@@ -1202,7 +1202,7 @@ describe('useTextStore', () => {
   });
 
   describe('navigation', () => {
-    it('應該能在文字資料間導航', () => {
+    it('should be able to navigate between text data', () => {
       const store = useTextStore();
       const mockData1: TextData = {
         id: 'text-1',

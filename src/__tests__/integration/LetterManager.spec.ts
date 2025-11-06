@@ -31,7 +31,7 @@ vi.mock('@/features/Letter/views/Letter.vue', () => ({
   },
 }));
 
-describe('LetterManager 整合測試', () => {
+describe('LetterManager Integration Tests', () => {
   let pinia: ReturnType<typeof createPinia>;
 
   beforeEach(() => {
@@ -39,8 +39,8 @@ describe('LetterManager 整合測試', () => {
     setActivePinia(pinia);
   });
 
-  describe('初始渲染', () => {
-    it('應該成功渲染組件', () => {
+  describe('Initial Rendering', () => {
+    it('Should render the component successfully', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -51,7 +51,7 @@ describe('LetterManager 整合測試', () => {
       expect(wrapper.find('.manager-layout').exists()).toBe(true);
     });
 
-    it('應該顯示主要的 UI 區塊', () => {
+    it('Should display main UI sections', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -60,10 +60,10 @@ describe('LetterManager 整合測試', () => {
 
       expect(wrapper.find('.manager-top-bar').exists()).toBe(true);
       expect(wrapper.find('.display-area').exists()).toBe(true);
-      expect(wrapper.find('.floating-play-button').exists()).toBe(false); // 預設是手動模式
+      expect(wrapper.find('.floating-play-button').exists()).toBe(false); // Default is manual mode
     });
 
-    it('應該顯示檔案工具列按鈕', () => {
+    it('Should display file toolbar buttons', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -74,7 +74,7 @@ describe('LetterManager 整合測試', () => {
       expect(fileUtils.exists()).toBe(true);
     });
 
-    it('應該顯示通用工具按鈕', () => {
+    it('Should display common utility buttons', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -86,8 +86,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('資料導航功能', () => {
-    it('應該在沒有資料時禁用導航按鈕', () => {
+  describe('Data Navigation Functionality', () => {
+    it('Should disable navigation buttons when there is no data', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -99,7 +99,7 @@ describe('LetterManager 整合測試', () => {
       expect(textStore.canGoNext).toBe(false);
     });
 
-    it('應該在有多筆資料時啟用導航按鈕', async () => {
+    it('Should enable navigation buttons when there are multiple data items', async () => {
       const textStore = useTextStore();
       const letterStore = useLetterStore();
 
@@ -157,8 +157,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('側邊欄功能', () => {
-    it('應該初始時隱藏側邊欄', () => {
+  describe('Sidebar Functionality', () => {
+    it('Should hide the sidebar initially', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -170,8 +170,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('字符顯示控制', () => {
-    it('應該正確初始化 charsPerRow', () => {
+  describe('Character Display Control', () => {
+    it('Should correctly initialize charsPerRow', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -181,7 +181,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).charsPerRow).toBe(10);
     });
 
-    it('應該正確初始化手動模式', () => {
+    it('Should correctly initialize manual mode', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -191,7 +191,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).isManual).toBe(true);
     });
 
-    it('應該正確初始化 duration', () => {
+    it('Should correctly initialize duration', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -202,8 +202,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('自動播放模式', () => {
-    it('應該在手動模式時隱藏浮動播放按鈕', () => {
+  describe('Auto Play Mode', () => {
+    it('Should hide the floating play button in manual mode', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -214,7 +214,7 @@ describe('LetterManager 整合測試', () => {
       expect(wrapper.find('.floating-play-button').exists()).toBe(false);
     });
 
-    it('應該正確設定預設的 autoRevealMode', () => {
+    it('Should correctly set the default autoRevealMode', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -225,8 +225,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('Store 同步', () => {
-    it('應該在有 currentData 時同步 currentId', async () => {
+  describe('Store Synchronization', () => {
+    it('Should synchronize currentId when currentData exists', async () => {
       const textStore = useTextStore();
       const mockData: TextData = {
         id: 'text-1',
@@ -248,7 +248,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe('text-1');
     });
 
-    it('應該在沒有資料時 currentId 為 null', () => {
+    it('Should have currentId as null when there is no data', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -258,7 +258,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe(null);
     });
 
-    it('應該正確計算 canShowAll', async () => {
+    it('Should correctly calculate canShowAll', async () => {
       const textStore = useTextStore();
       const letterStore = useLetterStore();
 
@@ -291,7 +291,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).canShowAll).toBe(true);
     });
 
-    it('應該正確計算 canHideAll', async () => {
+    it('Should correctly calculate canHideAll', async () => {
       const textStore = useTextStore();
       const letterStore = useLetterStore();
 
@@ -324,7 +324,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).canHideAll).toBe(true);
     });
 
-    it('應該正確計算 isSomeRevealed', async () => {
+    it('Should correctly calculate isSomeRevealed', async () => {
       const textStore = useTextStore();
       const letterStore = useLetterStore();
 
@@ -358,8 +358,8 @@ describe('LetterManager 整合測試', () => {
     });
   });
 
-  describe('檔案上傳', () => {
-    it('應該有隱藏的檔案輸入元素', () => {
+  describe('File Upload', () => {
+    it('Should have a hidden file input element', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -374,7 +374,7 @@ describe('LetterManager 整合測試', () => {
   });
 
   describe('reveal modes', () => {
-    it('應該有三種 reveal 模式', () => {
+    it('Should have three reveal modes', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -389,7 +389,7 @@ describe('LetterManager 整合測試', () => {
   });
 
   describe('computed properties', () => {
-    it('durationSec 應該正確轉換毫秒為秒', () => {
+    it('durationSec should correctly convert milliseconds to seconds', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
@@ -403,7 +403,7 @@ describe('LetterManager 整合測試', () => {
       expect(getVm(wrapper).durationSec).toBe(2.5);
     });
 
-    it('revealTypeButton 應該根據 isManual 顯示正確的圖示', () => {
+    it('revealTypeButton should display the correct icon based on isManual', () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],

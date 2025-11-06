@@ -2,258 +2,258 @@ import { test, expect } from '@playwright/test';
 import path from 'path';
 
 /**
- * Letter 功能的 E2E 測試
+ * E2E tests for Letter functionality
  *
- * 這個測試會模擬真實使用者的完整操作流程：
- * 1. 上傳文字檔案（.txt）
- * 2. 設定每行字元數
- * 3. 切換到自動模式並測試自動揭露功能
- * 4. 測試暫停/繼續
- * 5. 驗證 Canvas 渲染
- * 6. 測試多行文字檔的處理（換行自動分割成多項目）
+ * These tests simulate complete user workflows:
+ * 1. Upload text files (.txt)
+ * 2. Set characters per line
+ * 3. Switch to auto mode and test auto-reveal functionality
+ * 4. Test pause/resume
+ * 5. Verify Canvas rendering
+ * 6. Test handling of multi-line text files (newlines auto-split into multiple items)
  */
 
-test.describe('Letter 功能 - 完整使用者流程', () => {
+test.describe('Letter Feature - Complete User Workflow', () => {
   test.beforeEach(async ({ page }) => {
-    // 導航到 Letter 頁面（text-panel）
+    // Navigate to Letter page (text-panel)
     await page.goto('/quiz-display-tool/text-panel');
 
-    // 等待頁面載入完成
+    // Wait for page load to complete
     await page.waitForLoadState('networkidle');
   });
 
-  test('應該成功上傳文字檔並顯示在 Canvas 上', async ({ page }) => {
-    // 步驟 1: 找到檔案上傳按鈕（accept=".txt"）
+  test('Should successfully upload text file and display on Canvas', async ({ page }) => {
+    // Step 1: Find file upload button (accept=".txt")
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
 
-    // 步驟 2: 上傳測試文字檔
+    // Step 2: Upload test text file
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
-    // 步驟 3: 等待文字處理完成
-    // 檢查是否有 Canvas 元素出現
+    // Step 3: Wait for text processing to complete
+    // Check if Canvas element appears
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 4: 驗證文字已載入到 store
-    // 上傳後會自動切換到最新項目（最後一個），所以 next 按鈕應該 disabled
+    // Step 4: Verify text is loaded into store
+    // After upload, automatically switches to latest item (last one), so next button should be disabled
     const nextButton = page.locator('.file-utils .el-button-group button').nth(1);
 
-    // 最後一個項目時，next 應該 disabled
+    // When on last item, next should be disabled
     await expect(nextButton).toBeDisabled();
   });
 
-  test('應該能設定每行字元數', async ({ page }) => {
-    // 步驟 1: 上傳文字檔
+  test('Should be able to set characters per line', async ({ page }) => {
+    // Step 1: Upload text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
-    // 等待文字載入
+    // Wait for text to load
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 找到字元數設定（每行字元數）
+    // Step 2: Find character count setting (characters per line)
     const charsInput = page.locator('input[type="number"]').first();
 
-    // 設定每行字元數為 20
+    // Set characters per line to 20
     await charsInput.fill('20');
 
-    // 步驟 3: 確認設定已套用
+    // Step 3: Confirm setting is applied
     await expect(charsInput).toHaveValue('20');
   });
 
-  test('應該能切換到自動模式並執行自動揭露', async ({ page }) => {
-    // 步驟 1: 上傳文字檔
+  test('Should be able to switch to auto mode and perform auto-reveal', async ({ page }) => {
+    // Step 1: Upload text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 找到模式切換按鈕（從手動模式切換到自動模式）
-    // 根據 LetterManager.vue，模式切換按鈕在 top-bar-section mode-toggle
+    // Step 2: Find mode toggle button (switch from manual to auto mode)
+    // According to LetterManager.vue, mode toggle button is in top-bar-section mode-toggle
     const modeToggleButton = page.locator('.mode-toggle button').first();
     await modeToggleButton.click();
 
-    // 步驟 3: 確認已切換到自動模式（播放按鈕應該出現）
+    // Step 3: Confirm switched to auto mode (play button should appear)
     const playButton = page.locator('.floating-play-button button');
     await expect(playButton).toBeVisible();
 
-    // 步驟 4: 開始自動播放
+    // Step 4: Start auto-play
     await playButton.click();
 
-    // 步驟 5: 等待一段時間，確保有字元被揭露
+    // Step 5: Wait for a moment to ensure some characters are revealed
     await page.waitForTimeout(1000);
 
-    // 步驟 6: 暫停（播放後按鈕圖示會變成暫停）
+    // Step 6: Pause (button icon changes to pause after playing)
     await playButton.click();
 
-    // 驗證暫停後的狀態
-    // Canvas 應該還在，並且有部分內容已揭露
+    // Verify state after pausing
+    // Canvas should still be there with some content revealed
     await expect(page.locator('canvas')).toBeVisible();
   });
 
-  test('應該能全部顯示和全部隱藏', async ({ page }) => {
-    // 步驟 1: 上傳文字檔
+  test('Should be able to show all and hide all', async ({ page }) => {
+    // Step 1: Upload text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 點擊「全部顯示」
-    // PhFrameCorners icon 的按鈕，位於 common-utils 的 el-button-group 中的第二個按鈕
+    // Step 2: Click "Show all"
+    // Button with PhFrameCorners icon, second button in common-utils el-button-group
     const showAllButton = page.locator('.common-utils .el-button-group button').nth(1);
 
     await showAllButton.click();
 
-    // 驗證：Canvas 應該顯示完整文字
+    // Verify: Canvas should display complete text
     const canvas = page.locator('canvas').first();
     await expect(canvas).toBeVisible();
 
-    // 步驟 3: 點擊「全部隱藏」
-    // PhEyeClosed icon 的按鈕，位於 common-utils 的 el-button-group 中的第一個按鈕
+    // Step 3: Click "Hide all"
+    // Button with PhEyeClosed icon, first button in common-utils el-button-group
     const hideAllButton = page.locator('.common-utils .el-button-group button').first();
 
     await hideAllButton.click();
 
-    // 驗證：Canvas 應該還在但內容被遮蓋
+    // Verify: Canvas should still be there but content is covered
     await expect(canvas).toBeVisible();
   });
 
-  test('應該能上傳多行文字檔並自動分割成多個項目', async ({ page }) => {
-    // 步驟 1: 上傳多行文字檔（包含 5 行）
+  test('Should be able to upload multi-line text file and auto-split into multiple items', async ({ page }) => {
+    // Step 1: Upload multi-line text file (contains 5 lines)
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const multiLineTextPath = path.join(__dirname, 'fixtures', 'multi-line-text.txt');
     await fileInput.setInputFiles(multiLineTextPath);
 
-    // 等待最後一個項目載入（上傳後會自動切換到最後一個）
+    // Wait for last item to load (automatically switches to last one after upload)
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 驗證當前在最後一個項目，next 按鈕應該 disabled
+    // Step 2: Verify on last item, next button should be disabled
     const nextButton = page.locator('.file-utils .el-button-group button').nth(1);
     await expect(nextButton).toBeDisabled();
 
-    // 步驟 3: 驗證 prev 按鈕應該 enabled（因為不是第一個項目）
+    // Step 3: Verify prev button should be enabled (because not on first item)
     const prevButton = page.locator('.file-utils .el-button-group button').first();
     await expect(prevButton).toBeEnabled();
 
-    // 步驟 4: 點擊 prev 按鈕切換到倒數第二個項目
+    // Step 4: Click prev button to switch to second-to-last item
     await prevButton.click();
     await page.waitForTimeout(300);
 
-    // 步驟 5: 驗證現在兩個按鈕都應該 enabled（在中間項目）
+    // Step 5: Verify both buttons should be enabled now (on middle item)
     await expect(prevButton).toBeEnabled();
     await expect(nextButton).toBeEnabled();
 
-    // 步驟 6: 繼續往前切換到第一個項目
+    // Step 6: Continue switching backwards to first item
     for (let i = 0; i < 3; i++) {
       await prevButton.click();
       await page.waitForTimeout(200);
     }
 
-    // 步驟 7: 驗證在第一個項目時，prev 應該 disabled
+    // Step 7: Verify on first item, prev should be disabled
     await expect(prevButton).toBeDisabled();
     await expect(nextButton).toBeEnabled();
 
-    // Canvas 應該保持可見
+    // Canvas should remain visible
     await expect(page.locator('canvas')).toBeVisible();
   });
 
-  test('應該在側邊欄顯示文字項目列表', async ({ page }) => {
-    // 步驟 1: 上傳多行文字檔
+  test('Should display text item list in sidebar', async ({ page }) => {
+    // Step 1: Upload multi-line text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const multiLineTextPath = path.join(__dirname, 'fixtures', 'multi-line-text.txt');
     await fileInput.setInputFiles(multiLineTextPath);
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 打開側邊欄
+    // Step 2: Open sidebar
     const sidebarButton = page.locator('button').filter({
       hasText: /sidebar|側邊欄|列表/i
     }).first();
 
-    // 如果側邊欄按鈕存在，點擊它
+    // If sidebar button exists, click it
     if (await sidebarButton.isVisible()) {
       await sidebarButton.click();
 
-      // 步驟 3: 驗證側邊欄中有文字項目
-      // 應該至少有多個文字項目（來自多行文字檔）
+      // Step 3: Verify text items in sidebar
+      // Should have at least multiple text items (from multi-line text file)
       await page.waitForTimeout(500);
 
-      // 側邊欄應該可見
+      // Sidebar should be visible
       const sidebar = page.locator('[role="dialog"], .sidebar, .drawer').first();
       await expect(sidebar).toBeVisible({ timeout: 5000 });
     }
   });
 
-  test('Canvas 應該正確渲染並可以截圖比對', async ({ page }) => {
-    // 步驟 1: 上傳文字檔
+  test('Canvas should render correctly and allow screenshot comparison', async ({ page }) => {
+    // Step 1: Upload text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
-    // 等待 Canvas 渲染
+    // Wait for Canvas rendering
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
-    await page.waitForTimeout(1000); // 等待渲染完成
+    await page.waitForTimeout(1000); // Wait for rendering to complete
 
-    // 步驟 2: 取得 Canvas 元素
+    // Step 2: Get Canvas element
     const canvas = page.locator('canvas').first();
 
-    // 驗證 Canvas 有正確的尺寸（不是 0x0）
+    // Verify Canvas has correct dimensions (not 0x0)
     const boundingBox = await canvas.boundingBox();
     expect(boundingBox).not.toBeNull();
     expect(boundingBox!.width).toBeGreaterThan(0);
     expect(boundingBox!.height).toBeGreaterThan(0);
 
-    // 步驟 3: 截圖進行視覺回歸測試
-    // 第一次執行會建立 baseline，之後會比對差異
+    // Step 3: Take screenshot for visual regression testing
+    // First run creates baseline, subsequent runs compare differences
     await expect(canvas).toHaveScreenshot('letter-canvas-initial.png', {
-      maxDiffPixels: 100, // 允許小幅度差異
+      maxDiffPixels: 100, // Allow minor differences
     });
   });
 
-  test('應該能測試不同的自動揭露模式', async ({ page }) => {
-    // 步驟 1: 上傳文字檔
+  test('Should be able to test different auto-reveal modes', async ({ page }) => {
+    // Step 1: Upload text file
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
     const testTextPath = path.join(__dirname, 'fixtures', 'test.txt');
     await fileInput.setInputFiles(testTextPath);
 
     await expect(page.locator('canvas')).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 切換到自動模式
+    // Step 2: Switch to auto mode
     const modeToggleButton = page.locator('.mode-toggle button').first();
     await modeToggleButton.click();
 
-    // 步驟 3: 驗證揭露模式選擇器可見
+    // Step 3: Verify reveal mode selector is visible
     const modeSelect = page.locator('.text-select');
     await expect(modeSelect).toBeVisible();
 
-    // 步驟 4: 開始播放測試自動揭露
+    // Step 4: Start playing to test auto-reveal
     const playButton = page.locator('.floating-play-button button');
     await playButton.click();
 
-    // 等待部分揭露
+    // Wait for partial reveal
     await page.waitForTimeout(500);
 
-    // 暫停
+    // Pause
     await playButton.click();
 
-    // 驗證 Canvas 仍然可見
+    // Verify Canvas is still visible
     await expect(page.locator('canvas')).toBeVisible();
   });
 });
 
 /**
- * 效能測試：確保大量操作不會造成記憶體洩漏或效能問題
+ * Performance tests: Ensure bulk operations do not cause memory leaks or performance issues
  */
-test.describe('Letter 功能 - 效能測試', () => {
-  test('應該能快速上傳並切換多個文字項目', async ({ page }) => {
+test.describe('Letter Feature - Performance Tests', () => {
+  test('Should be able to quickly upload and switch multiple text items', async ({ page }) => {
     await page.goto('/quiz-display-tool/text-panel');
     await page.waitForLoadState('networkidle');
 
     const fileInput = page.locator('input[type="file"][accept=".txt"]');
 
-    // 準備不同的測試檔案（因為相同檔案會被去重）
+    // Prepare different test files (identical files will be deduplicated)
     const testFiles = [
       path.join(__dirname, 'fixtures', 'test-1.txt'),
       path.join(__dirname, 'fixtures', 'test-2.txt'),
@@ -262,7 +262,7 @@ test.describe('Letter 功能 - 效能測試', () => {
 
     const startTime = Date.now();
 
-    // 快速上傳 3 個不同的文字檔（每個包含 2 行，共 6 個項目）
+    // Quickly upload 3 different text files (each contains 2 lines, total 6 items)
     for (const filePath of testFiles) {
       await fileInput.setInputFiles(filePath);
       await page.waitForTimeout(200);
@@ -270,14 +270,14 @@ test.describe('Letter 功能 - 效能測試', () => {
 
     const uploadTime = Date.now() - startTime;
 
-    // 驗證上傳時間合理（不超過 5 秒）
+    // Verify upload time is reasonable (not exceeding 5 seconds)
     expect(uploadTime).toBeLessThan(5000);
 
-    // 驗證可以看到 Canvas
+    // Verify Canvas is visible
     await expect(page.locator('canvas')).toBeVisible();
 
-    // 測試快速切換項目
-    // 當前應該在最後一個項目，使用 Previous 按鈕往前切換
+    // Test quick item switching
+    // Should be on last item, use Previous button to switch backwards
     const prevButton = page.locator('.file-utils .el-button-group button').first();
     for (let i = 0; i < 5; i++) {
       if (await prevButton.isEnabled()) {
@@ -286,7 +286,7 @@ test.describe('Letter 功能 - 效能測試', () => {
       }
     }
 
-    // Canvas 應該仍然正常顯示
+    // Canvas should still display correctly
     await expect(page.locator('canvas')).toBeVisible();
   });
 });

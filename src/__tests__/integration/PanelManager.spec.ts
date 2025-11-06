@@ -58,7 +58,7 @@ vi.mock('@/features/Panel/composables/revealPatterns', () => ({
   ],
 }));
 
-describe('PanelManager 整合測試', () => {
+describe('PanelManager integration test', () => {
   let pinia: ReturnType<typeof createPinia>;
 
   beforeEach(() => {
@@ -66,8 +66,8 @@ describe('PanelManager 整合測試', () => {
     setActivePinia(pinia);
   });
 
-  describe('初始渲染', () => {
-    it('應該成功渲染組件', () => {
+  describe('Initial rendering', () => {
+    it('should successfully render the component', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -78,7 +78,7 @@ describe('PanelManager 整合測試', () => {
       expect(wrapper.find('.manager-layout').exists()).toBe(true);
     });
 
-    it('應該顯示主要的 UI 區塊', () => {
+    it('should display main UI sections', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -87,10 +87,10 @@ describe('PanelManager 整合測試', () => {
 
       expect(wrapper.find('.manager-top-bar').exists()).toBe(true);
       expect(wrapper.find('.display-area').exists()).toBe(true);
-      expect(wrapper.find('.floating-play-button').exists()).toBe(false); // 預設是手動模式
+      expect(wrapper.find('.floating-play-button').exists()).toBe(false); // default is manual mode
     });
 
-    it('應該顯示 grid selector', () => {
+    it('should display grid selector', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -102,8 +102,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('資料導航功能', () => {
-    it('應該在沒有資料時禁用導航按鈕', () => {
+  describe('Data navigation functionality', () => {
+    it('should disable navigation buttons when there is no data', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -115,7 +115,7 @@ describe('PanelManager 整合測試', () => {
       expect(imageStore.canGoNext).toBe(false);
     });
 
-    it('應該在有多筆資料時啟用導航按鈕', async () => {
+    it('should enable navigation buttons when there is multiple data', async () => {
       const imageStore = useImageStore();
       const panelStore = usePanelStore();
 
@@ -184,8 +184,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('Grid 設定', () => {
-    it('應該正確初始化 gridX 和 gridY', () => {
+  describe('Grid settings', () => {
+    it('should correctly initialize gridX and gridY', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -196,7 +196,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).gridY).toBe(5);
     });
 
-    it('應該正確初始化手動模式', () => {
+    it('should correctly initialize manual mode', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -206,7 +206,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).isManual).toBe(true);
     });
 
-    it('應該正確初始化 duration', () => {
+    it('should correctly initialize duration', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -217,8 +217,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('側邊欄功能', () => {
-    it('應該初始時隱藏側邊欄', () => {
+  describe('Sidebar functionality', () => {
+    it('should hide sidebar initially', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -229,8 +229,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('Store 同步', () => {
-    it('應該在有 currentData 時同步 currentId', async () => {
+  describe('Store synchronization', () => {
+    it('should synchronize currentId when there is currentData', async () => {
       const imageStore = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -258,7 +258,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe('img-1');
     });
 
-    it('應該在沒有資料時 currentId 為 null', () => {
+    it('should have currentId as null when there is no data', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -268,7 +268,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe(null);
     });
 
-    it('應該正確計算 canShowAll', async () => {
+    it('should correctly calculate canShowAll', async () => {
       const imageStore = useImageStore();
       const panelStore = usePanelStore();
 
@@ -306,7 +306,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).canShowAll).toBe(true);
     });
 
-    it('應該正確計算 canHideAll', async () => {
+    it('should correctly calculate canHideAll', async () => {
       const imageStore = useImageStore();
       const panelStore = usePanelStore();
 
@@ -344,7 +344,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).canHideAll).toBe(true);
     });
 
-    it('應該正確計算 isSomeRevealed', async () => {
+    it('should correctly calculate isSomeRevealed', async () => {
       const imageStore = useImageStore();
       const panelStore = usePanelStore();
 
@@ -383,8 +383,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('檔案上傳', () => {
-    it('應該有隱藏的檔案輸入元素', () => {
+  describe('File upload', () => {
+    it('should have hidden file input element', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -399,7 +399,7 @@ describe('PanelManager 整合測試', () => {
   });
 
   describe('computed properties', () => {
-    it('durationSec 應該正確轉換毫秒為秒', () => {
+    it('durationSec should correctly convert milliseconds to seconds', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -413,7 +413,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).durationSec).toBe(2.5);
     });
 
-    it('revealTypeButton 應該根據 isManual 顯示正確的圖示', () => {
+    it('revealTypeButton should display correct icon based on isManual', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -427,7 +427,7 @@ describe('PanelManager 整合測試', () => {
       expect(getVm(wrapper).revealTypeButton.icon).toBe('PhClockClockwise');
     });
 
-    it('autoRevealMode 應該正確組合 mainMode 和 subMode', () => {
+    it('autoRevealMode should correctly combine mainMode and subMode', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -448,8 +448,8 @@ describe('PanelManager 整合測試', () => {
     });
   });
 
-  describe('modeGet 函數', () => {
-    it('應該正確解析 spiral 模式', () => {
+  describe('modeGet function', () => {
+    it('should correctly parse spiral mode', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -461,7 +461,7 @@ describe('PanelManager 整合測試', () => {
       expect(sub).toBe('clockwise-center');
     });
 
-    it('應該正確解析 linear 模式', () => {
+    it('should correctly parse linear mode', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],
@@ -473,7 +473,7 @@ describe('PanelManager 整合測試', () => {
       expect(sub).toBe('horizontal');
     });
 
-    it('應該正確解析 random 模式', () => {
+    it('should correctly parse random mode', () => {
       const wrapper = mount(PanelManager, {
         global: {
           plugins: [pinia],

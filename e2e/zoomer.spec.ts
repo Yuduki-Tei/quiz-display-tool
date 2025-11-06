@@ -15,79 +15,80 @@ async function selectOption(page: Page, selectLocator: any, optionText: string) 
 }
 
 /**
- * Zoomer 功能的 E2E 測試
+ * Zoomer functionality E2E tests
  *
- * 這個測試會模擬真實使用者的完整操作流程：
- * 1. 上傳圖片檔案
- * 2. 繪製選取區域
- * 3. 切換顯示模式
- * 4. 測試縮放-抽出動畫
- * 5. 測試暫停/繼續
- * 6. 驗證 Canvas 渲染
+ * These tests simulate a complete user workflow:
+ * 1. Upload image files
+ * 2. Draw selection area
+ * 3. Toggle display mode
+ * 4. Test zoom-extract animation
+ * 5. Test pause/resume
+ * 6. Verify Canvas rendering
  */
 
-test.describe('Zoomer 功能 - 完整使用者流程', () => {
+test.describe('Zoomer functionality - Complete user workflow', () => {
   test.beforeEach(async ({ page }) => {
-    // 導航到 Zoomer 頁面
+    // Navigate to Zoomer page
     await page.goto('/quiz-display-tool/zoomer');
 
-    // 等待頁面載入完成
+    // Wait for page to finish loading
     await page.waitForLoadState('networkidle');
   });
 
-  test('應該成功上傳圖片並顯示在 Canvas 上', async ({ page }) => {
-    // 步驟 1: 找到檔案上傳按鈕（accept="image/*"）
+  test('Should successfully upload image and display on Canvas', async ({ page }) => {
+    // Step 1: Find file upload button (accept="image/*")
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
 
-    // 步驟 2: 上傳測試圖片
+    // Step 2: Upload test image
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
-    // 步驟 3: 等待圖片處理完成
-    // 檢查是否有 Canvas 元素出現
+    // Step 3: Wait for image processing to complete
+    // Check if Canvas element appears
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 4: 驗證圖片已載入到 store
-    // 上傳後會自動切換到最新項目（最後一個），所以 next 按鈕應該 disabled
+    // Step 4: Verify image is loaded in store
+    // After upload, it will automatically switch to the latest item (the last one),
+    // so the next button should be disabled
     const nextButton = page.locator('.file-utils .el-button-group button').nth(1);
 
-    // 最後一個項目時，next 應該 disabled
+    // When at the last item, next button should be disabled
     await expect(nextButton).toBeDisabled();
   });
 
-  test('應該能設定縮放時長', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Should be able to set zoom duration', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
-    // 等待圖片載入
+    // Wait for image to load
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 找到縮放時長設定（使用 el-input-number 元件）
+    // Step 2: Find zoom duration setting (using el-input-number component)
     const durationInput = page.locator('.duration-control .el-input-number input').first();
 
-    // 設定縮放時長為 10 秒
+    // Set zoom duration to 10 seconds
     await durationInput.fill('10');
 
-    // 步驟 3: 確認設定已套用
+    // Step 3: Verify setting has been applied
     await expect(durationInput).toHaveValue('10');
   });
 
-  test('應該能繪製選取區域', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Should be able to draw selection area', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 在 Canvas 上繪製選取區域
+    // Step 2: Draw selection area on Canvas
     const canvas = page.locator('canvas').first();
     const boundingBox = await canvas.boundingBox();
 
     if (boundingBox) {
-      // 從中心點開始拖拽繪製矩形
+      // Start dragging from center point to draw rectangle
       const startX = boundingBox.x + boundingBox.width * 0.3;
       const startY = boundingBox.y + boundingBox.height * 0.3;
       const endX = boundingBox.x + boundingBox.width * 0.7;
@@ -98,24 +99,25 @@ test.describe('Zoomer 功能 - 完整使用者流程', () => {
       await page.mouse.move(endX, endY);
       await page.mouse.up();
 
-      // 等待選取完成
+      // Wait for selection to complete
       await page.waitForTimeout(300);
     }
 
-    // 步驟 3: 驗證播放按鈕應該變為可用（有選取區域後才能開始縮放）
+    // Step 3: Verify play button should become enabled
+    // (play button is only enabled after selection area exists)
     const playButton = page.locator('.floating-play-button button');
     await expect(playButton).toBeEnabled();
   });
 
-  test('應該能切換顯示模式', async ({ page }) => {
-    // 步驟 1: 上傳圖片並繪製選取區域
+  test('Should be able to toggle display mode', async ({ page }) => {
+    // Step 1: Upload image and draw selection area
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 繪製選取區域
+    // Draw selection area
     const canvas = page.locator('canvas').first();
     const boundingBox = await canvas.boundingBox();
 
@@ -132,35 +134,35 @@ test.describe('Zoomer 功能 - 完整使用者流程', () => {
       await page.waitForTimeout(300);
     }
 
-    // 步驟 2: 找到顯示模式切換按鈕（mode-toggle）
+    // Step 2: Find display mode toggle button (mode-toggle)
     const modeToggleButton = page.locator('.mode-toggle button').first();
 
-    // 步驟 3: 點擊切換模式（full -> selection -> none -> full）
-    // 第一次點擊：切換到 selection 模式
+    // Step 3: Click to toggle mode (full -> selection -> none -> full)
+    // First click: switch to selection mode
     await modeToggleButton.click();
     await page.waitForTimeout(300);
 
-    // 第二次點擊：切換到 none 模式
+    // Second click: switch to none mode
     await modeToggleButton.click();
     await page.waitForTimeout(300);
 
-    // 第三次點擊：切換回 full 模式
+    // Third click: switch back to full mode
     await modeToggleButton.click();
     await page.waitForTimeout(300);
 
-    // Canvas 應該保持可見
+    // Canvas should remain visible
     await expect(canvas).toBeVisible();
   });
 
-  test('應該能執行縮放-抽出動畫並暫停', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Should be able to execute zoom-extract animation and pause', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 繪製選取區域
+    // Step 2: Draw selection area
     const mainCanvas = page.locator('canvas').first();
     const boundingBox = await mainCanvas.boundingBox();
 
@@ -177,34 +179,34 @@ test.describe('Zoomer 功能 - 完整使用者流程', () => {
       await page.waitForTimeout(300);
     }
 
-    // 步驟 3: 設定較短的縮放時長以便測試
+    // Step 3: Set shorter zoom duration for testing
     const durationInput = page.locator('.duration-control .el-input-number input').first();
     await durationInput.fill('3');
 
-    // 步驟 4: 開始縮放動畫
+    // Step 4: Start zoom animation
     const playButton = page.locator('.floating-play-button button');
     await playButton.click();
 
-    // 步驟 5: 等待一段時間，確保動畫開始
+    // Step 5: Wait a moment to ensure animation has started
     await page.waitForTimeout(500);
 
-    // 步驟 6: 暫停動畫
+    // Step 6: Pause animation
     await playButton.click();
 
-    // 驗證 zoomCanvas (第二個 canvas) 在 isZooming 時可見
+    // Verify zoomCanvas (second canvas) is visible during isZooming
     const zoomCanvas = page.locator('canvas').nth(1);
     await expect(zoomCanvas).toBeVisible();
   });
 
-  test('應該能顯示完整圖片', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Should be able to display full image', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 繪製選取區域
+    // Step 2: Draw selection area
     const mainCanvas = page.locator('canvas').first();
     const boundingBox = await mainCanvas.boundingBox();
 
@@ -221,115 +223,115 @@ test.describe('Zoomer 功能 - 完整使用者流程', () => {
       await page.waitForTimeout(300);
     }
 
-    // 步驟 3: 設定較短的縮放時長
+    // Step 3: Set shorter zoom duration
     const durationInput = page.locator('.duration-control .el-input-number input').first();
     await durationInput.fill('2');
     await page.waitForTimeout(200);
 
-    // 步驟 4: 開始縮放動畫
+    // Step 4: Start zoom animation
     const playButton = page.locator('.floating-play-button button');
     await playButton.click();
     await page.waitForTimeout(300);
 
-    // 步驟 5: 點擊「顯示完整圖片」按鈕 (只在 isZooming 時可用)
+    // Step 5: Click "Show full image" button (only available during isZooming)
     const showFullButton = page.locator('.common-utils button').first();
     await expect(showFullButton).toBeEnabled({ timeout: 3000 });
     await showFullButton.click();
     await page.waitForTimeout(300);
 
-    // 步驟 6: 驗證回到 full mode，mainCanvas 應該可見
+    // Step 6: Verify back to full mode, mainCanvas should be visible
     await expect(mainCanvas).toBeVisible();
   });
 
-  test('應該能上傳多張圖片並切換', async ({ page }) => {
-    // 步驟 1: 上傳第一張圖片
+  test('Should be able to upload multiple images and switch between them', async ({ page }) => {
+    // Step 1: Upload first image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 設定第一張圖片的縮放時長
+    // Step 2: Set zoom duration for first image
     const durationInput = page.locator('.duration-control .el-input-number input').first();
     await durationInput.fill('15');
 
-    // 步驟 3: 上傳第二張圖片
-    // 使用不同的圖片（因為相同圖片會被去重）
+    // Step 3: Upload second image
+    // Use a different image (identical images will be deduped)
     const testImagePath2 = path.join(__dirname, 'fixtures', 'test-image-1.svg');
     await fileInput.setInputFiles(testImagePath2);
     await page.waitForTimeout(500);
 
-    // 步驟 4: 驗證當前在最後一個項目，next 按鈕 disabled
+    // Step 4: Verify currently at last item, next button is disabled
     const nextButton = page.locator('.file-utils .el-button-group button').nth(1);
     await expect(nextButton).toBeDisabled();
 
-    // 步驟 5: 切換到上一張圖片
+    // Step 5: Switch to previous image
     const prevButton = page.locator('.file-utils .el-button-group button').first();
     await expect(prevButton).toBeEnabled();
     await prevButton.click();
     await page.waitForTimeout(300);
 
-    // 驗證：Canvas 應該保持可見
+    // Verify: Canvas should remain visible
     await expect(page.locator('canvas').first()).toBeVisible();
   });
 
-  test('應該在側邊欄顯示圖片列表', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Should display image list in sidebar', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
 
-    // 步驟 2: 打開側邊欄
+    // Step 2: Open sidebar
     const sidebarButton = page.locator('.file-utils button').first();
     await sidebarButton.click();
 
-    // 步驟 3: 驗證側邊欄中有圖片項目
+    // Step 3: Verify image items in sidebar
     await page.waitForTimeout(500);
 
-    // 側邊欄應該可見
+    // Sidebar should be visible
     const sidebar = page.locator('.el-drawer');
     await expect(sidebar).toBeVisible({ timeout: 5000 });
   });
 
-  test('Canvas 應該正確渲染並可以截圖比對', async ({ page }) => {
-    // 步驟 1: 上傳圖片
+  test('Canvas should render correctly and support screenshot comparison', async ({ page }) => {
+    // Step 1: Upload image
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
     const testImagePath = path.join(__dirname, 'fixtures', 'test-image.svg');
     await fileInput.setInputFiles(testImagePath);
 
-    // 等待 Canvas 渲染
+    // Wait for Canvas to render
     await expect(page.locator('canvas').first()).toBeVisible({ timeout: 5000 });
-    await page.waitForTimeout(1000); // 等待渲染完成
+    await page.waitForTimeout(1000); // Wait for rendering to complete
 
-    // 步驟 2: 取得 Canvas 元素
+    // Step 2: Get Canvas element
     const canvas = page.locator('canvas').first();
 
-    // 驗證 Canvas 有正確的尺寸（不是 0x0）
+    // Verify Canvas has correct dimensions (not 0x0)
     const boundingBox = await canvas.boundingBox();
     expect(boundingBox).not.toBeNull();
     expect(boundingBox!.width).toBeGreaterThan(0);
     expect(boundingBox!.height).toBeGreaterThan(0);
 
-    // 步驟 3: 截圖進行視覺回歸測試
-    // 第一次執行會建立 baseline，之後會比對差異
+    // Step 3: Take screenshot for visual regression testing
+    // First execution will create baseline, subsequent runs will compare differences
     await expect(canvas).toHaveScreenshot('zoomer-canvas-initial.png', {
-      maxDiffPixels: 100, // 允許小幅度差異
+      maxDiffPixels: 100, // Allow minor pixel differences
     });
   });
 });
 
 /**
- * 效能測試：確保大量操作不會造成記憶體洩漏或效能問題
+ * Performance tests: Ensure bulk operations don't cause memory leaks or performance issues
  */
-test.describe('Zoomer 功能 - 效能測試', () => {
-  test('應該能快速切換多張圖片', async ({ page }) => {
+test.describe('Zoomer functionality - Performance tests', () => {
+  test('Should be able to quickly switch between multiple images', async ({ page }) => {
     await page.goto('/quiz-display-tool/zoomer');
     await page.waitForLoadState('networkidle');
 
     const fileInput = page.locator('input[type="file"][accept="image/*"]');
 
-    // 準備不同的測試圖片（因為相同圖片會被去重）
+    // Prepare different test images (identical images will be deduped)
     const testImages = [
       path.join(__dirname, 'fixtures', 'test-image-1.svg'),
       path.join(__dirname, 'fixtures', 'test-image-2.svg'),
@@ -338,7 +340,7 @@ test.describe('Zoomer 功能 - 效能測試', () => {
 
     const startTime = Date.now();
 
-    // 快速上傳 3 個不同的圖片
+    // Quickly upload 3 different images
     for (const imagePath of testImages) {
       await fileInput.setInputFiles(imagePath);
       await page.waitForTimeout(200);
@@ -346,14 +348,14 @@ test.describe('Zoomer 功能 - 效能測試', () => {
 
     const uploadTime = Date.now() - startTime;
 
-    // 驗證上傳時間合理（不超過 5 秒）
+    // Verify upload time is reasonable (less than 5 seconds)
     expect(uploadTime).toBeLessThan(5000);
 
-    // 驗證可以看到 Canvas
+    // Verify Canvas is visible
     await expect(page.locator('canvas').first()).toBeVisible();
 
-    // 測試快速切換項目
-    // 當前應該在最後一個項目，使用 Previous 按鈕往前切換
+    // Test quick item switching
+    // Currently should be at the last item, use Previous button to switch backwards
     const prevButton = page.locator('.file-utils .el-button-group button').first();
     for (let i = 0; i < 2; i++) {
       if (await prevButton.isEnabled()) {
@@ -362,7 +364,7 @@ test.describe('Zoomer 功能 - 效能測試', () => {
       }
     }
 
-    // Canvas 應該仍然正常顯示
+    // Canvas should still display normally
     await expect(page.locator('canvas').first()).toBeVisible();
   });
 });

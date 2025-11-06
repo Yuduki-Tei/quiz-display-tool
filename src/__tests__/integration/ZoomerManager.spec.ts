@@ -42,7 +42,7 @@ vi.mock('@/composables/useNotifier', () => ({
   }),
 }));
 
-describe('ZoomerManager 整合測試', () => {
+describe('ZoomerManager Integration Tests', () => {
   let pinia: ReturnType<typeof createPinia>;
 
   beforeEach(() => {
@@ -50,8 +50,8 @@ describe('ZoomerManager 整合測試', () => {
     setActivePinia(pinia);
   });
 
-  describe('初始渲染', () => {
-    it('應該成功渲染組件', () => {
+  describe('Initial Rendering', () => {
+    it('Should successfully render the component', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -62,7 +62,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(wrapper.find('.manager-layout').exists()).toBe(true);
     });
 
-    it('應該顯示主要的 UI 區塊', () => {
+    it('Should display main UI sections', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -71,10 +71,10 @@ describe('ZoomerManager 整合測試', () => {
 
       expect(wrapper.find('.manager-top-bar').exists()).toBe(true);
       expect(wrapper.find('.display-area').exists()).toBe(true);
-      expect(wrapper.find('.floating-play-button').exists()).toBe(true); // Zoomer 永久顯示
+      expect(wrapper.find('.floating-play-button').exists()).toBe(true); // Zoomer always displays
     });
 
-    it('應該顯示 duration 控制', () => {
+    it('Should display duration control', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -86,8 +86,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('資料導航功能', () => {
-    it('應該在沒有資料時禁用導航按鈕', () => {
+  describe('Data Navigation Functionality', () => {
+    it('Should disable navigation buttons when there is no data', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -99,7 +99,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(imageStore.canGoNext).toBe(false);
     });
 
-    it('應該在有多筆資料時啟用導航按鈕', async () => {
+    it('Should enable navigation buttons when there are multiple data items', async () => {
       const imageStore = useImageStore();
       const zoomerStore = useZoomerStore();
 
@@ -162,8 +162,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('顯示模式', () => {
-    it('應該正確初始化 displayMode', () => {
+  describe('Display Mode', () => {
+    it('Should correctly initialize displayMode', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -173,7 +173,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).displayMode).toBe('full');
     });
 
-    it('應該有三種顯示模式', () => {
+    it('Should have three display modes', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -186,7 +186,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).displayModes[2].value).toBe('none');
     });
 
-    it('cycleDisplayMode 應該循環切換模式', () => {
+    it('cycleDisplayMode should cycle through modes', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -206,8 +206,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('Duration 設定', () => {
-    it('應該正確初始化 duration', () => {
+  describe('Duration Configuration', () => {
+    it('Should correctly initialize duration', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -218,8 +218,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('側邊欄功能', () => {
-    it('應該初始時隱藏側邊欄', () => {
+  describe('Sidebar Functionality', () => {
+    it('Should initially hide the sidebar', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -230,8 +230,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('Store 同步', () => {
-    it('應該在有 currentData 時同步 currentId', async () => {
+  describe('Store Synchronization', () => {
+    it('Should sync currentId when currentData exists', async () => {
       const imageStore = useImageStore();
       const mockData: ImageData = {
         id: 'img-1',
@@ -259,7 +259,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe('img-1');
     });
 
-    it('應該在沒有資料時 currentId 為 null', () => {
+    it('Should have currentId as null when there is no data', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -269,7 +269,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).currentId).toBe(null);
     });
 
-    it('應該正確計算 hasSelection', async () => {
+    it('Should correctly calculate hasSelection', async () => {
       const imageStore = useImageStore();
       const zoomerStore = useZoomerStore();
 
@@ -304,7 +304,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).hasSelection).toBe(true);
     });
 
-    it('hasSelection 應該在沒有選取區域時回傳 false', async () => {
+    it('hasSelection should return false when there is no selection area', async () => {
       const imageStore = useImageStore();
       const zoomerStore = useZoomerStore();
 
@@ -340,8 +340,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('檔案上傳', () => {
-    it('應該有隱藏的檔案輸入元素', () => {
+  describe('File Upload', () => {
+    it('Should have a hidden file input element', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -355,8 +355,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('computed properties', () => {
-    it('durationSec 應該正確轉換毫秒為秒', () => {
+  describe('Computed Properties', () => {
+    it('durationSec should correctly convert milliseconds to seconds', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -370,7 +370,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).durationSec).toBe(45);
     });
 
-    it('currentDisplayMode 應該根據 displayMode 回傳正確的 icon', () => {
+    it('currentDisplayMode should return correct icon based on displayMode', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -387,7 +387,7 @@ describe('ZoomerManager 整合測試', () => {
       expect(getVm(wrapper).currentDisplayMode.icon).toBe('PhEyeSlash');
     });
 
-    it('currentDisplayMode 應該根據 displayMode 回傳正確的 tooltip', () => {
+    it('currentDisplayMode should return correct tooltip based on displayMode', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],
@@ -405,8 +405,8 @@ describe('ZoomerManager 整合測試', () => {
     });
   });
 
-  describe('浮動播放按鈕', () => {
-    it('Zoomer 應該永久顯示浮動播放按鈕', () => {
+  describe('Floating Play Button', () => {
+    it('Zoomer should always display the floating play button', () => {
       const wrapper = mount(ZoomerManager, {
         global: {
           plugins: [pinia],

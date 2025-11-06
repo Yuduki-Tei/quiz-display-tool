@@ -8,25 +8,25 @@ describe('useLetterStore', () => {
     setActivePinia(createPinia());
   });
 
-  describe('初始狀態', () => {
-    it('應該有空的 contexts', () => {
+  describe('Initial state', () => {
+    it('should have empty contexts', () => {
       const store = useLetterStore();
       expect(store.contexts).toEqual({});
     });
 
-    it('應該初始化 isPaused 為 false', () => {
+    it('should initialize isPaused to false', () => {
       const store = useLetterStore();
       expect(store.isPaused).toBe(false);
     });
 
-    it('應該初始化 isAutoRevealing 為 false', () => {
+    it('should initialize isAutoRevealing to false', () => {
       const store = useLetterStore();
       expect(store.isAutoRevealing).toBe(false);
     });
   });
 
   describe('getContext', () => {
-    it('應該在 id 存在時回傳 context', () => {
+    it('should return context when id exists', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -42,13 +42,13 @@ describe('useLetterStore', () => {
       expect(result).toEqual(mockContext);
     });
 
-    it('應該在 id 不存在時回傳 null', () => {
+    it('should return null when id does not exist', () => {
       const store = useLetterStore();
       const result = store.getContext('non-existent');
       expect(result).toBeNull();
     });
 
-    it('應該在 id 為 null 時回傳 null', () => {
+    it('should return null when id is null', () => {
       const store = useLetterStore();
       const result = store.getContext(null);
       expect(result).toBeNull();
@@ -56,7 +56,7 @@ describe('useLetterStore', () => {
   });
 
   describe('setContext', () => {
-    it('應該設定新的 context', () => {
+    it('should set a new context', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -71,7 +71,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id']).toEqual(mockContext);
     });
 
-    it('應該覆蓋已存在的 context', () => {
+    it('should overwrite an existing context', () => {
       const store = useLetterStore();
       const oldContext: LetterContext = {
         totalChars: 5,
@@ -96,7 +96,7 @@ describe('useLetterStore', () => {
   });
 
   describe('setCharsPerRow', () => {
-    it('應該更新現有 context 的 charsPerRow', () => {
+    it('should update charsPerRow of an existing context', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -111,7 +111,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].charsPerRow).toBe(10);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = useLetterStore();
       store.setCharsPerRow('non-existent', 10);
       expect(store.contexts['non-existent']).toBeUndefined();
@@ -119,7 +119,7 @@ describe('useLetterStore', () => {
   });
 
   describe('hasContext', () => {
-    it('應該在 context 存在時回傳 true', () => {
+    it('should return true when context exists', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -133,20 +133,20 @@ describe('useLetterStore', () => {
       expect(store.hasContext('test-id')).toBe(true);
     });
 
-    it('應該在 context 不存在時回傳 false', () => {
+    it('should return false when context does not exist', () => {
       const store = useLetterStore();
       expect(store.hasContext('non-existent')).toBe(false);
     });
   });
 
   describe('setAutoRevealing', () => {
-    it('應該設定 isAutoRevealing 為 true', () => {
+    it('should set isAutoRevealing to true', () => {
       const store = useLetterStore();
       store.setAutoRevealing(true);
       expect(store.isAutoRevealing).toBe(true);
     });
 
-    it('應該設定 isAutoRevealing 為 false', () => {
+    it('should set isAutoRevealing to false', () => {
       const store = useLetterStore();
       store.setAutoRevealing(true);
       store.setAutoRevealing(false);
@@ -155,13 +155,13 @@ describe('useLetterStore', () => {
   });
 
   describe('setPaused', () => {
-    it('應該設定 isPaused 為 true', () => {
+    it('should set isPaused to true', () => {
       const store = useLetterStore();
       store.setPaused(true);
       expect(store.isPaused).toBe(true);
     });
 
-    it('應該設定 isPaused 為 false', () => {
+    it('should set isPaused to false', () => {
       const store = useLetterStore();
       store.setPaused(true);
       store.setPaused(false);
@@ -170,7 +170,7 @@ describe('useLetterStore', () => {
   });
 
   describe('revealChar', () => {
-    it('應該將字符索引加入 revealed 陣列', () => {
+    it('should add character index to revealed array', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -185,7 +185,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].revealed).toContain(3);
     });
 
-    it('應該不重複加入已存在的索引', () => {
+    it('should not add duplicate indices', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 10,
@@ -200,14 +200,14 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].revealed).toEqual([3]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = useLetterStore();
       expect(() => store.revealChar('non-existent', 0)).not.toThrow();
     });
   });
 
   describe('revealAll', () => {
-    it('應該顯示所有字符', () => {
+    it('should reveal all characters', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 5,
@@ -222,14 +222,14 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].revealed).toEqual([0, 1, 2, 3, 4]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = useLetterStore();
       expect(() => store.revealAll('non-existent')).not.toThrow();
     });
   });
 
   describe('coverAll', () => {
-    it('應該隱藏所有字符', () => {
+    it('should hide all characters', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 5,
@@ -244,7 +244,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].revealed).toEqual([]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = useLetterStore();
       expect(() => store.coverAll('non-existent')).not.toThrow();
     });
@@ -260,7 +260,7 @@ describe('useLetterStore', () => {
       });
     });
 
-    it('應該為 random 模式生成亂序陣列', () => {
+    it('should generate a shuffled array for random mode', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 5,
@@ -276,10 +276,10 @@ describe('useLetterStore', () => {
       const order = store.contexts['test-id'].order;
       expect(order).toBeDefined();
       expect(order?.length).toBe(5);
-      expect(new Set(order).size).toBe(5); // 所有元素都不重複
+      expect(new Set(order).size).toBe(5); // all elements are unique
     });
 
-    it('應該為 sequential 模式生成順序陣列', () => {
+    it('should generate a sequential array for sequential mode', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 5,
@@ -295,7 +295,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].order).toEqual([0, 1, 2, 3, 4]);
     });
 
-    it('應該為 reverse 模式生成反序陣列', () => {
+    it('should generate a reverse array for reverse mode', () => {
       const store = useLetterStore();
       const mockContext: LetterContext = {
         totalChars: 5,
@@ -311,7 +311,7 @@ describe('useLetterStore', () => {
       expect(store.contexts['test-id'].order).toEqual([4, 3, 2, 1, 0]);
     });
 
-    it('如果 context 不存在應該不做任何事', () => {
+    it('should do nothing if context does not exist', () => {
       const store = useLetterStore();
       expect(() => store.generateOrder('non-existent', 'random')).not.toThrow();
     });

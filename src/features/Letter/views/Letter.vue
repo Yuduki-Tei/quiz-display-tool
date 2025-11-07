@@ -96,9 +96,12 @@ const startAutoReveal = () => {
     return false;
   }
 
+  const charsPerSecond = letterContext.charsPerSecond || 5;
+  const duration = Math.round(1000 / charsPerSecond);
+
   startReveal({
     id: props.id,
-    duration: letterContext.duration || 200,
+    duration: duration,
     onReveal: () => {
       // Redraw text when a letter is revealed
       draw();

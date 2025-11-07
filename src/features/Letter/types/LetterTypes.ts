@@ -5,7 +5,7 @@ export interface LetterContext {
   isManual: boolean;
   autoRevealMode: string;
   order?: number[];
-  duration?: number;
+  charsPerSecond?: number;
 }
 
 export interface LetterCombinedContext extends LetterContext {

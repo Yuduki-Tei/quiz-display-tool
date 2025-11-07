@@ -53,19 +53,19 @@
       <div class="top-bar-section auto-play">
         <div class="duration-control" v-show="!isManual">
           <el-slider
-            v-model="durationSec"
-            :min="0.01"
-            :max="3"
-            :step="0.01"
+            v-model="charsPerSecondControl"
+            :min="1"
+            :max="100"
+            :step="1"
             style="width: 120px"
             :disabled="isManual || isAutoRevealing"
             :show-tooltip="false"
           />
           <el-input-number
-            v-model="durationSec"
-            :min="0.01"
-            :max="3"
-            :step="0.01"
+            v-model="charsPerSecondControl"
+            :min="1"
+            :max="100"
+            :step="1"
             size="small"
             :disabled="isManual || isAutoRevealing"
             style="width: 100px"
@@ -117,7 +117,9 @@
         <Button
           @click="handleRevealControl"
           :icon="isAutoRevealing && !isPaused ? 'PhPause' : 'PhPlay'"
-          :title="isAutoRevealing && !isPaused ? t('topbar.pause') : t('topbar.play')"
+          :title="
+            isAutoRevealing && !isPaused ? t('topbar.pause') : t('topbar.play')
+          "
           :icon-size="28"
           :disabled="!canShowAll"
           size="large"
@@ -190,7 +192,7 @@ const {
           revealed: [],
           isManual: isManual.value,
           autoRevealMode: autoRevealMode.value,
-          duration: duration.value,
+          charsPerSecond: charsPerSecond.value,
         });
       }
     }
@@ -200,7 +202,7 @@ const {
 // Letter-specific state
 const letter = ref<LetterInstance | null>(null);
 const charsPerRow = ref<number>(10);
-const duration = ref<number>(200);
+const charsPerSecond = ref<number>(5);
 const isManual = ref<boolean>(true);
 const autoRevealMode = ref<string>("random");
 
@@ -222,15 +224,15 @@ const canHideAll = computed((): boolean => {
   return ctx ? ctx.revealed.length > 0 : false;
 });
 
-const durationSec = computed({
-  get: () => duration.value / 1000,
+const charsPerSecondControl = computed({
+  get: () => charsPerSecond.value,
   set: (v) => {
-    duration.value = Math.round(v * 1000);
+    charsPerSecond.value = v;
     const ctx = letterStore.getContext(currentId.value);
     if (ctx) {
       letterStore.setContext(currentId.value, {
         ...ctx,
-        duration: duration.value,
+        charsPerSecond: charsPerSecond.value,
       });
     }
   },
@@ -244,7 +246,9 @@ const revealModes = [
 
 const revealTypeButton = computed(() => ({
   icon: isManual.value ? "PhCursorClick" : "PhClockClockwise",
-  tooltip: isManual.value ? t("letter.switchToAuto") : t("letter.switchToManual"),
+  tooltip: isManual.value
+    ? t("letter.switchToAuto")
+    : t("letter.switchToManual"),
 }));
 
 // Letter-specific methods
@@ -299,7 +303,7 @@ watch(charsPerRow, (newValue) => {
 watch(currentId, (id) => {
   const ctx = letterStore.getContext(id);
   if (ctx) {
-    duration.value = ctx.duration || 200;
+    charsPerSecond.value = ctx.charsPerSecond || 5;
     isManual.value = ctx.isManual;
     charsPerRow.value = ctx.charsPerRow;
     autoRevealMode.value = ctx.autoRevealMode;

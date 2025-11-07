@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quiz Display Tool</title>
+  <script>
+    // GitHub Pages SPA redirect hack
+    // This script takes the current URL path and converts it into a query string
+    // parameter that will be read by index.html
+    var pathSegmentsToKeep = 1; // Keep "/quiz-display-tool/" base path
+
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, pathSegmentsToKeep + 1).join('/') +
+      '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
+</head>
+<body>
+</body>
+</html>

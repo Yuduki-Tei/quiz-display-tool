@@ -225,7 +225,8 @@ describe('PanelManager integration test', () => {
         },
       });
 
-      expect(getVm(wrapper).isSidebarVisible).toBe(false);
+      const managerLayout = wrapper.findComponent({ name: 'ManagerLayout' });
+      expect(managerLayout.vm.isSidebarVisible).toBe(false);
     });
   });
 

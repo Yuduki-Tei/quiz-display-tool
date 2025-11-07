@@ -209,9 +209,9 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
     currentData,
 
     // Store state (if needed by parent)
-    isZooming: isZooming || ref(false),
-    isAutoRevealing: isAutoRevealing || ref(false),
-    isPaused: isPaused || ref(false),
+    isZooming: isZooming,
+    isAutoRevealing: isAutoRevealing,
+    isPaused: isPaused,
 
     // Methods
     triggerFileInput,

@@ -5,7 +5,7 @@
         <!-- File utils section -->
         <div class="top-bar-section file-utils">
           <Button
-            @click="$emit('toggle-sidebar')"
+            @click="toggleSidebar"
             :disabled="disabled"
             icon="PhSidebarSimple"
             :title="t('sidebar.openSidebar')"
@@ -54,8 +54,7 @@
 
   <!-- Sidebar drawer -->
   <el-drawer
-    :model-value="sidebarVisible"
-    @update:model-value="$emit('update:sidebar-visible', $event)"
+    v-model="isSidebarVisible"
     direction="ltr"
     size="280px"
     :with-header="false"
@@ -65,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import Button from '@/components/Button.vue';
 
@@ -72,24 +72,27 @@ interface Props {
   canGoPrev?: boolean;
   canGoNext?: boolean;
   disabled?: boolean;
-  sidebarVisible?: boolean;
 }
 
 withDefaults(defineProps<Props>(), {
   canGoPrev: false,
   canGoNext: false,
   disabled: false,
-  sidebarVisible: false,
 });
 
 defineEmits<{
-  'toggle-sidebar': [];
   'go-prev': [];
   'go-next': [];
-  'update:sidebar-visible': [value: boolean];
 }>();
 
 const { t } = useI18n();
+
+// Internal sidebar state
+const isSidebarVisible = ref(false);
+
+const toggleSidebar = () => {
+  isSidebarVisible.value = !isSidebarVisible.value;
+};
 </script>
 
 <style scoped>

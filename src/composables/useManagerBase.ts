@@ -98,7 +98,6 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
   } = config;
 
   // Reactive state
-  const isSidebarVisible = ref(false);
   const fileInput = ref<HTMLInputElement | null>(null);
 
   // Notification system
@@ -183,7 +182,6 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
    */
   const handleDataSelect = (id: string) => {
     dataStore.setCurrentById(id);
-    isSidebarVisible.value = false;
   };
 
   /**
@@ -202,7 +200,6 @@ export function useManagerBase<T extends BaseDataItem = BaseDataItem>(
 
   return {
     // Reactive state
-    isSidebarVisible,
     fileInput,
 
     // Computed

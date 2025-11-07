@@ -3,11 +3,8 @@
     :can-go-prev="canGoPrev"
     :can-go-next="canGoNext"
     :disabled="isAutoRevealing"
-    :sidebar-visible="isSidebarVisible"
-    @toggle-sidebar="isSidebarVisible = true"
     @go-prev="goToPrev"
     @go-next="goToNext"
-    @update:sidebar-visible="isSidebarVisible = $event"
   >
     <!-- File input -->
     <template #file-input>
@@ -225,7 +222,6 @@ const { t } = useI18n();
 
 // Use shared manager base functionality
 const {
-  isSidebarVisible,
   fileInput,
   currentId,
   canGoPrev,

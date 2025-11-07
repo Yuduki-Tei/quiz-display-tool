@@ -115,6 +115,7 @@ import DataSidebar from "@/components/DataSidebar.vue";
 import Button from "@/components/Button.vue";
 import { useI18n } from "vue-i18n";
 import ManagerLayout from "@/components/ManagerLayout.vue";
+import type { ZoomerInstance } from "./types/ZoomerInstance";
 
 const imageStore = useImageStore();
 const zoomStore = useZoomerStore();
@@ -151,7 +152,7 @@ const {
 });
 
 // Zoomer-specific state
-const zoomer = ref<InstanceType<typeof Zoomer> | null>(null);
+const zoomer = ref<ZoomerInstance | null>(null);
 const duration = ref(30000);
 const displayMode = ref<string>("full");
 

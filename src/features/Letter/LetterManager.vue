@@ -154,6 +154,7 @@ import Icon from "@/components/Icon.vue";
 import DataSidebar from "@/components/DataSidebar.vue";
 import Letter from "./views/Letter.vue";
 import ManagerLayout from "@/components/ManagerLayout.vue";
+import type { LetterInstance } from "./types/LetterInstance";
 
 const textStore = useTextStore();
 const letterStore = useLetterStore();
@@ -201,7 +202,7 @@ const {
 });
 
 // Letter-specific state
-const letter = ref<InstanceType<typeof Letter> | null>(null);
+const letter = ref<LetterInstance | null>(null);
 const charsPerRow = ref<number>(10);
 const duration = ref<number>(200);
 const isManual = ref<boolean>(true);

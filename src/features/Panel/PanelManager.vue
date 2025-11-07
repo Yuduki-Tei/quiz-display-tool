@@ -217,6 +217,7 @@ import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
 import ManagerLayout from "@/components/ManagerLayout.vue";
+import type { PanelInstance } from "./types/PanelInstance";
 
 const imageStore = useImageStore();
 const panelStore = usePanelStore();
@@ -256,7 +257,7 @@ const {
 });
 
 // Panel-specific state
-const panel = ref<InstanceType<typeof Panel> | null>(null);
+const panel = ref<PanelInstance | null>(null);
 const gridX = ref<number>(5);
 const gridY = ref<number>(5);
 const duration = ref<number>(1000);

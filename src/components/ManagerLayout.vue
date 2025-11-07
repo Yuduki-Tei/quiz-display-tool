@@ -13,13 +13,13 @@
           <slot name="file-input"></slot>
           <el-button-group>
             <Button
-              @click="$emit('go-prev')"
+              @click="emit('go-prev')"
               :disabled="!canGoPrev"
               icon="PhArrowLeft"
               :title="t('topbar.previous')"
             />
             <Button
-              @click="$emit('go-next')"
+              @click="emit('go-next')"
               :disabled="!canGoNext"
               icon="PhArrowRight"
               :title="t('topbar.next')"
@@ -64,9 +64,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import Button from '@/components/Button.vue';
+import { ref } from "vue";
+import { useI18n } from "vue-i18n";
+import Button from "@/components/Button.vue";
 
 interface Props {
   canGoPrev?: boolean;
@@ -80,9 +80,9 @@ withDefaults(defineProps<Props>(), {
   disabled: false,
 });
 
-defineEmits<{
-  'go-prev': [];
-  'go-next': [];
+const emit = defineEmits<{
+  (e: "go-prev"): void;
+  (e: "go-next"): void;
 }>();
 
 const { t } = useI18n();

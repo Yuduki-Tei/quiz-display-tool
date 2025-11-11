@@ -1,11 +1,5 @@
 <template>
   <div id="app">
-    <div
-      v-if="$route.name !== 'home'"
-      style="position: fixed; bottom: 10px; right: 10px; z-index: 2000"
-      class="home-button-container"
-    ></div>
-
     <div class="language-controls">
       <LanguageSelector v-if="$route.name === 'home'" />
     </div>

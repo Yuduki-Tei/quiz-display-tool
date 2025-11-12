@@ -14,10 +14,10 @@
     </div>
     <div class="room-info" v-else>
       <p class="room-label">房間名稱: <strong>{{ roomInfo.roomId }}</strong></p>
-      <p class="room-label">人數: <strong>{{ roomInfo.usersCount }} 人</strong></p>
+      <p class="room-label">人數: <strong>{{ roomInfo.usersCount }} 人</strong> | 角色: <strong>{{ role }}</strong></p>
       <button class="leave-btn" @click="leave">Leave</button>
     </div>
-    <div class="quiz-section">
+  <div class="quiz-section" v-if="!isViewer">
       <h2 class="section-title">{{ t("home.imageQuiz") }}</h2>
       <div class="mode-selection" role="group" :aria-label="t('aria.selectMode')">
         <button
@@ -52,7 +52,7 @@
         </button>
       </div>
     </div>
-    <div class="quiz-section">
+  <div class="quiz-section" v-if="!isViewer">
       <h2 class="section-title">{{ t("home.textQuiz") }}</h2>
       <div class="mode-selection" role="group" :aria-label="t('aria.selectMode')">
         <button
@@ -79,16 +79,20 @@
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import Icon from "@/components/Icon.vue";
-import { ref, reactive } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { connectRoom, onRoomInfo, getCurrentRoomInfo, leaveRoom } from "@/realtime/socket";
+import { installRouteSync } from "@/realtime/socket";
+import { useSessionStore } from "@/stores/sessionStore";
 
 const { t } = useI18n();
 const router = useRouter();
 
 // Multiplayer minimal state
 const roomInput = ref("");
-const joined = ref(false);
-const role = ref<'host' | 'viewer' | null>(null);
+const session = useSessionStore();
+const role = computed(() => session.role);
+const isViewer = computed(() => session.isViewer());
+const joined = computed(() => !!session.roomId && !!session.role);
 const roomInfo = reactive({ roomId: '', usersCount: 0 });
 
 onRoomInfo((info) => {
@@ -100,12 +104,11 @@ const joinRoom = async () => {
   if (!roomInput.value.trim()) return;
   const userId = `user-${Math.random().toString(36).slice(2, 8)}`;
   try {
-    const res = await connectRoom(roomInput.value.trim(), userId);
-    role.value = res.role;
-    joined.value = true;
+    await connectRoom(roomInput.value.trim(), userId);
     const current = getCurrentRoomInfo();
     roomInfo.roomId = current.roomId || '';
     roomInfo.usersCount = current.usersCount;
+    installRouteSync();
   } catch (e) {
     console.error('Join failed', e);
   }
@@ -113,13 +116,21 @@ const joinRoom = async () => {
 
 const leave = () => {
   leaveRoom();
-  joined.value = false;
-  role.value = null;
   roomInfo.roomId = '';
   roomInfo.usersCount = 0;
 };
 
+onMounted(() => {
+  if (joined.value) {
+    const current = getCurrentRoomInfo();
+    roomInfo.roomId = current.roomId || '';
+    roomInfo.usersCount = current.usersCount;
+    installRouteSync();
+  }
+});
+
 const selectMode = (mode: "zoomer" | "panel" | "text-panel") => {
+  if (isViewer.value) return; // block viewer navigation controls
   router.push(`/${mode}`);
 };
 </script>

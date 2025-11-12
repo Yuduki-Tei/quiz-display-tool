@@ -3,6 +3,7 @@
     :can-go-prev="canGoPrev"
     :can-go-next="canGoNext"
     :disabled="isZooming"
+    :is-viewer="session.isViewer()"
     @go-prev="goToPrev"
     @go-next="goToNext"
   >
@@ -103,6 +104,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
+import { useSessionStore } from "@/stores/sessionStore";
 import { useImageStore } from "@/stores/dataStore";
 import { useZoomerStore } from "./stores/zoomerStore";
 import { useManagerBase } from "@/composables/useManagerBase";
@@ -115,6 +117,7 @@ import ManagerLayout from "@/components/ManagerLayout.vue";
 import type { ZoomerInstance } from "./types/ZoomerInstance";
 
 const imageStore = useImageStore();
+const session = useSessionStore();
 const zoomStore = useZoomerStore();
 const { t } = useI18n();
 

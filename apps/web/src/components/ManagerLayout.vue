@@ -1,7 +1,7 @@
 <template>
   <el-container class="manager-layout">
     <el-main class="manager-main">
-      <div class="manager-top-bar">
+      <div v-if="!isViewer" class="manager-top-bar">
         <!-- File utils section -->
         <div class="top-bar-section file-utils">
           <Button
@@ -43,17 +43,18 @@
       </div>
 
       <!-- Display area (feature-specific view component) -->
-      <div class="display-area">
+      <div class="display-area" :class="{ 'viewer-mode': isViewer }">
         <slot name="display"></slot>
       </div>
     </el-main>
   </el-container>
 
   <!-- Floating play button -->
-  <slot name="floating-button"></slot>
+  <slot v-if="!isViewer" name="floating-button"></slot>
 
   <!-- Sidebar drawer -->
   <el-drawer
+    v-if="!isViewer"
     v-model="isSidebarVisible"
     direction="ltr"
     size="280px"
@@ -72,12 +73,14 @@ interface Props {
   canGoPrev?: boolean;
   canGoNext?: boolean;
   disabled?: boolean;
+  isViewer?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   canGoPrev: false,
   canGoNext: false,
   disabled: false,
+  isViewer: false,
 });
 
 const emit = defineEmits<{
@@ -91,10 +94,14 @@ const { t } = useI18n();
 const isSidebarVisible = ref(false);
 
 const toggleSidebar = () => {
+  if (props.isViewer) return;
   isSidebarVisible.value = !isSidebarVisible.value;
 };
 </script>
 
 <style scoped>
 /* Styles can be moved here from individual managers if they are truly common */
+.viewer-mode {
+  padding-top: 0.5rem;
+}
 </style>

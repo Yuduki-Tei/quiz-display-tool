@@ -3,6 +3,7 @@
     :can-go-prev="canGoPrev"
     :can-go-next="canGoNext"
     :disabled="isAutoRevealing"
+    :is-viewer="session.isViewer()"
     @go-prev="goToPrev"
     @go-next="goToNext"
   >
@@ -144,6 +145,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useSessionStore } from "@/stores/sessionStore";
 import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "./stores/letterStore";
 import { useManagerBase } from "@/composables/useManagerBase";
@@ -156,6 +158,7 @@ import ManagerLayout from "@/components/ManagerLayout.vue";
 import type { LetterInstance } from "./types/LetterInstance";
 
 const textStore = useTextStore();
+const session = useSessionStore();
 const letterStore = useLetterStore();
 const { t } = useI18n();
 

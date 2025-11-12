@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 import { io, Socket } from 'socket.io-client';
+import router from '@/router';
+import { useSessionStore } from '@/stores/sessionStore';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
 
@@ -45,6 +47,8 @@ export function connectRoom(roomId: string, userId: string): Promise<JoinResult>
     socket.on('joined', (payload: JoinResult) => {
       currentRoom = payload.roomId;
       usersCount = payload.usersCount;
+      const session = useSessionStore();
+      session.setSession(payload.roomId, payload.role);
       emitRoomInfo();
       resolve(payload);
     });
@@ -59,7 +63,17 @@ export function connectRoom(roomId: string, userId: string): Promise<JoinResult>
     socket.on('disconnect', () => {
       currentRoom = null;
       usersCount = 0;
+      const session = useSessionStore();
+      session.clear();
       emitRoomInfo();
+    });
+
+    // Viewer listens to host route changes
+    socket.on('route:change', ({ path }) => {
+      const session = useSessionStore();
+      if (session.isViewer() && router.currentRoute.value.path !== path) {
+        router.push(path);
+      }
     });
 
     socket.on('connect_error', (err) => {
@@ -76,4 +90,22 @@ export function leaveRoom() {
   if (socket) {
     socket.disconnect();
   }
+}
+
+export function emitRouteChange(path: string) {
+  const session = useSessionStore();
+  if (!socket || !socket.connected || !session.roomId || session.role !== 'host') return;
+  socket.emit('route:change', { roomId: session.roomId, path });
+}
+
+let routeHookInstalled = false;
+export function installRouteSync() {
+  if (routeHookInstalled) return;
+  routeHookInstalled = true;
+  router.afterEach((to) => {
+    const session = useSessionStore();
+    if (session.role === 'host') {
+      emitRouteChange(to.path);
+    }
+  });
 }

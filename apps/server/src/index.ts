@@ -62,6 +62,15 @@ io.on('connection', (socket) => {
       }
     });
   });
+
+  // Host route change broadcast
+  socket.on('route:change', ({ roomId, path }: { roomId: string; path: string }) => {
+    if (!roomId || !path) return;
+    const room = rooms.get(roomId);
+    if (!room) return;
+    if (room.hostSocketId !== socket.id) return; // only host allowed
+    io.to(roomId).emit('route:change', { path });
+  });
 });
 
 const PORT = process.env.PORT || 3000;

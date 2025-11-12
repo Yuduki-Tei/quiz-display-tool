@@ -1,5 +1,5 @@
 import { ElMessage, ElNotification, ElMessageBox } from "element-plus";
-import type { NotifierOptions } from "@/@types/types";
+import type { NotifierOptions } from "@shared-types/types";
 import { useI18n } from "vue-i18n";
 
 const capitalize = (s: string): string => {

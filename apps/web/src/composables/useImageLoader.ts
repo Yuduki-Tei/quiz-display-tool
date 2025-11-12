@@ -1,4 +1,4 @@
-import type { ImageData } from "@/@types/types";
+import type { ImageData } from "@shared-types/types";
 
 export async function loadImageFile(
   file: File,

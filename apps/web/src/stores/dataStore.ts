@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { BaseData, ImageData, TextData } from "../@types/types";
+import type { BaseData, ImageData, TextData } from "@shared-types/types";
 
 function createDataStore<T extends BaseData>(storeName: string) {
   return defineStore(storeName, {

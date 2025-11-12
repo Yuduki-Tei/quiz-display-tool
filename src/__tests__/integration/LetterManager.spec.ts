@@ -125,7 +125,7 @@ describe("LetterManager Integration Tests", () => {
         revealed: [],
         isManual: true,
         autoRevealMode: "random",
-        duration: 200,
+        charsPerSecond: 5,
       });
 
       letterStore.setContext("text-2", {
@@ -134,7 +134,7 @@ describe("LetterManager Integration Tests", () => {
         revealed: [],
         isManual: true,
         autoRevealMode: "random",
-        duration: 200,
+        charsPerSecond: 5,
       });
 
       const wrapper = mount(LetterManager, {
@@ -191,14 +191,14 @@ describe("LetterManager Integration Tests", () => {
       expect(getVm(wrapper).isManual).toBe(true);
     });
 
-    it("Should correctly initialize duration", () => {
+    it("Should correctly initialize charsPerSecond", () => {
       const wrapper = mount(LetterManager, {
         global: {
           plugins: [pinia],
         },
       });
 
-      expect(getVm(wrapper).duration).toBe(200);
+      expect(getVm(wrapper).charsPerSecond).toBe(5);
     });
   });
 
@@ -277,7 +277,7 @@ describe("LetterManager Integration Tests", () => {
         revealed: [0, 1],
         isManual: true,
         autoRevealMode: "random",
-        duration: 200,
+        charsPerSecond: 5,
       });
 
       const wrapper = mount(LetterManager, {
@@ -310,7 +310,7 @@ describe("LetterManager Integration Tests", () => {
         revealed: [0, 1, 2],
         isManual: true,
         autoRevealMode: "random",
-        duration: 200,
+        charsPerSecond: 5,
       });
 
       const wrapper = mount(LetterManager, {
@@ -343,7 +343,7 @@ describe("LetterManager Integration Tests", () => {
         revealed: [0, 1],
         isManual: true,
         autoRevealMode: "random",
-        duration: 200,
+        charsPerSecond: 5,
       });
 
       const wrapper = mount(LetterManager, {
@@ -389,18 +389,33 @@ describe("LetterManager Integration Tests", () => {
   });
 
   describe("computed properties", () => {
-    it("durationSec should correctly convert milliseconds to seconds", () => {
-      const wrapper = mount(LetterManager, {
-        global: {
-          plugins: [pinia],
-        },
+    it("charsPerSecondControl should sync with store and update context", async () => {
+      const textStore = useTextStore();
+      const letterStore = useLetterStore();
+      textStore.addData({
+        id: "text-1",
+        name: "Test",
+        content: "HelloWorld",
+        thumbnailSrc: null,
       });
-
-      getVm(wrapper).duration = 1000;
-      expect(getVm(wrapper).durationSec).toBe(1);
-
-      getVm(wrapper).duration = 2500;
-      expect(getVm(wrapper).durationSec).toBe(2.5);
+      letterStore.setContext("text-1", {
+        totalChars: 10,
+        charsPerRow: 10,
+        revealed: [],
+        isManual: false,
+        autoRevealMode: "random",
+        charsPerSecond: 5,
+      });
+      const wrapper = mount(LetterManager, {
+        global: { plugins: [pinia] },
+      });
+      await getVm(wrapper).$nextTick();
+      expect(getVm(wrapper).charsPerSecond).toBe(5);
+      // simulate slider/input change via computed setter
+      getVm(wrapper).charsPerSecondControl = 8;
+      await getVm(wrapper).$nextTick();
+      const ctx = letterStore.getContext("text-1");
+      expect(ctx?.charsPerSecond).toBe(8);
     });
 
     it("revealTypeButton should display the correct icon based on isManual", () => {

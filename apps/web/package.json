@@ -1,0 +1,48 @@
+{
+  "name": "quiz-display-tool-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "deploy": "gh-pages -d dist",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug"
+  },
+  "dependencies": {
+    "@phosphor-icons/vue": "^2.2.1",
+    "@types/file-saver": "^2.0.7",
+    "element-plus": "^2.10.2",
+    "file-saver": "^2.0.5",
+    "gh-pages": "^6.3.0",
+    "jszip": "^3.10.1",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.17",
+    "vue-i18n": "^9.14.5",
+    "vue-router": "^4.6.3",
+    "vuedraggable": "^4.1.0",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitest/coverage-v8": "^4.0.5",
+    "@vitest/ui": "^4.0.5",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.4.0",
+    "happy-dom": "^20.0.10",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "sass": "^1.89.2",
+    "sass-embedded": "^1.89.2",
+    "typescript": "^5.0.0",
+    "unplugin-auto-import": "^20.2.0",
+    "unplugin-vue-components": "^30.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^4.0.5"
+  }
+}

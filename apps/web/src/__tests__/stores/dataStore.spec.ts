@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { useImageStore, useTextStore } from '@/stores/dataStore';
-import type { ImageData, TextData } from '@/@types/types';
+import type { ImageData, TextData } from '@shared-types/types';
 
 describe('useImageStore', () => {
   beforeEach(() => {

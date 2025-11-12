@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import ZoomerManager from '@/features/Zoomer/ZoomerManager.vue';
 import { useImageStore } from '@/stores/dataStore';
 import { useZoomerStore } from '@/features/Zoomer/stores/zoomerStore';
-import type { ImageData } from '@/@types/types';
+import type { ImageData } from '@shared-types/types';
 
 // Helper to get typed component instance
 const getVm = (wrapper: ReturnType<typeof mount>) => wrapper.vm as any;

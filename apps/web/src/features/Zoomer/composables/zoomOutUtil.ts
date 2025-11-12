@@ -8,7 +8,7 @@
  * Calling `startZoomOut` will always stop any previously running animation.
  */
 
-import type { ImageData } from "@/@types/types";
+import type { ImageData } from "@shared-types/types";
 import type { ZoomerContext } from "../types/ZoomerTypes";
 import { useZoomerStore } from "../stores/zoomerStore";
 

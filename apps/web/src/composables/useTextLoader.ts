@@ -1,4 +1,4 @@
-import type { TextData } from "@/@types/types";
+import type { TextData } from "@shared-types/types";
 
 /**
  * Generate SHA-256 hash from file for unique ID

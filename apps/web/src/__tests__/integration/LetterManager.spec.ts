@@ -4,7 +4,7 @@ import { createPinia, setActivePinia } from "pinia";
 import LetterManager from "@/features/Letter/LetterManager.vue";
 import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "@/features/Letter/stores/letterStore";
-import type { TextData } from "@/@types/types";
+import type { TextData } from "@shared-types/types";
 
 // Helper to get typed component instance
 const getVm = (wrapper: ReturnType<typeof mount>) => wrapper.vm as any;

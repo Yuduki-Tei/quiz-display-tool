@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import type { BaseData, ImageData, TextData } from "@/@types/types";
+import type { BaseData, ImageData, TextData } from "@shared-types/types";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { loadImageFile } from "@/composables/useImageLoader";

@@ -4,9 +4,10 @@
       <canvas
         ref="letterCanvas"
         class="letterCanvas"
+        :class="{ 'is-viewer': props.isViewer, 'is-disabled': !props.isManualMode || letterStore.isAutoRevealing }"
         :width="canvasWidth"
         :height="canvasHeight"
-        style="position: absolute; cursor: pointer"
+        :style="{ position: 'absolute' }"
         @click="onLetterClick"
       ></canvas>
     </div>
@@ -32,10 +33,12 @@ const props = withDefaults(
   defineProps<{
     id?: string | null;
     isManualMode?: boolean;
+    isViewer?: boolean;
   }>(),
   {
     id: null,
     isManualMode: true,
+    isViewer: false,
   }
 );
 
@@ -70,18 +73,28 @@ const draw = () => {
   drawText(letterCanvas, context, canvasWidth.value, canvasHeight.value);
 };
 
+let pendingDraw = false;
+const scheduleDraw = () => {
+  if (pendingDraw) return;
+  pendingDraw = true;
+  nextTick(() => {
+    pendingDraw = false;
+    draw();
+  });
+};
+
 // Handle click on letter
 const onLetterClick = (e: MouseEvent) => {
   if (
     !letterCanvas.value ||
     !context.value ||
     letterStore.isAutoRevealing ||
-    !props.isManualMode
-  )
-    return;
+    !props.isManualMode ||
+    props.isViewer
+  ) return;
 
   handleLetterClick(e, letterCanvas, context, canvasWidth.value, canvasHeight.value);
-  draw();
+  scheduleDraw();
 };
 
 // Exposed methods for parent component
@@ -129,7 +142,7 @@ const revealAllLetters = () => {
   if (!props.id) return false;
 
   return revealAll(props.id, () => {
-    draw();
+    scheduleDraw();
   });
 };
 
@@ -137,7 +150,7 @@ const coverAllLetters = () => {
   if (!props.id) return false;
 
   return coverAll(props.id, () => {
-    draw();
+    scheduleDraw();
   });
 };
 
@@ -157,7 +170,7 @@ watch(
     if (newId) {
       nextTick(() => {
         updateCanvasDimensions();
-        draw();
+        scheduleDraw();
       });
     }
   },
@@ -165,30 +178,23 @@ watch(
 );
 
 watch(
-  () => context.value?.revealed,
-  () => {
-    draw();
+  () => context.value,
+  (ctx) => {
+    if (ctx && (ctx as LetterCombinedContext).totalChars) {
+      scheduleDraw();
+    }
   },
   { deep: true }
 );
 
-watch(
-  () => context.value?.charsPerRow,
-  () => {
-    draw();
-  }
-);
-
 onMounted(() => {
   updateCanvasDimensions();
-  draw();
+  scheduleDraw();
 
   // Handle window resize
   window.addEventListener("resize", () => {
     updateCanvasDimensions();
-    nextTick(() => {
-      draw();
-    });
+    scheduleDraw();
   });
 });
 </script>
@@ -214,5 +220,14 @@ onMounted(() => {
 
 .letterCanvas {
   background-color: #1a1a1a;
+  cursor: pointer;
+}
+
+.letterCanvas.is-viewer {
+  cursor: default;
+}
+
+.letterCanvas.is-disabled {
+  cursor: not-allowed;
 }
 </style>

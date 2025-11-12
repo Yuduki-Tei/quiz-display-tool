@@ -71,6 +71,33 @@ io.on('connection', (socket) => {
     if (room.hostSocketId !== socket.id) return; // only host allowed
     io.to(roomId).emit('route:change', { path });
   });
+
+  // Letter synchronization events
+  // Viewer requests snapshot -> forward to host only
+  socket.on('letter:snapshot:request', ({ roomId }: { roomId: string }) => {
+    if (!roomId) return;
+    const room = rooms.get(roomId);
+    if (!room || !room.hostSocketId) return;
+    io.to(room.hostSocketId).emit('letter:snapshot:request', { requester: socket.id, roomId });
+  });
+
+  // Host responds with snapshot -> deliver only to requester
+  socket.on('letter:snapshot', ({ roomId, to, snapshot }: { roomId: string; to: string; snapshot: any }) => {
+    if (!roomId || !to || !snapshot) return;
+    const room = rooms.get(roomId);
+    if (!room) return;
+    if (room.hostSocketId !== socket.id) return; // only host
+    io.to(to).emit('letter:snapshot', { snapshot });
+  });
+
+  // Host sends patch ops -> broadcast to entire room
+  socket.on('letter:patch', ({ roomId, ops }: { roomId: string; ops: any[] }) => {
+    if (!roomId || !ops) return;
+    const room = rooms.get(roomId);
+    if (!room) return;
+    if (room.hostSocketId !== socket.id) return; // only host
+    io.to(roomId).emit('letter:patch', { ops });
+  });
 });
 
 const PORT = process.env.PORT || 3000;

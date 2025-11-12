@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
 import type { LetterContext } from "../types/LetterTypes";
+import { useSessionStore } from '@/stores/sessionStore';
+import { useTextStore } from '@/stores/dataStore';
+import { emitLetterPatch } from '@/realtime/letterSync';
 
 interface LetterState {
   contexts: Record<string, LetterContext>;
@@ -25,7 +28,24 @@ export const useLetterStore = defineStore("letter", {
      * Set letter context
      */
     setContext(id: string, context: LetterContext): void {
+      const isNew = !this.contexts[id];
       this.contexts[id] = context;
+      const session = useSessionStore();
+      if (session.role === 'host') {
+        if (isNew) {
+          const textStore = useTextStore();
+          const data = textStore.getData(id);
+            if (data) {
+              emitLetterPatch([
+                { type: 'addContext', item: { id: data.id, name: (data as any).name || data.id, content: (data as any).content || '', thumbnailSrc: (data as any).thumbnailSrc || null, context } }
+              ]);
+            }
+        } else {
+          emitLetterPatch([
+            { type: 'patchContext', id, partial: context }
+          ]);
+        }
+      }
     },
 
     /**
@@ -34,6 +54,12 @@ export const useLetterStore = defineStore("letter", {
     setCharsPerRow(id: string, charsPerRow: number): void {
       if (this.contexts[id]) {
         this.contexts[id].charsPerRow = charsPerRow;
+        const session = useSessionStore();
+        if (session.role === 'host') {
+          emitLetterPatch([
+            { type: 'patchContext', id, partial: { charsPerRow } }
+          ]);
+        }
       }
     },
 
@@ -65,6 +91,12 @@ export const useLetterStore = defineStore("letter", {
       const context = this.getContext(id);
       if (context && !context.revealed.includes(index)) {
         context.revealed.push(index);
+        const session = useSessionStore();
+        if (session.role === 'host') {
+          emitLetterPatch([
+            { type: 'appendRevealed', id, indices: [index] }
+          ]);
+        }
       }
     },
 
@@ -78,6 +110,12 @@ export const useLetterStore = defineStore("letter", {
           { length: context.totalChars },
           (_, i) => i
         );
+        const session = useSessionStore();
+        if (session.role === 'host') {
+          emitLetterPatch([
+            { type: 'setRevealed', id, revealed: [...context.revealed] }
+          ]);
+        }
       }
     },
 
@@ -88,6 +126,12 @@ export const useLetterStore = defineStore("letter", {
       const context = this.getContext(id);
       if (context) {
         context.revealed = [];
+        const session = useSessionStore();
+        if (session.role === 'host') {
+          emitLetterPatch([
+            { type: 'setRevealed', id, revealed: [] }
+          ]);
+        }
       }
     },
 
@@ -117,6 +161,12 @@ export const useLetterStore = defineStore("letter", {
       }
 
       context.order = indices;
+      const session = useSessionStore();
+      if (session.role === 'host') {
+        emitLetterPatch([
+          { type: 'patchContext', id, partial: { order: [...indices] } }
+        ]);
+      }
     },
   },
 });

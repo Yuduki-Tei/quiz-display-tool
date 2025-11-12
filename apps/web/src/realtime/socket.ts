@@ -18,9 +18,18 @@ export interface JoinResult {
 export type RoomInfoListener = (info: { roomId: string; usersCount: number }) => void;
 
 let roomInfoListeners: RoomInfoListener[] = [];
+let joinedListeners: Array<(payload: JoinResult) => void> = [];
 
 export function onRoomInfo(listener: RoomInfoListener) {
   roomInfoListeners.push(listener);
+}
+
+export function onJoined(listener: (payload: JoinResult) => void) {
+  joinedListeners.push(listener);
+}
+
+export function getSocket(): Socket | null {
+  return socket;
 }
 
 function emitRoomInfo() {
@@ -51,6 +60,7 @@ export function connectRoom(roomId: string, userId: string): Promise<JoinResult>
       session.setSession(payload.roomId, payload.role);
       emitRoomInfo();
       resolve(payload);
+      joinedListeners.forEach((l) => l(payload));
     });
 
     socket.on('roomUsers', ({ roomId: r, usersCount: c }) => {

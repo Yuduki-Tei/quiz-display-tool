@@ -109,7 +109,7 @@
 
     <!-- Display area -->
     <template #display>
-      <Letter ref="letter" :id="currentId" :isManualMode="isManual" />
+  <Letter ref="letter" :id="currentId" :isManualMode="isManual" :isViewer="session.isViewer()" />
     </template>
 
     <!-- Floating play button -->
@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "./stores/letterStore";
@@ -156,6 +156,8 @@ import DataSidebar from "@/components/DataSidebar.vue";
 import Letter from "./views/Letter.vue";
 import ManagerLayout from "@/components/ManagerLayout.vue";
 import type { LetterInstance } from "./types/LetterInstance";
+import { installLetterSync } from '@/realtime/letterSync';
+import { emitLetterPatch } from '@/realtime/letterSync';
 
 const textStore = useTextStore();
 const session = useSessionStore();
@@ -264,6 +266,11 @@ const handleRevealControl = () => {
           ...ctx,
           autoRevealMode: autoRevealMode.value,
         });
+        if (session.role === 'host') {
+          emitLetterPatch([
+            { type: 'patchContext', id: currentId.value, partial: { autoRevealMode: autoRevealMode.value } }
+          ]);
+        }
       }
     }
     letter.value?.startAutoReveal();
@@ -278,10 +285,23 @@ const handleRevealControl = () => {
 
 const handleRevealAll = () => {
   letter.value?.revealAllLetters();
+  if (session.role === 'host' && currentId.value) {
+    const ctx = letterStore.getContext(currentId.value);
+    if (ctx) {
+      emitLetterPatch([
+        { type: 'setRevealed', id: currentId.value, revealed: Array.from({ length: ctx.totalChars }, (_, i) => i) }
+      ]);
+    }
+  }
 };
 
 const handleCoverAll = () => {
   letter.value?.coverAllLetters();
+  if (session.role === 'host' && currentId.value) {
+    emitLetterPatch([
+      { type: 'setRevealed', id: currentId.value, revealed: [] }
+    ]);
+  }
 };
 
 const toggleManualMode = () => {
@@ -292,6 +312,11 @@ const toggleManualMode = () => {
       ...ctx,
       isManual: isManual.value,
     });
+    if (session.role === 'host' && currentId.value) {
+      emitLetterPatch([
+        { type: 'patchContext', id: currentId.value, partial: { isManual: isManual.value } }
+      ]);
+    }
   }
 };
 
@@ -299,6 +324,11 @@ const toggleManualMode = () => {
 watch(charsPerRow, (newValue) => {
   if (currentId.value) {
     letterStore.setCharsPerRow(currentId.value, newValue);
+    if (session.role === 'host') {
+      emitLetterPatch([
+        { type: 'patchContext', id: currentId.value, partial: { charsPerRow: newValue } }
+      ]);
+    }
   }
 });
 
@@ -311,6 +341,11 @@ watch(currentId, (id) => {
     charsPerRow.value = ctx.charsPerRow;
     autoRevealMode.value = ctx.autoRevealMode;
   }
+  if (session.role === 'host' && id) {
+    emitLetterPatch([
+      { type: 'setCurrent', id }
+    ]);
+  }
 });
 
 // Watch for autoRevealMode changes and update store
@@ -321,7 +356,16 @@ watch(autoRevealMode, () => {
       ...ctx,
       autoRevealMode: autoRevealMode.value,
     });
+    if (session.role === 'host' && currentId.value) {
+      emitLetterPatch([
+        { type: 'patchContext', id: currentId.value, partial: { autoRevealMode: autoRevealMode.value } }
+      ]);
+    }
   }
+});
+
+onMounted(() => {
+  installLetterSync();
 });
 </script>
 

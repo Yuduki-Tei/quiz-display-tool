@@ -26,7 +26,7 @@ function flipChar(ctx: LetterCombinedContext, index: number) {
 
 export function drawText(
   canvas: Ref<HTMLCanvasElement | null>,
-  context: ComputedRef<LetterCombinedContext | Record<string, never>>,
+  context: ComputedRef<LetterCombinedContext | null>,
   canvasWidth: number,
   canvasHeight: number
 ) {
@@ -115,7 +115,7 @@ export function drawText(
 export function handleLetterClick(
   e: MouseEvent,
   letterCanvas: Ref<HTMLCanvasElement | null>,
-  context: ComputedRef<LetterCombinedContext | Record<string, never>>,
+  context: ComputedRef<LetterCombinedContext | null>,
   canvasWidth: number,
   canvasHeight: number
 ) {

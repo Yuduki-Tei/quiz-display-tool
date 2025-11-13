@@ -4,7 +4,10 @@
       <canvas
         ref="letterCanvas"
         class="letterCanvas"
-        :class="{ 'is-viewer': props.isViewer, 'is-disabled': !props.isManualMode || letterStore.isAutoRevealing }"
+        :class="{
+          'is-viewer': props.isViewer,
+          'is-disabled': !props.isManualMode || letterStore.isAutoRevealing,
+        }"
         :width="canvasWidth"
         :height="canvasHeight"
         :style="{ position: 'absolute' }"
@@ -50,8 +53,8 @@ const letterCanvas = ref<HTMLCanvasElement | null>(null);
 const canvasWidth = ref<number>(800);
 const canvasHeight = ref<number>(600);
 
-const context = computed<LetterCombinedContext | Record<string, never>>(() => {
-  if (!props.id) return {};
+const context = computed<LetterCombinedContext | null>(() => {
+  if (!props.id) return null;
   const textData = textStore.getData(props.id);
   const letterContext = letterStore.getContext(props.id);
   return {
@@ -73,6 +76,13 @@ const draw = () => {
   drawText(letterCanvas, context, canvasWidth.value, canvasHeight.value);
 };
 
+const clearCanvas = () => {
+  if (!letterCanvas.value) return;
+  const ctx = letterCanvas.value.getContext("2d");
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvasWidth.value, canvasHeight.value);
+};
+
 let pendingDraw = false;
 const scheduleDraw = () => {
   if (pendingDraw) return;
@@ -91,9 +101,16 @@ const onLetterClick = (e: MouseEvent) => {
     letterStore.isAutoRevealing ||
     !props.isManualMode ||
     props.isViewer
-  ) return;
+  )
+    return;
 
-  handleLetterClick(e, letterCanvas, context, canvasWidth.value, canvasHeight.value);
+  handleLetterClick(
+    e,
+    letterCanvas,
+    context,
+    canvasWidth.value,
+    canvasHeight.value
+  );
   scheduleDraw();
 };
 
@@ -165,26 +182,17 @@ defineExpose({
 
 // Watch for changes
 watch(
-  () => props.id,
-  (newId) => {
-    if (newId) {
-      nextTick(() => {
-        updateCanvasDimensions();
-        scheduleDraw();
-      });
-    }
-  },
-  { immediate: true }
-);
-
-watch(
   () => context.value,
   (ctx) => {
-    if (ctx && (ctx as LetterCombinedContext).totalChars) {
+    if (letterCanvas.value && ctx) {
+      updateCanvasDimensions();
       scheduleDraw();
+    } else if (letterCanvas.value) {
+      updateCanvasDimensions();
+      clearCanvas();
     }
   },
-  { deep: true }
+  { immediate: true, flush: "post" }
 );
 
 onMounted(() => {

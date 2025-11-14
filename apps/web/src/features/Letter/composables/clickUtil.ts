@@ -7,7 +7,6 @@ import { Ref, ComputedRef } from "vue";
 import { useLetterStore } from "../stores/letterStore";
 import { LetterCombinedContext } from "../types/LetterTypes";
 import { useSessionStore } from "@/stores/sessionStore";
-import { emitLetterPatch } from "@/realtime/letterSync";
 
 function isCharRevealed(ctx: LetterCombinedContext, index: number): boolean {
   return ctx.revealed.includes(index);
@@ -29,11 +28,7 @@ function flipChar(ctx: LetterCombinedContext, index: number) {
     changed = true;
   }
 
-  if (changed && session.role === "host") {
-    emitLetterPatch([
-      { type: "setRevealed", id, revealed: [...context.revealed] },
-    ]);
-  }
+  // Emission handled by host adapter now
 }
 
 export function drawText(

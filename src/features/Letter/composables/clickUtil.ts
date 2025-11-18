@@ -8,7 +8,7 @@ import { useLetterStore } from "../stores/letterStore";
 import { LetterCombinedContext } from "../types/LetterTypes";
 
 function isCharRevealed(ctx: LetterCombinedContext, index: number): boolean {
-  return ctx.revealed.includes(index);
+  return Array.isArray(ctx.revealed) && ctx.revealed.includes(index);
 }
 
 function flipChar(ctx: LetterCombinedContext, index: number) {

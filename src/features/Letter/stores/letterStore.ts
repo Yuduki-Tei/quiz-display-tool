@@ -118,5 +118,19 @@ export const useLetterStore = defineStore("letter", {
 
       context.order = indices;
     },
+
+    /**
+     * Import letter contexts data
+     */
+    importData(data: { contexts: Record<string, LetterContext> }): void {
+      const normalizedContexts: Record<string, LetterContext> = {};
+      for (const [id, context] of Object.entries(data.contexts)) {
+        normalizedContexts[id] = {
+          ...context,
+          revealed: Array.isArray(context.revealed) ? context.revealed : [],
+        };
+      }
+      this.contexts = normalizedContexts;
+    },
   },
 });

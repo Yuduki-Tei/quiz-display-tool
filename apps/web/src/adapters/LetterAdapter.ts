@@ -1,14 +1,15 @@
 import { useLetterStore } from "@/features/Letter/stores/letterStore";
+import { useConnectionService } from "@/services/ConnectionService";
 import type { LetterContext } from "@/features/Letter/types/LetterTypes";
 
 /**
  * LetterAdapter - Manages Letter feature state and synchronization
  *
- * Phase 2: Offline mode - wraps store operations
- * Future: Will add online sync capabilities
+ * Phase 3: Online mode - syncs actions to backend when connected as host
  */
 export class LetterAdapter {
   private store = useLetterStore();
+  private connectionService = useConnectionService();
 
   /**
    * Get letter context by id
@@ -54,23 +55,44 @@ export class LetterAdapter {
 
   /**
    * Reveal a character at index
+   * Optimistic update: updates local state immediately, then syncs to backend if connected as host
    */
   revealChar(id: string, index: number): void {
+    // Always update local state first (optimistic update)
     this.store.revealChar(id, index);
+
+    // If connected as host, send action to backend
+    if (this.shouldSync()) {
+      this.emitAction('revealChar', { id, index });
+    }
   }
 
   /**
    * Reveal all characters
+   * Optimistic update: updates local state immediately, then syncs to backend if connected as host
    */
   revealAll(id: string): void {
+    // Always update local state first (optimistic update)
     this.store.revealAll(id);
+
+    // If connected as host, send action to backend
+    if (this.shouldSync()) {
+      this.emitAction('revealAll', { id });
+    }
   }
 
   /**
    * Cover all characters
+   * Optimistic update: updates local state immediately, then syncs to backend if connected as host
    */
   coverAll(id: string): void {
+    // Always update local state first (optimistic update)
     this.store.coverAll(id);
+
+    // If connected as host, send action to backend
+    if (this.shouldSync()) {
+      this.emitAction('coverAll', { id });
+    }
   }
 
   /**
@@ -92,6 +114,29 @@ export class LetterAdapter {
    */
   isPaused(): boolean {
     return this.store.isPaused;
+  }
+
+  /**
+   * Check if should sync to backend
+   * Only sync when connected AND user is host
+   */
+  private shouldSync(): boolean {
+    return this.connectionService.isConnected() && this.connectionService.isHost();
+  }
+
+  /**
+   * Emit action to backend via Socket.IO
+   */
+  private emitAction(action: string, payload: any): void {
+    const socket = this.connectionService.getSocket();
+    if (socket) {
+      socket.emit('letterAction', {
+        action,
+        payload,
+        timestamp: Date.now(),
+      });
+      console.log('[LetterAdapter] Emitted action:', action, payload);
+    }
   }
 }
 

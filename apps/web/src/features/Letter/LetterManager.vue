@@ -146,6 +146,7 @@
 import { ref, computed, watch } from "vue";
 import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "./stores/letterStore";
+import { useLetterAdapter } from "@/adapters/LetterAdapter";
 import { useManagerBase } from "@/composables/useManagerBase";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
@@ -157,6 +158,7 @@ import type { LetterInstance } from "./types/LetterInstance";
 
 const textStore = useTextStore();
 const letterStore = useLetterStore();
+const letterAdapter = useLetterAdapter();
 const { t } = useI18n();
 
 // Use shared manager base functionality
@@ -183,10 +185,10 @@ const {
   },
   onFileAdded: (id: string, status: string) => {
     if (status === "added") {
-      // Initialize letterStore context for each text
+      // Initialize letter context for each text via adapter
       const textData = textStore.getData(id);
       if (textData) {
-        letterStore.setContext(id, {
+        letterAdapter.setContext(id, {
           totalChars: textData.content.length,
           charsPerRow: charsPerRow.value,
           revealed: [],
@@ -208,19 +210,19 @@ const autoRevealMode = ref<string>("random");
 
 // Letter-specific computed properties
 const isSomeRevealed = computed((): boolean => {
-  const ctx = letterStore.getContext(currentId.value);
+  const ctx = letterAdapter.getContext(currentId.value);
   return ctx
     ? ctx.totalChars > ctx.revealed.length && ctx.revealed.length > 0
     : false;
 });
 
 const canShowAll = computed((): boolean => {
-  const ctx = letterStore.getContext(currentId.value);
+  const ctx = letterAdapter.getContext(currentId.value);
   return ctx && ctx.revealed.length < ctx.totalChars;
 });
 
 const canHideAll = computed((): boolean => {
-  const ctx = letterStore.getContext(currentId.value);
+  const ctx = letterAdapter.getContext(currentId.value);
   return ctx ? ctx.revealed.length > 0 : false;
 });
 
@@ -228,9 +230,9 @@ const charsPerSecondControl = computed({
   get: () => charsPerSecond.value,
   set: (v) => {
     charsPerSecond.value = v;
-    const ctx = letterStore.getContext(currentId.value);
+    const ctx = letterAdapter.getContext(currentId.value);
     if (ctx) {
-      letterStore.setContext(currentId.value, {
+      letterAdapter.setContext(currentId.value, {
         ...ctx,
         charsPerSecond: charsPerSecond.value,
       });
@@ -255,9 +257,9 @@ const revealTypeButton = computed(() => ({
 const handleRevealControl = () => {
   if (!isAutoRevealing.value) {
     if (currentId.value) {
-      const ctx = letterStore.getContext(currentId.value);
+      const ctx = letterAdapter.getContext(currentId.value);
       if (ctx) {
-        letterStore.setContext(currentId.value, {
+        letterAdapter.setContext(currentId.value, {
           ...ctx,
           autoRevealMode: autoRevealMode.value,
         });
@@ -283,25 +285,25 @@ const handleCoverAll = () => {
 
 const toggleManualMode = () => {
   isManual.value = !isManual.value;
-  const ctx = letterStore.getContext(currentId.value);
+  const ctx = letterAdapter.getContext(currentId.value);
   if (ctx) {
-    letterStore.setContext(currentId.value, {
+    letterAdapter.setContext(currentId.value, {
       ...ctx,
       isManual: isManual.value,
     });
   }
 };
 
-// Watch for changes to charsPerRow and update letter store
+// Watch for changes to charsPerRow and update via adapter
 watch(charsPerRow, (newValue) => {
   if (currentId.value) {
-    letterStore.setCharsPerRow(currentId.value, newValue);
+    letterAdapter.setCharsPerRow(currentId.value, newValue);
   }
 });
 
-// Watch for currentId changes and sync local state with store
+// Watch for currentId changes and sync local state
 watch(currentId, (id) => {
-  const ctx = letterStore.getContext(id);
+  const ctx = letterAdapter.getContext(id);
   if (ctx) {
     charsPerSecond.value = ctx.charsPerSecond || 5;
     isManual.value = ctx.isManual;
@@ -310,11 +312,11 @@ watch(currentId, (id) => {
   }
 });
 
-// Watch for autoRevealMode changes and update store
+// Watch for autoRevealMode changes and update via adapter
 watch(autoRevealMode, () => {
-  const ctx = letterStore.getContext(currentId.value);
+  const ctx = letterAdapter.getContext(currentId.value);
   if (ctx) {
-    letterStore.setContext(currentId.value, {
+    letterAdapter.setContext(currentId.value, {
       ...ctx,
       autoRevealMode: autoRevealMode.value,
     });

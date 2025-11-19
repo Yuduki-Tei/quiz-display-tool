@@ -4,7 +4,7 @@
  */
 
 import { Ref, ComputedRef } from "vue";
-import { useLetterStore } from "../stores/letterStore";
+import { useLetterAdapter } from "@/adapters/LetterAdapter";
 import { LetterCombinedContext } from "../types/LetterTypes";
 
 function isCharRevealed(ctx: LetterCombinedContext, index: number): boolean {
@@ -13,15 +13,8 @@ function isCharRevealed(ctx: LetterCombinedContext, index: number): boolean {
 
 function flipChar(ctx: LetterCombinedContext, index: number) {
   const id = ctx.id;
-  const store = useLetterStore();
-  const context = store.getContext(id);
-  if (!context) return;
-
-  if (!isCharRevealed(ctx, index)) {
-    context.revealed.push(index);
-  } else {
-    context.revealed = ctx.revealed.filter((i) => i !== index);
-  }
+  const adapter = useLetterAdapter();
+  adapter.flipChar(id, index);
 }
 
 export function drawText(

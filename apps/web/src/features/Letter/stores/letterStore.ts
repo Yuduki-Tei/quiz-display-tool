@@ -69,6 +69,27 @@ export const useLetterStore = defineStore("letter", {
     },
 
     /**
+     * Flip a character at index
+     * If revealed, cover it. If covered, reveal it.
+     */
+    flipChar(id: string, index: number): void {
+      const context = this.contexts[id];
+      if (!context) return;
+
+      if (context.revealed.includes(index)) {
+        this.contexts[id] = {
+          ...context,
+          revealed: context.revealed.filter((i: number) => i !== index),
+        };
+      } else {
+        this.contexts[id] = {
+          ...context,
+          revealed: [...context.revealed, index],
+        };
+      }
+    },
+
+    /**
      * Reveal all characters
      */
     revealAll(id: string): void {

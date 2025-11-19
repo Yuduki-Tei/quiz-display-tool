@@ -11,6 +11,43 @@ export class LetterAdapter {
   private store = useLetterStore();
   private connectionService = useConnectionService();
 
+  constructor() {
+    // Register handler for incoming letterAction events from other users
+    this.connectionService.onAction(
+      "letterAction",
+      this.handleIncomingAction.bind(this)
+    );
+  }
+
+  /**
+   * Handle incoming letterAction events from other users
+   */
+  private handleIncomingAction(data: {
+    action: string;
+    payload: any;
+    timestamp: number;
+  }): void {
+    const { action, payload } = data;
+    console.log("[LetterAdapter] Handling incoming action", action, payload);
+
+    switch (action) {
+      case "flipChar":
+        this.flipChar(payload.id, payload.index, true);
+        break;
+      case "revealChar":
+        this.store.revealChar(payload.id, payload.index);
+        break;
+      case "revealAll":
+        this.store.revealAll(payload.id);
+        break;
+      case "coverAll":
+        this.store.coverAll(payload.id);
+        break;
+      default:
+        console.warn("[LetterAdapter] Unknown action", action);
+    }
+  }
+
   /**
    * Get letter context by id
    */
@@ -63,7 +100,23 @@ export class LetterAdapter {
 
     // If connected as host, send action to backend
     if (this.shouldSync()) {
-      this.emitAction('revealChar', { id, index });
+      this.emitAction("revealChar", { id, index });
+    }
+  }
+
+  /**
+   * Flip (toggle) a character at index
+   * If revealed, cover it. If covered, reveal it.
+   * Optimistic update: updates local state immediately, then syncs to backend if connected as host
+   * @param skipEmit - If true, only update local state without emitting to backend (used when receiving events from other users)
+   */
+  flipChar(id: string, index: number, skipEmit: boolean = false): void {
+    // Always update local state first (optimistic update)
+    this.store.flipChar(id, index);
+
+    // If connected as host and not explicitly skipping emit, send action to backend
+    if (!skipEmit && this.shouldSync()) {
+      this.emitAction("flipChar", { id, index });
     }
   }
 
@@ -77,7 +130,7 @@ export class LetterAdapter {
 
     // If connected as host, send action to backend
     if (this.shouldSync()) {
-      this.emitAction('revealAll', { id });
+      this.emitAction("revealAll", { id });
     }
   }
 
@@ -91,7 +144,7 @@ export class LetterAdapter {
 
     // If connected as host, send action to backend
     if (this.shouldSync()) {
-      this.emitAction('coverAll', { id });
+      this.emitAction("coverAll", { id });
     }
   }
 
@@ -121,7 +174,9 @@ export class LetterAdapter {
    * Only sync when connected AND user is host
    */
   private shouldSync(): boolean {
-    return this.connectionService.isConnected() && this.connectionService.isHost();
+    return (
+      this.connectionService.isConnected() && this.connectionService.isHost()
+    );
   }
 
   /**
@@ -130,12 +185,12 @@ export class LetterAdapter {
   private emitAction(action: string, payload: any): void {
     const socket = this.connectionService.getSocket();
     if (socket) {
-      socket.emit('letterAction', {
+      socket.emit("letterAction", {
         action,
         payload,
         timestamp: Date.now(),
       });
-      console.log('[LetterAdapter] Emitted action:', action, payload);
+      console.log("[LetterAdapter] Emitted action:", action, payload);
     }
   }
 }

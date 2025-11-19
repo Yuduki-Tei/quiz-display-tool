@@ -16,6 +16,11 @@ export interface RoomInfo {
 
 type ConnectionStatusListener = (connected: boolean) => void;
 type RoomInfoListener = (info: RoomInfo) => void;
+type ActionEventHandler = (data: {
+  action: string;
+  payload: any;
+  timestamp: number;
+}) => void;
 
 /**
  * ConnectionService - Manages Socket.IO connections and room state
@@ -29,6 +34,7 @@ export class ConnectionService {
 
   private connectionListeners: ConnectionStatusListener[] = [];
   private roomInfoListeners: RoomInfoListener[] = [];
+  private actionHandlers: Map<string, ActionEventHandler> = new Map();
 
   /**
    * Connect to a specified room
@@ -82,7 +88,26 @@ export class ConnectionService {
       this.socket.on("connect_error", (err) => {
         reject(err);
       });
+      this.setupActionListeners();
     });
+  }
+
+  /**
+   * Setup listeners for action events
+   */
+  private setupActionListeners(): void {
+    if (!this.socket) return;
+
+    this.socket.on(
+      "letterAction",
+      (data: { action: string; payload: any; timestamp: number }) => {
+        console.log("[ConnectionService] Received letterAction", data);
+        const handler = this.actionHandlers.get("letterAction");
+        if (handler) {
+          handler(data);
+        }
+      }
+    );
   }
 
   /**
@@ -176,6 +201,23 @@ export class ConnectionService {
     if (index > -1) {
       this.roomInfoListeners.splice(index, 1);
     }
+  }
+
+  /**
+   * Register a handler for action events (letterAction, panelAction, etc.)
+   * @param eventName - The name of the event (e.g., "letterAction", "panelAction")
+   * @param handler - The handler function to call when the event is received
+   */
+  onAction(eventName: string, handler: ActionEventHandler): void {
+    this.actionHandlers.set(eventName, handler);
+  }
+
+  /**
+   * Unregister a handler for action events
+   * @param eventName - The name of the event to unregister
+   */
+  offAction(eventName: string): void {
+    this.actionHandlers.delete(eventName);
   }
 
   // Reactive getters for Vue components

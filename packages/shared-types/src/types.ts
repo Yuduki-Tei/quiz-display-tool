@@ -24,3 +24,7 @@ export interface NotifierOptions {
   title?: string;
   [key: string]: any;
 }
+
+export type Nullable<T, K extends keyof T> = Omit<T, K> & {
+  [P in K]: T[P] | null;
+};

@@ -135,4 +135,72 @@ function createDataStore<T extends BaseData>(storeName: string) {
 }
 
 export const useImageStore = createDataStore<ImageData>("imageStore");
-export const useTextStore = createDataStore<TextData>("textStore");
+
+// Create base text store
+const _useTextStore = createDataStore<TextData>("textStore");
+
+// Extend text store with additional methods for text synchronization
+export function useTextStore() {
+  const store = _useTextStore();
+
+  // Add extension methods to the store instance
+  return Object.assign(store, {
+    /**
+     * Add a placeholder text (for viewers)
+     * Creates a TextData with placeholder characters
+     */
+    addPlaceholderText(
+      id: string,
+      name: string,
+      totalChars: number,
+      thumbnailSrc: string | null
+    ): "added" | "updated" {
+      const placeholder = "■".repeat(totalChars);
+      return store.addData({
+        id,
+        name,
+        content: placeholder,
+        thumbnailSrc,
+      } as TextData);
+    },
+
+    /**
+     * Update a specific character at index
+     */
+    updateCharAt(id: string, index: number, char: string): boolean {
+      const idx = store.getIndexById(id);
+      if (idx === -1) return false;
+
+      const data = store.allData[idx];
+      const arr = data.content.split("");
+      if (index < 0 || index >= arr.length) return false;
+
+      arr[index] = char;
+      // Use setData to trigger reactivity
+      store.setData(id, { ...data, content: arr.join("") });
+      return true;
+    },
+
+    /**
+     * Batch update multiple characters
+     */
+    batchUpdateChars(
+      id: string,
+      chars: Array<{ index: number; char: string }>
+    ): boolean {
+      const idx = store.getIndexById(id);
+      if (idx === -1) return false;
+
+      const data = store.allData[idx];
+      const arr = data.content.split("");
+      chars.forEach(({ index, char }) => {
+        if (index >= 0 && index < arr.length) {
+          arr[index] = char;
+        }
+      });
+      // Use setData to trigger reactivity
+      store.setData(id, { ...data, content: arr.join("") });
+      return true;
+    },
+  });
+}

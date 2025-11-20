@@ -160,6 +160,14 @@ export class ConnectionService {
       }
     });
 
+    this.socket.on("textAction", (data: ActionEvent) => {
+      console.log("[ConnectionService] Received textAction", data);
+      const handler = this.actionHandlers.get("textAction");
+      if (handler) {
+        handler(data);
+      }
+    });
+
     this.socket.on(
       "routeSync",
       (data: { path: string; query?: Record<string, string> }) => {

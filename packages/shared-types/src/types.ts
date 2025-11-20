@@ -32,19 +32,28 @@ export type Nullable<T, K extends keyof T> = Omit<T, K> & {
 // Socket.IO Action Types
 export type LetterAction =
   | {
-      action: "revealChar";
-      payload: { id: string; index: number };
+      action: "charReveal";
+      payload: { id: string; index: number; char: string };
     }
   | {
-      action: "flipChar";
-      payload: { id: string; index: number };
-    }
-  | {
-      action: "revealAll";
-      payload: { id: string };
+      action: "batchCharReveal";
+      payload: { id: string; chars: Array<{ index: number; char: string }> };
     }
   | {
       action: "coverAll";
+      payload: { id: string };
+    };
+
+export type TextAction =
+  | {
+      action: "textUpload";
+      payload: {
+        id: string;
+        totalChars: number;
+      };
+    }
+  | {
+      action: "textDelete";
       payload: { id: string };
     };
 
@@ -56,6 +65,6 @@ export type RouteChangeAction = {
   };
 };
 
-export type ActionEvent = (LetterAction | RouteChangeAction) & {
+export type ActionEvent = (LetterAction | TextAction | RouteChangeAction) & {
   timestamp: number;
 };

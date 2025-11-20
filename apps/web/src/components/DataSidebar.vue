@@ -130,6 +130,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "select-data", id: string): void;
   (e: "add-file"): void;
+  (e: "delete-data", id: string): void;
 }>();
 
 const dataStore = props.dataStore;
@@ -152,6 +153,7 @@ const selectData = (id: string) => {
 };
 
 const handleDelete = (id: string) => {
+  emit("delete-data", id);
   dataStore.removeData(id);
   extraStore.removeContext(id);
 };

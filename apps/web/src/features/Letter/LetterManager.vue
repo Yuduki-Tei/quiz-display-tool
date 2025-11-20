@@ -1,5 +1,6 @@
 <template>
   <ManagerLayout
+    v-if="canControl"
     :can-go-prev="canGoPrev"
     :can-go-next="canGoNext"
     :disabled="isAutoRevealing"
@@ -137,9 +138,13 @@
         data-type="text"
         @select-data="handleDataSelect"
         @add-file="triggerFileInput"
+        @delete-data="handleDataDelete"
       />
     </template>
   </ManagerLayout>
+  <div v-else class="viewer-mode">
+    <Letter ref="letter" :id="currentId" :isManualMode="isManual" />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -148,6 +153,7 @@ import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "./stores/letterStore";
 import { useLetterAdapter } from "@/adapters/LetterAdapter";
 import { useManagerBase } from "@/composables/useManagerBase";
+import { useRoleRestrictions } from "@/composables/useRoleRestrictions";
 import { useI18n } from "vue-i18n";
 import Button from "@/components/Button.vue";
 import Icon from "@/components/Icon.vue";
@@ -159,6 +165,7 @@ import type { LetterInstance } from "./types/LetterInstance";
 const textStore = useTextStore();
 const letterStore = useLetterStore();
 const letterAdapter = useLetterAdapter();
+const { canControl } = useRoleRestrictions();
 const { t } = useI18n();
 
 // Use shared manager base functionality
@@ -196,6 +203,8 @@ const {
           autoRevealMode: autoRevealMode.value,
           charsPerSecond: charsPerSecond.value,
         });
+
+        letterAdapter.emitTextUpload(id, textData.content.length);
       }
     }
   },
@@ -294,6 +303,11 @@ const toggleManualMode = () => {
   }
 };
 
+const handleDataDelete = (id: string) => {
+  // Emit text delete event to sync with viewers
+  letterAdapter.emitTextDelete(id);
+};
+
 // Watch for changes to charsPerRow and update via adapter
 watch(charsPerRow, (newValue) => {
   if (currentId.value) {
@@ -337,5 +351,13 @@ watch(autoRevealMode, () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.viewer-mode {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

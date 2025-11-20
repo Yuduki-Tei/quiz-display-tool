@@ -7,9 +7,15 @@
         :class="{
           'is-disabled': !props.isManualMode || letterStore.isAutoRevealing,
         }"
+        :style="{
+          position: 'absolute',
+          cursor:
+            props.isManualMode && canControl && !letterStore.isAutoRevealing
+              ? 'pointer'
+              : 'default',
+        }"
         :width="canvasWidth"
         :height="canvasHeight"
-        style="position: absolute; cursor: pointer"
         @click="onLetterClick"
       ></canvas>
     </div>
@@ -20,6 +26,7 @@
 import { ref, computed, nextTick, watch, onMounted } from "vue";
 import { useTextStore } from "@/stores/dataStore";
 import { useLetterStore } from "../stores/letterStore";
+import { useRoleRestrictions } from "@/composables/useRoleRestrictions";
 import { LetterCombinedContext } from "../types/LetterTypes";
 import { drawText, handleLetterClick } from "../composables/clickUtil";
 import {
@@ -44,6 +51,7 @@ const props = withDefaults(
 
 const textStore = useTextStore();
 const letterStore = useLetterStore();
+const { canControl } = useRoleRestrictions();
 
 const canvasContainer = ref<HTMLElement | null>(null);
 const letterCanvas = ref<HTMLCanvasElement | null>(null);
@@ -96,7 +104,8 @@ const onLetterClick = (e: MouseEvent) => {
     !letterCanvas.value ||
     !context.value ||
     letterStore.isAutoRevealing ||
-    !props.isManualMode
+    !props.isManualMode ||
+    !canControl.value
   )
     return;
 
@@ -196,6 +205,16 @@ watch(
   () => {
     draw();
   }
+);
+
+// Watch for content and revealed changes (important for viewer synchronization)
+watch(
+  () => [context.value?.content, context.value?.revealed],
+  () => {
+    console.log("[Letter] Content or revealed changed, redrawing");
+    scheduleDraw();
+  },
+  { deep: true }
 );
 
 onMounted(() => {

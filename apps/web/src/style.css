@@ -4,6 +4,14 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#app,
+main {
+  height: 100%;
+  width: 100%;
+}
+
 /* 共通レイアウト: manager, display, canvas container */
 .manager-layout {
   height: 100vh;

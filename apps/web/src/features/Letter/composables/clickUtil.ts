@@ -31,6 +31,15 @@ export function drawText(
   const contextValue = context.value as LetterCombinedContext;
   const { content, charsPerRow } = contextValue;
 
+  // Debug: log content and revealed state
+  console.log(
+    "[drawText]",
+    "canvas size:", canvasWidth, "x", canvasHeight,
+    "content length:", content.length,
+    "revealed:", contextValue.revealed?.length || 0,
+    "first 10 chars:", content.substring(0, 10)
+  );
+
   // Clear canvas
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 

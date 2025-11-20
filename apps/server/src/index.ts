@@ -118,8 +118,38 @@ io.on("connection", (socket) => {
       return;
     }
 
-    socket.to(currentRoomId).emit("letterAction", data);
+    io.to(currentRoomId).emit("letterAction", data);
     console.log("[letterAction] Broadcasted to room", currentRoomId);
+  });
+
+  socket.on("textAction", (data: ActionEvent) => {
+    console.log("[textAction]", socket.id, data.action, data.payload);
+
+    let currentRoomId: string | null = null;
+    rooms.forEach((room, roomId) => {
+      for (const [, info] of room.users) {
+        if (info.socketId === socket.id) {
+          currentRoomId = roomId;
+          break;
+        }
+      }
+    });
+
+    if (!currentRoomId) {
+      console.log("[textAction] Socket not in any room", socket.id);
+      return;
+    }
+
+    const room = rooms.get(currentRoomId);
+    if (!room) return;
+
+    if (room.hostSocketId !== socket.id) {
+      console.log("[textAction] Sender is not host, ignoring", socket.id);
+      return;
+    }
+
+    io.to(currentRoomId).emit("textAction", data);
+    console.log("[textAction] Broadcasted to room", currentRoomId);
   });
 
   socket.on(

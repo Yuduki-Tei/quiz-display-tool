@@ -14,10 +14,10 @@
     </div>
     <div class="room-info" v-else>
       <p class="room-label">
-        房間名稱: <strong>{{ roomInfo.roomId }}</strong>
+        房間名稱: <strong>{{ roomId }}</strong>
       </p>
       <p class="room-label">
-        人數: <strong>{{ roomInfo.usersCount }} 人</strong>
+        人數: <strong>{{ usersCount }} 人</strong>
       </p>
       <button class="leave-btn" @click="leave">Leave</button>
     </div>
@@ -101,27 +101,15 @@ const connectionService = useConnectionService();
 // Multiplayer minimal state
 const roomInput = ref("");
 const joined = ref(false);
-const role = ref<"host" | "viewer" | null>(null);
-const roomInfo = reactive({ roomId: "", usersCount: 0 });
-
-connectionService.onRoomInfoChange((info) => {
-  roomInfo.roomId = info.roomId || "";
-  roomInfo.usersCount = info.usersCount;
-});
+const roomId = connectionService.roomIdRef;
+const usersCount = connectionService.usersCountRef;
 
 const joinRoom = async () => {
   if (!roomInput.value.trim()) return;
   const userId = `user-${Math.random().toString(36).slice(2, 8)}`;
   try {
-    const res = await connectionService.connectRoom(
-      roomInput.value.trim(),
-      userId
-    );
-    role.value = res.role;
+    await connectionService.connectRoom(roomInput.value.trim(), userId);
     joined.value = true;
-    const current = connectionService.getRoomInfo();
-    roomInfo.roomId = current.roomId || "";
-    roomInfo.usersCount = current.usersCount;
   } catch (e) {
     console.error("Join failed", e);
   }
@@ -130,9 +118,6 @@ const joinRoom = async () => {
 const leave = () => {
   connectionService.leaveRoom();
   joined.value = false;
-  role.value = null;
-  roomInfo.roomId = "";
-  roomInfo.usersCount = 0;
 };
 
 const selectMode = (mode: "zoomer" | "panel" | "text-panel") => {

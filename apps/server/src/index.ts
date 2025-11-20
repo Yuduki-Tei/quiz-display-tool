@@ -29,10 +29,34 @@ io.on("connection", (socket) => {
     "joinRoom",
     ({ roomId, userId }: { roomId: string; userId: string }) => {
       if (!roomId || !userId) return;
+
+      const socketRooms = Array.from(socket.rooms);
+      if (socketRooms.includes(roomId)) {
+        console.log("[joinRoom] Socket already in room", socket.id, roomId);
+        const room = rooms.get(roomId);
+        if (room) {
+          const existingUser = room.users.get(userId);
+          const role = existingUser?.role || "viewer";
+          const usersCount = room.users.size;
+          socket.emit("joined", { roomId, role, usersCount });
+        }
+        return;
+      }
+
       let room = rooms.get(roomId);
       if (!room) {
         room = { hostSocketId: socket.id, users: new Map() };
         rooms.set(roomId, room);
+      }
+      const existingUser = room.users.get(userId);
+      if (existingUser && existingUser.socketId !== socket.id) {
+        console.log(
+          "[joinRoom] UserId already in room with different socket",
+          userId,
+          existingUser.socketId,
+          "new:",
+          socket.id
+        );
       }
 
       const role: "host" | "viewer" =
@@ -43,6 +67,16 @@ io.on("connection", (socket) => {
       const usersCount = room.users.size;
       socket.emit("joined", { roomId, role, usersCount });
       io.to(roomId).emit("roomUsers", { roomId, usersCount });
+      console.log(
+        "[joinRoom] User joined",
+        userId,
+        "as",
+        role,
+        "in room",
+        roomId,
+        "total users:",
+        usersCount
+      );
     }
   );
 

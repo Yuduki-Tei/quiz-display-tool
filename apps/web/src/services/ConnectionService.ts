@@ -1,21 +1,20 @@
-import { ref, computed, type Ref } from "vue";
+import { ref, reactive, computed, type Ref } from "vue";
+import type { Nullable } from "@shared-types/types";
 import { io, type Socket } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
 
-export interface JoinResult {
+type Role = "host" | "viewer";
+
+export type JoinResult = {
   roomId: string;
-  role: "host" | "viewer";
+  role: Role;
   usersCount: number;
-}
+};
 
-export interface RoomInfo {
-  roomId: string | null;
-  usersCount: number;
-}
+export type RoomStatus = Nullable<JoinResult, "roomId" | "role">;
+export type RoomInfo = Pick<RoomStatus, "roomId" | "usersCount">;
 
-type ConnectionStatusListener = (connected: boolean) => void;
-type RoomInfoListener = (info: RoomInfo) => void;
 type ActionEventHandler = (data: {
   action: string;
   payload: any;
@@ -28,68 +27,122 @@ type ActionEventHandler = (data: {
 export class ConnectionService {
   private socket: Socket | null = null;
   private connected: Ref<boolean> = ref(false);
-  private role: Ref<"host" | "viewer" | null> = ref(null);
-  private currentRoom: Ref<string | null> = ref(null);
-  private usersCount: Ref<number> = ref(0);
+  private roomStatus: RoomStatus = reactive({
+    roomId: null,
+    role: null,
+    usersCount: 0,
+  });
 
-  private connectionListeners: ConnectionStatusListener[] = [];
-  private roomInfoListeners: RoomInfoListener[] = [];
   private actionHandlers: Map<string, ActionEventHandler> = new Map();
+  private isConnecting: boolean = false;
+  private pendingConnection: Promise<JoinResult> | null = null;
+
+  /**
+   * Initialize socket connection
+   */
+  private connectSocket(): void {
+    if (this.socket) {
+      console.log("[ConnectionService] Disconnecting existing socket");
+      this.socket.removeAllListeners();
+      this.socket.disconnect();
+      this.socket = null;
+    }
+
+    this.socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+      reconnection: true,
+      reconnectionAttempts: 5,
+    });
+
+    this.socket.on("connect", () => {
+      this.connected.value = true;
+      console.log("[ConnectionService] Socket connected");
+    });
+
+    this.socket.on("roomUsers", ({ roomId: r, usersCount: c }) => {
+      if (r === this.roomStatus.roomId) {
+        this.roomStatus.usersCount = c;
+      }
+    });
+
+    this.socket.on("disconnect", () => {
+      this.connected.value = false;
+      this.roomStatus.roomId = null;
+      this.roomStatus.role = null;
+      this.roomStatus.usersCount = 0;
+    });
+
+    this.socket.on("reconnect", () => {
+      this.connected.value = true;
+    });
+
+    this.setupActionListeners();
+  }
 
   /**
    * Connect to a specified room
    */
   async connectRoom(roomId: string, userId: string): Promise<JoinResult> {
-    return new Promise((resolve, reject) => {
-      if (this.socket?.connected) {
-        this.socket.disconnect();
-      }
+    if (
+      this.socket?.connected &&
+      this.roomStatus.roomId === roomId &&
+      this.roomStatus.role !== null
+    ) {
+      console.log("[ConnectionService] Already connected to room", roomId);
+      return {
+        roomId: this.roomStatus.roomId,
+        role: this.roomStatus.role,
+        usersCount: this.roomStatus.usersCount,
+      };
+    }
 
-      this.socket = io(SOCKET_URL, {
-        transports: ["websocket"],
-        reconnection: true,
-        reconnectionAttempts: 5,
-      });
+    if (this.isConnecting && this.pendingConnection) {
+      console.log(
+        "[ConnectionService] Connection already in progress, waiting..."
+      );
+      return this.pendingConnection;
+    }
 
-      this.socket.on("connect", () => {
-        this.connected.value = true;
-        this.notifyConnectionListeners(true);
+    this.isConnecting = true;
+
+    this.pendingConnection = new Promise((resolve, reject) => {
+      this.connectSocket();
+
+      let hasResolved = false;
+
+      this.socket!.on("connect", () => {
+        console.log("[ConnectionService] Joining room", roomId);
         this.socket!.emit("joinRoom", { roomId, userId });
       });
 
-      this.socket.on("joined", (payload: JoinResult) => {
-        this.role.value = payload.role;
-        this.currentRoom.value = payload.roomId;
-        this.usersCount.value = payload.usersCount;
-        this.notifyRoomInfoListeners();
-        resolve(payload);
-      });
+      this.socket!.on("joined", (payload: JoinResult) => {
+        Object.assign(this.roomStatus, payload);
+        console.log(
+          "[ConnectionService] Joined room",
+          payload.roomId,
+          "as",
+          payload.role
+        );
 
-      this.socket.on("roomUsers", ({ roomId: r, usersCount: c }) => {
-        if (r === this.currentRoom.value) {
-          this.usersCount.value = c;
-          this.notifyRoomInfoListeners();
+        if (!hasResolved) {
+          hasResolved = true;
+          this.isConnecting = false;
+          this.pendingConnection = null;
+          resolve(payload);
         }
       });
 
-      this.socket.on("disconnect", () => {
-        this.connected.value = false;
-        this.currentRoom.value = null;
-        this.usersCount.value = 0;
-        this.notifyConnectionListeners(false);
-        this.notifyRoomInfoListeners();
+      this.socket!.on("connect_error", (err) => {
+        if (!hasResolved) {
+          hasResolved = true;
+          this.isConnecting = false;
+          this.pendingConnection = null;
+          reject(err);
+        }
       });
-
-      this.socket.on("reconnect", () => {
-        this.connected.value = true;
-        this.notifyConnectionListeners(true);
-      });
-
-      this.socket.on("connect_error", (err) => {
-        reject(err);
-      });
-      this.setupActionListeners();
     });
+
+    return this.pendingConnection;
   }
 
   /**
@@ -119,9 +172,11 @@ export class ConnectionService {
       this.socket = null;
     }
     this.connected.value = false;
-    this.role.value = null;
-    this.currentRoom.value = null;
-    this.usersCount.value = 0;
+    Object.assign(this.roomStatus, {
+      roomId: null,
+      role: null,
+      usersCount: 0,
+    });
   }
 
   /**
@@ -135,21 +190,21 @@ export class ConnectionService {
    * Check if current role is Host
    */
   isHost(): boolean {
-    return this.role.value === "host";
+    return this.roomStatus.role === "host";
   }
 
   /**
    * Check if current role is Viewer
    */
   isViewer(): boolean {
-    return this.role.value === "viewer";
+    return this.roomStatus.role === "viewer";
   }
 
   /**
    * Get current role
    */
   getRole(): "host" | "viewer" | null {
-    return this.role.value;
+    return this.roomStatus.role;
   }
 
   /**
@@ -157,8 +212,8 @@ export class ConnectionService {
    */
   getRoomInfo(): RoomInfo {
     return {
-      roomId: this.currentRoom.value,
-      usersCount: this.usersCount.value,
+      roomId: this.roomStatus.roomId,
+      usersCount: this.roomStatus.usersCount,
     };
   }
 
@@ -167,40 +222,6 @@ export class ConnectionService {
    */
   getSocket(): Socket | null {
     return this.socket;
-  }
-
-  /**
-   * Listen to connection status changes
-   */
-  onConnectionChange(listener: ConnectionStatusListener): void {
-    this.connectionListeners.push(listener);
-  }
-
-  /**
-   * Listen to room info changes
-   */
-  onRoomInfoChange(listener: RoomInfoListener): void {
-    this.roomInfoListeners.push(listener);
-  }
-
-  /**
-   * Remove connection status listener
-   */
-  offConnectionChange(listener: ConnectionStatusListener): void {
-    const index = this.connectionListeners.indexOf(listener);
-    if (index > -1) {
-      this.connectionListeners.splice(index, 1);
-    }
-  }
-
-  /**
-   * Remove room info listener
-   */
-  offRoomInfoChange(listener: RoomInfoListener): void {
-    const index = this.roomInfoListeners.indexOf(listener);
-    if (index > -1) {
-      this.roomInfoListeners.splice(index, 1);
-    }
   }
 
   /**
@@ -226,27 +247,15 @@ export class ConnectionService {
   }
 
   get roleRef(): Ref<"host" | "viewer" | null> {
-    return computed(() => this.role.value);
+    return computed(() => this.roomStatus.role);
   }
 
   get roomIdRef(): Ref<string | null> {
-    return computed(() => this.currentRoom.value);
+    return computed(() => this.roomStatus.roomId);
   }
 
   get usersCountRef(): Ref<number> {
-    return computed(() => this.usersCount.value);
-  }
-
-  private notifyConnectionListeners(connected: boolean): void {
-    this.connectionListeners.forEach((listener) => listener(connected));
-  }
-
-  private notifyRoomInfoListeners(): void {
-    const info: RoomInfo = {
-      roomId: this.currentRoom.value,
-      usersCount: this.usersCount.value,
-    };
-    this.roomInfoListeners.forEach((listener) => listener(info));
+    return computed(() => this.roomStatus.usersCount);
   }
 }
 

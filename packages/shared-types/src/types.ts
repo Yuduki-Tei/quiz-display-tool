@@ -48,6 +48,14 @@ export type LetterAction =
       payload: { id: string };
     };
 
-export type ActionEvent = LetterAction & {
+export type RouteChangeAction = {
+  action: "routeChange";
+  payload: {
+    path: string;
+    query?: Record<string, string>;
+  };
+};
+
+export type ActionEvent = (LetterAction | RouteChangeAction) & {
   timestamp: number;
 };

@@ -16,6 +16,10 @@ export type RoomStatus = Nullable<JoinResult, "roomId" | "role">;
 export type RoomInfo = Pick<RoomStatus, "roomId" | "usersCount">;
 
 type ActionEventHandler = (data: ActionEvent) => void;
+type RouteSyncHandler = (data: {
+  path: string;
+  query?: Record<string, string>;
+}) => void;
 
 /**
  * ConnectionService - Manages Socket.IO connections and room state
@@ -30,6 +34,7 @@ export class ConnectionService {
   });
 
   private actionHandlers: Map<string, ActionEventHandler> = new Map();
+  private routeSyncHandler: RouteSyncHandler | null = null;
   private isConnecting: boolean = false;
   private pendingConnection: Promise<JoinResult> | null = null;
 
@@ -154,6 +159,16 @@ export class ConnectionService {
         handler(data);
       }
     });
+
+    this.socket.on(
+      "routeSync",
+      (data: { path: string; query?: Record<string, string> }) => {
+        console.log("[ConnectionService] Received routeSync", data);
+        if (this.routeSyncHandler) {
+          this.routeSyncHandler(data);
+        }
+      }
+    );
   }
 
   /**
@@ -232,6 +247,33 @@ export class ConnectionService {
    */
   offAction(eventName: string): void {
     this.actionHandlers.delete(eventName);
+  }
+
+  /**
+   * Emit route change event (only host can emit)
+   * @param path - The route path
+   * @param query - Optional query parameters
+   */
+  emitRouteChange(path: string, query?: Record<string, string>): void {
+    if (!this.socket || !this.isHost()) {
+      return;
+    }
+    this.socket.emit("routeChange", { path, query });
+  }
+
+  /**
+   * Register a handler for route sync events
+   * @param handler - The handler function to call when route sync is received
+   */
+  onRouteSync(handler: RouteSyncHandler): void {
+    this.routeSyncHandler = handler;
+  }
+
+  /**
+   * Unregister route sync handler
+   */
+  offRouteSync(): void {
+    this.routeSyncHandler = null;
   }
 
   // Reactive getters for Vue components

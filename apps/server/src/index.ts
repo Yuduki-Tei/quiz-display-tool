@@ -7,6 +7,7 @@ import type { ActionEvent } from "@quiz/shared-types";
 interface RoomState {
   hostSocketId: string | null;
   users: Map<string, { socketId: string; role: "host" | "viewer" }>;
+  currentRoute?: { path: string; query?: Record<string, string> };
 }
 
 const app = express();
@@ -68,6 +69,16 @@ io.on("connection", (socket) => {
       const usersCount = room.users.size;
       socket.emit("joined", { roomId, role, usersCount });
       io.to(roomId).emit("roomUsers", { roomId, usersCount });
+
+      if (role === "viewer" && room.currentRoute) {
+        socket.emit("routeSync", room.currentRoute);
+        console.log(
+          "[joinRoom] Sent current route to viewer",
+          socket.id,
+          room.currentRoute
+        );
+      }
+
       console.log(
         "[joinRoom] User joined",
         userId,
@@ -110,6 +121,40 @@ io.on("connection", (socket) => {
     socket.to(currentRoomId).emit("letterAction", data);
     console.log("[letterAction] Broadcasted to room", currentRoomId);
   });
+
+  socket.on(
+    "routeChange",
+    (data: { path: string; query?: Record<string, string> }) => {
+      console.log("[routeChange]", socket.id, data.path);
+
+      let currentRoomId: string | null = null;
+      rooms.forEach((room, roomId) => {
+        for (const [, info] of room.users) {
+          if (info.socketId === socket.id) {
+            currentRoomId = roomId;
+            break;
+          }
+        }
+      });
+
+      if (!currentRoomId) {
+        console.log("[routeChange] Socket not in any room", socket.id);
+        return;
+      }
+
+      const room = rooms.get(currentRoomId);
+      if (!room) return;
+
+      if (room.hostSocketId !== socket.id) {
+        console.log("[routeChange] Sender is not host, ignoring", socket.id);
+        return;
+      }
+
+      room.currentRoute = { path: data.path, query: data.query };
+      socket.to(currentRoomId).emit("routeSync", data);
+      console.log("[routeChange] Broadcasted to room", currentRoomId, data);
+    }
+  );
 
   socket.on("disconnect", () => {
     console.log("[disconnect]", socket.id);

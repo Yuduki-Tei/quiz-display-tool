@@ -1,5 +1,5 @@
 import { ref, reactive, computed, type Ref } from "vue";
-import type { Nullable } from "@shared-types/types";
+import type { Nullable, ActionEvent } from "@shared-types/types";
 import { io, type Socket } from "socket.io-client";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
@@ -15,11 +15,7 @@ export type JoinResult = {
 export type RoomStatus = Nullable<JoinResult, "roomId" | "role">;
 export type RoomInfo = Pick<RoomStatus, "roomId" | "usersCount">;
 
-type ActionEventHandler = (data: {
-  action: string;
-  payload: any;
-  timestamp: number;
-}) => void;
+type ActionEventHandler = (data: ActionEvent) => void;
 
 /**
  * ConnectionService - Manages Socket.IO connections and room state
@@ -151,16 +147,13 @@ export class ConnectionService {
   private setupActionListeners(): void {
     if (!this.socket) return;
 
-    this.socket.on(
-      "letterAction",
-      (data: { action: string; payload: any; timestamp: number }) => {
-        console.log("[ConnectionService] Received letterAction", data);
-        const handler = this.actionHandlers.get("letterAction");
-        if (handler) {
-          handler(data);
-        }
+    this.socket.on("letterAction", (data: ActionEvent) => {
+      console.log("[ConnectionService] Received letterAction", data);
+      const handler = this.actionHandlers.get("letterAction");
+      if (handler) {
+        handler(data);
       }
-    );
+    });
   }
 
   /**

@@ -1,6 +1,7 @@
 import { useLetterStore } from "@/features/Letter/stores/letterStore";
 import { useConnectionService } from "@/services/ConnectionService";
 import type { LetterContext } from "@/features/Letter/types/LetterTypes";
+import type { ActionEvent } from "@shared-types/types";
 
 /**
  * LetterAdapter - Manages Letter feature state and synchronization
@@ -22,29 +23,22 @@ export class LetterAdapter {
   /**
    * Handle incoming letterAction events from other users
    */
-  private handleIncomingAction(data: {
-    action: string;
-    payload: any;
-    timestamp: number;
-  }): void {
-    const { action, payload } = data;
-    console.log("[LetterAdapter] Handling incoming action", action, payload);
+  private handleIncomingAction(data: ActionEvent): void {
+    console.log("[LetterAdapter] Handling incoming action", data.action, data.payload);
 
-    switch (action) {
+    switch (data.action) {
       case "flipChar":
-        this.flipChar(payload.id, payload.index, true);
+        this.flipChar(data.payload.id, data.payload.index, true);
         break;
       case "revealChar":
-        this.store.revealChar(payload.id, payload.index);
+        this.store.revealChar(data.payload.id, data.payload.index);
         break;
       case "revealAll":
-        this.store.revealAll(payload.id);
+        this.store.revealAll(data.payload.id);
         break;
       case "coverAll":
-        this.store.coverAll(payload.id);
+        this.store.coverAll(data.payload.id);
         break;
-      default:
-        console.warn("[LetterAdapter] Unknown action", action);
     }
   }
 
@@ -182,7 +176,18 @@ export class LetterAdapter {
   /**
    * Emit action to backend via Socket.IO
    */
-  private emitAction(action: string, payload: any): void {
+  private emitAction(
+    action: "revealChar" | "flipChar",
+    payload: { id: string; index: number }
+  ): void;
+  private emitAction(
+    action: "revealAll" | "coverAll",
+    payload: { id: string }
+  ): void;
+  private emitAction(
+    action: string,
+    payload: { id: string; index?: number }
+  ): void {
     const socket = this.connectionService.getSocket();
     if (socket) {
       socket.emit("letterAction", {

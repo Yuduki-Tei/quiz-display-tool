@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import type { ActionEvent } from "@quiz/shared-types";
 
 interface RoomState {
   hostSocketId: string | null;
@@ -80,48 +81,35 @@ io.on("connection", (socket) => {
     }
   );
 
-  socket.on(
-    "letterAction",
-    ({
-      action,
-      payload,
-      timestamp,
-    }: {
-      action: string;
-      payload: any;
-      timestamp: number;
-    }) => {
-      console.log("[letterAction]", socket.id, action, payload);
+  socket.on("letterAction", (data: ActionEvent) => {
+    console.log("[letterAction]", socket.id, data.action, data.payload);
 
-      let currentRoomId: string | null = null;
-      rooms.forEach((room, roomId) => {
-        for (const [, info] of room.users) {
-          if (info.socketId === socket.id) {
-            currentRoomId = roomId;
-            break;
-          }
+    let currentRoomId: string | null = null;
+    rooms.forEach((room, roomId) => {
+      for (const [, info] of room.users) {
+        if (info.socketId === socket.id) {
+          currentRoomId = roomId;
+          break;
         }
-      });
-
-      if (!currentRoomId) {
-        console.log("[letterAction] Socket not in any room", socket.id);
-        return;
       }
+    });
 
-      const room = rooms.get(currentRoomId);
-      if (!room) return;
-
-      if (room.hostSocketId !== socket.id) {
-        console.log("[letterAction] Sender is not host, ignoring", socket.id);
-        return;
-      }
-
-      socket
-        .to(currentRoomId)
-        .emit("letterAction", { action, payload, timestamp });
-      console.log("[letterAction] Broadcasted to room", currentRoomId);
+    if (!currentRoomId) {
+      console.log("[letterAction] Socket not in any room", socket.id);
+      return;
     }
-  );
+
+    const room = rooms.get(currentRoomId);
+    if (!room) return;
+
+    if (room.hostSocketId !== socket.id) {
+      console.log("[letterAction] Sender is not host, ignoring", socket.id);
+      return;
+    }
+
+    socket.to(currentRoomId).emit("letterAction", data);
+    console.log("[letterAction] Broadcasted to room", currentRoomId);
+  });
 
   socket.on("disconnect", () => {
     console.log("[disconnect]", socket.id);
